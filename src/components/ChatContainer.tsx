@@ -38,45 +38,33 @@ export const ChatContainer = () => {
     setIsLoading(true);
 
     try {
-      // Here you would typically make an API call to your AI model
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const aiResponse = `Thank you for your message${message ? ' and' : ''} ${files.length > 0 ? 'the attachments' : ''}! Here's a sample response that demonstrates markdown and code formatting:
+      // Make API call to the Llama backend
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
 
-### Features Available:
-- Markdown support
-- Code highlighting
-- Math equations
-- Tables
-- File uploads
-- Copy functionality
-- Edit messages
-- Take screenshots
+      if (!response.ok) {
+        throw new Error('Failed to get response from Llama model');
+      }
 
-\`\`\`python
-def process_files(files):
-    for file in files:
-        print(f"Processing {file.name}")
-
-# Example usage
-process_files(uploaded_files)
-\`\`\`
-
-| Feature | Status |
-|---------|--------|
-| Markdown | ✅ |
-| Code | ✅ |
-| Math | ✅ |
-| Files | ✅ |
-
-You can use $E = mc^2$ inline math or display math:
-
-$$
-F = G\\frac{m_1m_2}{r^2}
-$$`;
+      const data = await response.json();
       
-      setMessages((prev) => [...prev, { id: Date.now().toString(), text: aiResponse, isAi: true }]);
+      if (data.success) {
+        setMessages((prev) => [...prev, {
+          id: Date.now().toString(),
+          text: data.response,
+          isAi: true
+        }]);
+      } else {
+        throw new Error('Failed to get valid response from model');
+      }
     } catch (error) {
-      toast.error("Failed to get response. Please try again.");
+      console.error('Error:', error);
+      toast.error("Failed to get response. Please ensure the Llama backend is running.");
     } finally {
       setIsLoading(false);
     }
@@ -97,11 +85,11 @@ $$`;
     <div className="min-h-screen bg-[#343541] font-inter text-white pb-32">
       {messages.length === 0 ? (
         <div className="h-screen flex flex-col items-center justify-center text-gray-400 px-4">
-          <h1 className="text-3xl font-bold mb-8">ChatGPT</h1>
+          <h1 className="text-3xl font-bold mb-8">Llama Chat</h1>
           <div className="max-w-xl text-center space-y-4">
             <p className="text-lg">Welcome! How can I help you today?</p>
             <p className="text-sm">
-              I can help you with writing, analysis, math, and coding. Feel free to ask any question or upload files!
+              I'm powered by the Llama model. Feel free to ask any question or upload files!
             </p>
           </div>
         </div>
