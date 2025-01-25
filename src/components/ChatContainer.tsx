@@ -3,30 +3,52 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { toast } from "sonner";
 
+interface Message {
+  text: string;
+  isAi: boolean;
+  attachments?: Array<{
+    type: 'image' | 'file';
+    url: string;
+    name: string;
+  }>;
+}
+
 export const ChatContainer = () => {
-  const [messages, setMessages] = useState<Array<{ text: string; isAi: boolean }>>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = async (message: string) => {
-    setMessages((prev) => [...prev, { text: message, isAi: false }]);
+  const handleSendMessage = async (message: string, files: File[]) => {
+    const attachments = await Promise.all(
+      files.map(async (file) => ({
+        type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
+        url: URL.createObjectURL(file),
+        name: file.name
+      }))
+    );
+
+    setMessages((prev) => [...prev, { text: message, isAi: false, attachments }]);
     setIsLoading(true);
 
     try {
       // Here you would typically make an API call to your AI model
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      const aiResponse = `Thank you for your message! Here's a sample response that demonstrates markdown and code formatting:
+      const aiResponse = `Thank you for your message${message ? ' and' : ''} ${files.length > 0 ? 'the attachments' : ''}! Here's a sample response that demonstrates markdown and code formatting:
 
 ### Features Available:
 - Markdown support
 - Code highlighting
 - Math equations
 - Tables
+- File uploads
+- Copy functionality
 
 \`\`\`python
-def greet(name):
-    return f"Hello, {name}!"
+def process_files(files):
+    for file in files:
+        print(f"Processing {file.name}")
 
-print(greet("User"))
+# Example usage
+process_files(uploaded_files)
 \`\`\`
 
 | Feature | Status |
@@ -34,6 +56,7 @@ print(greet("User"))
 | Markdown | ✅ |
 | Code | ✅ |
 | Math | ✅ |
+| Files | ✅ |
 
 You can use $E = mc^2$ inline math or display math:
 
@@ -57,7 +80,7 @@ $$`;
           <div className="max-w-xl text-center space-y-4">
             <p className="text-lg">Welcome! How can I help you today?</p>
             <p className="text-sm">
-              I can help you with writing, analysis, math, and coding. Feel free to ask any question!
+              I can help you with writing, analysis, math, and coding. Feel free to ask any question or upload files!
             </p>
           </div>
         </div>
@@ -68,6 +91,7 @@ $$`;
               key={index}
               message={message.text}
               isAi={message.isAi}
+              attachments={message.attachments}
             />
           ))}
           {isLoading && (
