@@ -4,6 +4,7 @@ import { ChatInput } from "./ChatInput";
 import { toast } from "sonner";
 
 interface Message {
+  id: string;
   text: string;
   isAi: boolean;
   attachments?: Array<{
@@ -26,7 +27,14 @@ export const ChatContainer = () => {
       }))
     );
 
-    setMessages((prev) => [...prev, { text: message, isAi: false, attachments }]);
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      text: message,
+      isAi: false,
+      attachments
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
     setIsLoading(true);
 
     try {
@@ -41,6 +49,8 @@ export const ChatContainer = () => {
 - Tables
 - File uploads
 - Copy functionality
+- Edit messages
+- Take screenshots
 
 \`\`\`python
 def process_files(files):
@@ -64,12 +74,23 @@ $$
 F = G\\frac{m_1m_2}{r^2}
 $$`;
       
-      setMessages((prev) => [...prev, { text: aiResponse, isAi: true }]);
+      setMessages((prev) => [...prev, { id: Date.now().toString(), text: aiResponse, isAi: true }]);
     } catch (error) {
       toast.error("Failed to get response. Please try again.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEditMessage = (messageId: string, newText: string) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, text: newText }
+          : msg
+      )
+    );
+    toast.success("Message updated successfully");
   };
 
   return (
@@ -86,12 +107,13 @@ $$`;
         </div>
       ) : (
         <div className="divide-y divide-gray-700">
-          {messages.map((message, index) => (
+          {messages.map((message) => (
             <ChatMessage
-              key={index}
+              key={message.id}
               message={message.text}
               isAi={message.isAi}
               attachments={message.attachments}
+              onEdit={(newText) => handleEditMessage(message.id, newText)}
             />
           ))}
           {isLoading && (
