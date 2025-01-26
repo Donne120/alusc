@@ -130,7 +130,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                           <SyntaxHighlighter
                             language={match[1]}
                             PreTag="div"
-                            style={atomDark}
+                            style={atomDark as { [key: string]: React.CSSProperties }}
                             customStyle={{ margin: 0 }}
                             {...props}
                           >
