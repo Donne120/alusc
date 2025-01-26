@@ -50,7 +50,6 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
         const canvas = await html2canvas(messageElement);
         const dataUrl = canvas.toDataURL('image/png');
         
-        // Create temporary link to download the screenshot
         const link = document.createElement('a');
         link.href = dataUrl;
         link.download = 'chat-screenshot.png';
@@ -94,14 +93,14 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
               ) : (
                 <ReactMarkdown
                   components={{
-                    code({ node, inline, className, children, ...props }) {
+                    code({ node, className, children, ...props }) {
                       const match = /language-(\w+)/.exec(className || '');
-                      return !inline && match ? (
+                      return !className?.includes('inline') && match ? (
                         <div className="relative group">
                           <SyntaxHighlighter
-                            style={atomDark}
                             language={match[1]}
                             PreTag="div"
+                            style={atomDark as any}
                             {...props}
                           >
                             {String(children).replace(/\n$/, '')}
