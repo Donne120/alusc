@@ -6,6 +6,13 @@ import { Copy, Check, Edit, Camera } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import remarkGfm from 'remark-gfm';
+
+<lov-add-dependency>remark-math@latest</lov-add-dependency>
+<lov-add-dependency>rehype-katex@latest</lov-add-dependency>
+<lov-add-dependency>remark-gfm@latest</lov-add-dependency>
 
 interface ChatMessageProps {
   message: string;
@@ -92,7 +99,34 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                 />
               ) : (
                 <ReactMarkdown
+                  remarkPlugins={[remarkMath, remarkGfm]}
+                  rehypePlugins={[rehypeKatex]}
                   components={{
+                    table: ({ children }) => (
+                      <div className="overflow-x-auto my-4">
+                        <table className="min-w-full divide-y divide-gray-700 border border-gray-700">
+                          {children}
+                        </table>
+                      </div>
+                    ),
+                    thead: ({ children }) => (
+                      <thead className="bg-gray-800">{children}</thead>
+                    ),
+                    th: ({ children }) => (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                        {children}
+                      </th>
+                    ),
+                    td: ({ children }) => (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {children}
+                      </td>
+                    ),
+                    tr: ({ children }) => (
+                      <tr className="hover:bg-gray-700 transition-colors">
+                        {children}
+                      </tr>
+                    ),
                     code({ node, className, children, ...props }) {
                       const match = /language-(\w+)/.exec(className || '');
                       return !className?.includes('inline') && match ? (
@@ -100,7 +134,8 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                           <SyntaxHighlighter
                             language={match[1]}
                             PreTag="div"
-                            style={atomDark as any}
+                            style={atomDark}
+                            customStyle={{ margin: 0 }}
                             {...props}
                           >
                             {String(children).replace(/\n$/, '')}
