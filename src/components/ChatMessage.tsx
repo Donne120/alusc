@@ -82,9 +82,18 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
             isAi ? "bg-[#19c37d]" : "bg-[#9859f5]"
           )}
         >
-          {isAi ? "AI" : "U"}
+          {isAi ? "SC" : "U"}
         </div>
         <div className="flex-1">
+          {isAi && (
+            <div className="mb-2">
+              <img 
+                src="/lovable-uploads/6a746a81-f095-4d25-8a43-e84122f6a4f9.png" 
+                alt="SC Logo" 
+                className="h-6 w-auto"
+              />
+            </div>
+          )}
           <div className="flex justify-between items-start">
             <div className="flex-1 text-gray-100 prose prose-invert max-w-none">
               {isEditing ? (
@@ -130,7 +139,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                           <SyntaxHighlighter
                             language={match[1]}
                             PreTag="div"
-                            style={atomDark as { [key: string]: React.CSSProperties }}
+                            style={atomDark as unknown as { [key: string]: React.CSSProperties }}
                             customStyle={{ margin: 0 }}
                             {...props}
                           >
