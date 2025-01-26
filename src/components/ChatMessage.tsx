@@ -10,10 +10,6 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 
-<lov-add-dependency>remark-math@latest</lov-add-dependency>
-<lov-add-dependency>rehype-katex@latest</lov-add-dependency>
-<lov-add-dependency>remark-gfm@latest</lov-add-dependency>
-
 interface ChatMessageProps {
   message: string;
   isAi?: boolean;
