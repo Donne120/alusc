@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ interface Message {
   id: string;
   text: string;
   isAi: boolean;
+  timestamp: number;
   attachments?: Array<{
     type: 'image' | 'file';
     url: string;
@@ -14,55 +15,49 @@ interface Message {
   }>;
 }
 
+const STORAGE_KEY = 'alu_chat_messages';
+
+const formatMarkdown = (text: string, type: 'code' | 'math' | 'general') => {
+  switch (type) {
+    case 'code':
+      return `\`\`\`python\n${text}\n\`\`\``;
+    case 'math':
+      return `$${text}$`;
+    default:
+      return text;
+  }
+};
+
 export const ChatContainer = () => {
-  const [messages, setMessages] = useState<Message[]>([{
-    id: "markdown-demo",
-    text: `# Welcome to ALU Student Companion
-
-## Text Formatting
-**Bold text** for emphasis
-*Italic text* for subtle emphasis
-***Bold and italic*** for strong emphasis
-~~Strikethrough~~ for outdated content
-
-## Lists
-### Ordered List
-1. First item
-2. Second item
-3. Third item
-
-### Unordered List
-- Main point
-  - Sub-point
-  - Another sub-point
-- Another point
-
-## Blockquotes
-> Important information or quotes go here
-> Multiple lines can be used
->> Nested quotes are possible
-
-## Code Examples
-Inline \`code\` looks like this
-
-\`\`\`python
-def hello_world():
-    print("Hello, students!")
-\`\`\`
-
-## Tables
-| Feature | Description |
-|---------|-------------|
-| Chat | Real-time assistance |
-| Resources | Study materials |
-| Practice | Interactive exercises |
-
----
-
-Feel free to ask any questions!`,
-    isAi: true
-  }]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load messages from localStorage on component mount
+  useEffect(() => {
+    const savedMessages = localStorage.getItem(STORAGE_KEY);
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        setMessages(parsedMessages);
+      } catch (error) {
+        console.error('Error loading messages:', error);
+        toast.error("Failed to load previous messages");
+      }
+    } else {
+      // Set initial welcome message if no stored messages
+      setMessages([{
+        id: "welcome",
+        text: `# Welcome to ALU Student Companion\n\n## Text Formatting\n**Bold text** for emphasis\n*Italic text* for subtle emphasis\n***Bold and italic*** for strong emphasis\n~~Strikethrough~~ for outdated content\n\n## Lists\n### Ordered List\n1. First item\n2. Second item\n3. Third item\n\n### Unordered List\n- Main point\n  - Sub-point\n  - Another sub-point\n- Another point\n\n## Blockquotes\n> Important information or quotes go here\n> Multiple lines can be used\n>> Nested quotes are possible\n\n## Code Examples\nInline \`code\` looks like this\n\n\`\`\`python\ndef hello_world():\n    print("Hello, students!")\n\`\`\`\n\n## Tables\n| Feature | Description |\n|---------|-------------|\n| Chat | Real-time assistance |\n| Resources | Study materials |\n| Practice | Interactive exercises |\n\n---\n\nFeel free to ask any questions!`,
+        isAi: true,
+        timestamp: Date.now()
+      }]);
+    }
+  }, []);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
 
   const handleSendMessage = async (message: string, files: File[]) => {
     const attachments = await Promise.all(
@@ -77,6 +72,7 @@ Feel free to ask any questions!`,
       id: Date.now().toString(),
       text: message,
       isAi: false,
+      timestamp: Date.now(),
       attachments
     };
 
@@ -84,13 +80,15 @@ Feel free to ask any questions!`,
     setIsLoading(true);
 
     try {
-      // Make API call to the Llama backend
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ 
+          message,
+          context: messages.slice(-5).map(m => ({ role: m.isAi ? 'assistant' : 'user', content: m.text }))
+        }),
       });
 
       if (!response.ok) {
@@ -100,10 +98,12 @@ Feel free to ask any questions!`,
       const data = await response.json();
       
       if (data.success) {
+        const aiResponse = data.response;
         setMessages((prev) => [...prev, {
           id: Date.now().toString(),
-          text: data.response,
-          isAi: true
+          text: aiResponse,
+          isAi: true,
+          timestamp: Date.now()
         }]);
       } else {
         throw new Error('Failed to get valid response from model');
@@ -120,7 +120,7 @@ Feel free to ask any questions!`,
     setMessages((prev) =>
       prev.map((msg) =>
         msg.id === messageId
-          ? { ...msg, text: newText }
+          ? { ...msg, text: newText, timestamp: Date.now() }
           : msg
       )
     );

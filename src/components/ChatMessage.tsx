@@ -107,41 +107,16 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                   remarkPlugins={[remarkMath, remarkGfm]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    table: ({ children }) => (
-                      <div className="overflow-x-auto my-4">
-                        <table className="min-w-full divide-y divide-gray-700 border border-gray-700">
-                          {children}
-                        </table>
-                      </div>
-                    ),
-                    thead: ({ children }) => (
-                      <thead className="bg-gray-800">{children}</thead>
-                    ),
-                    th: ({ children }) => (
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        {children}
-                      </th>
-                    ),
-                    td: ({ children }) => (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {children}
-                      </td>
-                    ),
-                    tr: ({ children }) => (
-                      <tr className="hover:bg-gray-700 transition-colors">
-                        {children}
-                      </tr>
-                    ),
-                    code({ node, className, children, ...props }) {
+                    code({ node, inline, className, children, ...props }) {
                       const match = /language-(\w+)/.exec(className || '');
-                      return !className?.includes('inline') && match ? (
+                      return !inline && match ? (
                         <div className="relative group">
                           <SyntaxHighlighter
+                            {...props}
+                            style={atomDark}
                             language={match[1]}
                             PreTag="div"
-                            style={atomDark as unknown as { [key: string]: React.CSSProperties }}
                             customStyle={{ margin: 0 }}
-                            {...props}
                           >
                             {String(children).replace(/\n$/, '')}
                           </SyntaxHighlighter>
