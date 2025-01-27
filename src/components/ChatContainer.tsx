@@ -41,45 +41,62 @@ export const ChatContainer = () => {
   const [currentConversationId, setCurrentConversationId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Initialize with a default conversation if none exists
+  const initializeDefaultConversation = () => {
+    const defaultConversation: Conversation = {
+      id: Date.now().toString(),
+      title: "New Chat",
+      timestamp: Date.now(),
+      messages: [{
+        id: "welcome",
+        text: `# Welcome to ALU Student Companion\n\n## Text Formatting\n**Bold text** for emphasis\n*Italic text* for subtle emphasis\n***Bold and italic*** for strong emphasis\n~~Strikethrough~~ for outdated content\n\n## Lists\n### Ordered List\n1. First item\n2. Second item\n3. Third item\n\n### Unordered List\n- Main point\n  - Sub-point\n  - Another sub-point\n- Another point\n\n## Blockquotes\n> Important information or quotes go here\n> Multiple lines can be used\n>> Nested quotes are possible\n\n## Code Examples\nInline \`code\` looks like this\n\n\`\`\`python\ndef hello_world():\n    print("Hello, students!")\n\`\`\`\n\n## Tables\n| Feature | Description |\n|---------|-------------|\n| Chat | Real-time assistance |\n| Resources | Study materials |\n| Practice | Interactive exercises |\n\n---\n\nFeel free to ask any questions!`,
+        isAi: true,
+        timestamp: Date.now()
+      }]
+    };
+    setConversations([defaultConversation]);
+    setCurrentConversationId(defaultConversation.id);
+    return defaultConversation;
+  };
+
   // Load conversations from localStorage on component mount
   useEffect(() => {
     const savedConversations = localStorage.getItem(STORAGE_KEY);
     if (savedConversations) {
       try {
         const parsed = JSON.parse(savedConversations);
-        setConversations(parsed);
         if (parsed.length > 0) {
+          setConversations(parsed);
           setCurrentConversationId(parsed[0].id);
+        } else {
+          initializeDefaultConversation();
         }
       } catch (error) {
         console.error('Error loading conversations:', error);
         toast.error("Failed to load previous conversations");
+        initializeDefaultConversation();
       }
     } else {
-      // Create initial conversation with welcome message
-      const initialConversation: Conversation = {
-        id: Date.now().toString(),
-        title: "New Chat",
-        timestamp: Date.now(),
-        messages: [{
-          id: "welcome",
-          text: `# Welcome to ALU Student Companion\n\n## Text Formatting\n**Bold text** for emphasis\n*Italic text* for subtle emphasis\n***Bold and italic*** for strong emphasis\n~~Strikethrough~~ for outdated content\n\n## Lists\n### Ordered List\n1. First item\n2. Second item\n3. Third item\n\n### Unordered List\n- Main point\n  - Sub-point\n  - Another sub-point\n- Another point\n\n## Blockquotes\n> Important information or quotes go here\n> Multiple lines can be used\n>> Nested quotes are possible\n\n## Code Examples\nInline \`code\` looks like this\n\n\`\`\`python\ndef hello_world():\n    print("Hello, students!")\n\`\`\`\n\n## Tables\n| Feature | Description |\n|---------|-------------|\n| Chat | Real-time assistance |\n| Resources | Study materials |\n| Practice | Interactive exercises |\n\n---\n\nFeel free to ask any questions!`,
-          isAi: true,
-          timestamp: Date.now()
-        }]
-      };
-      setConversations([initialConversation]);
-      setCurrentConversationId(initialConversation.id);
+      initializeDefaultConversation();
     }
   }, []);
 
   // Save conversations to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+    if (conversations.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+    }
   }, [conversations]);
 
-  const getCurrentConversation = () => {
-    return conversations.find(conv => conv.id === currentConversationId) || conversations[0];
+  const getCurrentConversation = (): Conversation => {
+    const current = conversations.find(conv => conv.id === currentConversationId);
+    if (!current && conversations.length > 0) {
+      return conversations[0];
+    }
+    if (!current) {
+      return initializeDefaultConversation();
+    }
+    return current;
   };
 
   const createNewConversation = () => {
