@@ -20,7 +20,7 @@ export const ChatContainer = () => {
       timestamp: Date.now(),
       messages: [{
         id: "welcome",
-        text: `# Welcome to ALU Student Companion\n\n## Text Formatting\n**Bold text** for emphasis\n*Italic text* for subtle emphasis\n***Bold and italic*** for strong emphasis\n~~Strikethrough~~ for outdated content\n\n## Lists\n### Ordered List\n1. First item\n2. Second item\n3. Third item\n\n### Unordered List\n- Main point\n  - Sub-point\n  - Another sub-point\n- Another point\n\n## Blockquotes\n> Important information or quotes go here\n> Multiple lines can be used\n>> Nested quotes are possible\n\n## Code Examples\nInline \`code\` looks like this\n\n\`\`\`python\ndef hello_world():\n    print("Hello, students!")\n\`\`\`\n\n## Tables\n| Feature | Description |\n|---------|-------------|\n| Chat | Real-time assistance |\n| Resources | Study materials |\n| Practice | Interactive exercises |\n\n---\n\nFeel free to ask any questions!`,
+        text: `# Welcome to ALU Student Companion\n\nI'm here to help! I'll remember our conversation and provide relevant context-aware responses. Feel free to ask any questions!`,
         isAi: true,
         timestamp: Date.now()
       }]
@@ -136,14 +136,22 @@ export const ChatContainer = () => {
         const aiResponse = data.response;
         setConversations(prev => prev.map(conv => {
           if (conv.id === currentConversationId) {
+            const updatedMessages = [...conv.messages, {
+              id: Date.now().toString(),
+              text: aiResponse,
+              isAi: true,
+              timestamp: Date.now()
+            }];
+            
+            // Update conversation title if it's a new conversation
+            const updatedTitle = conv.messages.length === 0 ? 
+              message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
+              conv.title;
+            
             return {
               ...conv,
-              messages: [...conv.messages, {
-                id: Date.now().toString(),
-                text: aiResponse,
-                isAi: true,
-                timestamp: Date.now()
-              }]
+              title: updatedTitle,
+              messages: updatedMessages
             };
           }
           return conv;

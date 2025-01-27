@@ -15,7 +15,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
         <div className="max-w-xl text-center space-y-4">
           <p className="text-lg">Welcome! How can I help you today?</p>
           <p className="text-sm">
-            I'm your academic assistant. Feel free to ask any questions!
+            I remember our conversations and provide context-aware responses to better assist you.
           </p>
         </div>
       </div>
