@@ -21,6 +21,13 @@ interface ChatMessageProps {
   onEdit?: (newMessage: string) => void;
 }
 
+interface CodeProps {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children: any;
+}
+
 export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }: ChatMessageProps) => {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -107,12 +114,11 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                   remarkPlugins={[remarkMath, remarkGfm]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    code({ node, inline, className, children, ...props }) {
+                    code: ({ node, inline, className, children, ...props }: CodeProps) => {
                       const match = /language-(\w+)/.exec(className || '');
                       return !inline && match ? (
                         <div className="relative group">
                           <SyntaxHighlighter
-                            {...props}
                             style={atomDark}
                             language={match[1]}
                             PreTag="div"
@@ -128,7 +134,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                           </button>
                         </div>
                       ) : (
-                        <code className={className} {...props}>
+                        <code {...props} className={className}>
                           {children}
                         </code>
                       );
