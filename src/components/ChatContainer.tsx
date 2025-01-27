@@ -1,47 +1,18 @@
 import { useState, useEffect } from "react";
-import { ChatMessage } from "./ChatMessage";
-import { ChatInput } from "./ChatInput";
 import { toast } from "sonner";
-
-interface Message {
-  id: string;
-  text: string;
-  isAi: boolean;
-  timestamp: number;
-  attachments?: Array<{
-    type: 'image' | 'file';
-    url: string;
-    name: string;
-  }>;
-}
-
-interface Conversation {
-  id: string;
-  title: string;
-  messages: Message[];
-  timestamp: number;
-}
+import { ChatInput } from "./ChatInput";
+import { ConversationSidebar } from "./chat/ConversationSidebar";
+import { ChatMessages } from "./chat/ChatMessages";
+import { Conversation, Message } from "@/types/chat";
 
 const STORAGE_KEY = 'alu_chat_conversations';
 const MAX_CONTEXT_MESSAGES = 10;
-
-const formatMarkdown = (text: string, type: 'code' | 'math' | 'general') => {
-  switch (type) {
-    case 'code':
-      return `\`\`\`python\n${text}\n\`\`\``;
-    case 'math':
-      return `$${text}$`;
-    default:
-      return text;
-  }
-};
 
 export const ChatContainer = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Initialize with a default conversation if none exists
   const initializeDefaultConversation = () => {
     const defaultConversation: Conversation = {
       id: Date.now().toString(),
@@ -59,7 +30,6 @@ export const ChatContainer = () => {
     return defaultConversation;
   };
 
-  // Load conversations from localStorage on component mount
   useEffect(() => {
     const savedConversations = localStorage.getItem(STORAGE_KEY);
     if (savedConversations) {
@@ -81,7 +51,6 @@ export const ChatContainer = () => {
     }
   }, []);
 
-  // Save conversations to localStorage whenever they change
   useEffect(() => {
     if (conversations.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
@@ -211,68 +180,19 @@ export const ChatContainer = () => {
 
   return (
     <div className="min-h-screen bg-[#343541] font-inter text-white">
-      {/* Sidebar for conversation history */}
-      <div className="fixed left-0 top-0 h-full w-64 bg-[#202123] p-2 overflow-y-auto border-r border-gray-700">
-        <button
-          onClick={createNewConversation}
-          className="w-full p-3 mb-2 bg-[#40414f] hover:bg-[#4f505f] rounded-lg text-left flex items-center gap-2"
-        >
-          <span>+ New Chat</span>
-        </button>
-        <div className="space-y-2">
-          {conversations.map(conv => (
-            <button
-              key={conv.id}
-              onClick={() => setCurrentConversationId(conv.id)}
-              className={`w-full p-3 rounded-lg text-left truncate hover:bg-[#40414f] ${
-                conv.id === currentConversationId ? 'bg-[#40414f]' : ''
-              }`}
-            >
-              {conv.title || 'New Chat'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main chat area */}
+      <ConversationSidebar
+        conversations={conversations}
+        currentConversationId={currentConversationId}
+        onNewChat={createNewConversation}
+        onSelectConversation={setCurrentConversationId}
+      />
       <div className="pl-64">
         <div className="pb-32">
-          {currentConversation.messages.length === 0 ? (
-            <div className="h-screen flex flex-col items-center justify-center text-gray-400 px-4">
-              <h1 className="text-3xl font-bold mb-8">ALU Student Companion</h1>
-              <div className="max-w-xl text-center space-y-4">
-                <p className="text-lg">Welcome! How can I help you today?</p>
-                <p className="text-sm">
-                  I'm your academic assistant. Feel free to ask any questions!
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-700">
-              {currentConversation.messages.map((message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message.text}
-                  isAi={message.isAi}
-                  attachments={message.attachments}
-                  onEdit={(newText) => handleEditMessage(message.id, newText)}
-                />
-              ))}
-              {isLoading && (
-                <div className="py-4 px-8 text-gray-400 animate-pulse bg-[#444654] border-b border-gray-700">
-                  <div className="max-w-3xl mx-auto flex gap-4 md:gap-6">
-                    <div className="w-8 h-8 rounded bg-[#19c37d] flex items-center justify-center text-white shrink-0">
-                      SC
-                    </div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-gray-600 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-600 rounded w-1/2 mt-2"></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          <ChatMessages
+            messages={currentConversation.messages}
+            isLoading={isLoading}
+            onEditMessage={handleEditMessage}
+          />
         </div>
         <ChatInput onSend={handleSendMessage} disabled={isLoading} />
       </div>
