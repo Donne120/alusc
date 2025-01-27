@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Conversation } from "@/types/chat";
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface ConversationSidebarProps {
@@ -31,12 +31,31 @@ export const ConversationSidebar = ({
     }
   };
 
+  const getConversationTitle = (conversation: Conversation) => {
+    if (conversation.messages.length <= 1) return "New Chat";
+    // Get the first non-AI message as the summary
+    const firstUserMessage = conversation.messages.find(msg => !msg.isAi);
+    if (!firstUserMessage) return "New Chat";
+    return firstUserMessage.text.slice(0, 30) + (firstUserMessage.text.length > 30 ? '...' : '');
+  };
+
+  const handleDeleteConversation = (convId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    const remainingConversations = conversations.filter(conv => conv.id !== convId);
+    if (remainingConversations.length === 0) {
+      onNewChat();
+    } else if (convId === currentConversationId) {
+      onSelectConversation(remainingConversations[0].id);
+    }
+    toast.success("Conversation deleted");
+  };
+
   return (
     <div className="fixed left-0 top-0 h-full w-64 bg-[#202123] p-2 overflow-y-auto border-r border-gray-700">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-white">
-            {currentConversation?.title || 'New Chat'}
+            {currentConversation ? getConversationTitle(currentConversation) : 'New Chat'}
           </h2>
           <Button
             variant="ghost"
@@ -55,15 +74,27 @@ export const ConversationSidebar = ({
         </button>
         <div className="space-y-2">
           {conversations.map(conv => (
-            <button
+            <div
               key={conv.id}
-              onClick={() => onSelectConversation(conv.id)}
-              className={`w-full p-3 rounded-lg text-left truncate hover:bg-[#40414f] ${
-                conv.id === currentConversationId ? 'bg-[#40414f]' : ''
-              }`}
+              className="group relative"
             >
-              {conv.title || 'New Chat'}
-            </button>
+              <button
+                onClick={() => onSelectConversation(conv.id)}
+                className={`w-full p-3 rounded-lg text-left truncate hover:bg-[#40414f] ${
+                  conv.id === currentConversationId ? 'bg-[#40414f]' : ''
+                }`}
+              >
+                {getConversationTitle(conv)}
+              </button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => handleDeleteConversation(conv.id, e)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-[#40414f]"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           ))}
         </div>
       </div>
