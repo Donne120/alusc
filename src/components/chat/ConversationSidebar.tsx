@@ -54,8 +54,8 @@ export const ConversationSidebar = ({
   };
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-[#202123] p-2 overflow-y-auto border-r border-gray-700 flex flex-col">
-      <div className="flex-1">
+    <div className="fixed left-0 top-0 h-full w-64 bg-[#202123] p-2 border-r border-gray-700 flex flex-col z-50">
+      <div className="flex-1 overflow-y-auto mb-2">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-white">
             {currentConversation ? getConversationTitle(currentConversation) : 'New Chat'}
@@ -102,18 +102,17 @@ export const ConversationSidebar = ({
         </div>
       </div>
       
-      {/* User Profile and Settings Section */}
-      <div className="mt-auto border-t border-gray-700 pt-2">
+      <div className="mt-auto border-t border-gray-700 pt-2 sticky bottom-0 bg-[#202123]">
         <button
           onClick={() => navigate('/profile')}
-          className="w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2"
+          className="w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300"
         >
           <User className="h-4 w-4" />
           <span>{user?.name || 'Profile'}</span>
         </button>
         <button
           onClick={() => navigate('/settings')}
-          className="w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2"
+          className="w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300"
         >
           <Settings className="h-4 w-4" />
           <span>Settings</span>
