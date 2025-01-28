@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Conversation } from "@/types/chat";
-import { Trash2, X } from "lucide-react";
+import { Settings, Trash2, User, X } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ConversationSidebarProps {
   conversations: Conversation[];
@@ -16,6 +18,8 @@ export const ConversationSidebar = ({
   onNewChat,
   onSelectConversation,
 }: ConversationSidebarProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const currentConversation = conversations.find(conv => conv.id === currentConversationId);
   
   const handleClearChat = () => {
@@ -33,7 +37,6 @@ export const ConversationSidebar = ({
 
   const getConversationTitle = (conversation: Conversation) => {
     if (conversation.messages.length <= 1) return "New Chat";
-    // Get the first non-AI message as the summary
     const firstUserMessage = conversation.messages.find(msg => !msg.isAi);
     if (!firstUserMessage) return "New Chat";
     return firstUserMessage.text.slice(0, 30) + (firstUserMessage.text.length > 30 ? '...' : '');
@@ -51,8 +54,8 @@ export const ConversationSidebar = ({
   };
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-[#202123] p-2 overflow-y-auto border-r border-gray-700">
-      <div className="flex flex-col gap-2">
+    <div className="fixed left-0 top-0 h-full w-64 bg-[#202123] p-2 overflow-y-auto border-r border-gray-700 flex flex-col">
+      <div className="flex-1">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-white">
             {currentConversation ? getConversationTitle(currentConversation) : 'New Chat'}
@@ -97,6 +100,24 @@ export const ConversationSidebar = ({
             </div>
           ))}
         </div>
+      </div>
+      
+      {/* User Profile and Settings Section */}
+      <div className="mt-auto border-t border-gray-700 pt-2">
+        <button
+          onClick={() => navigate('/profile')}
+          className="w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2"
+        >
+          <User className="h-4 w-4" />
+          <span>{user?.name || 'Profile'}</span>
+        </button>
+        <button
+          onClick={() => navigate('/settings')}
+          className="w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2"
+        >
+          <Settings className="h-4 w-4" />
+          <span>Settings</span>
+        </button>
       </div>
     </div>
   );
