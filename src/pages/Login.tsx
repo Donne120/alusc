@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,36 +23,57 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+    <div className="min-h-screen flex items-center justify-center bg-[#1A1F2C]">
+      <div className="max-w-md w-full space-y-8 p-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-2">ALU</h1>
+          <h2 className="text-3xl font-bold text-white mb-6">
+            Welcome Back to ALU Student Companion
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Use your ALU student email
-          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <Input
-              type="email"
-              placeholder="student@alustudent.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div>
+              <label htmlFor="email" className="block text-white mb-2">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your.name@alustudent.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-[#1A1F2C] border-gray-600 text-white placeholder:text-gray-400"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-white mb-2">
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-[#1A1F2C] border-gray-600 text-white placeholder:text-gray-400"
+              />
+            </div>
           </div>
-          <Button type="submit" className="w-full">
-            Sign in
+          <Button
+            type="submit"
+            className="w-full bg-[#ea384c] hover:bg-[#ea384c]/90 text-white"
+          >
+            Sign In
           </Button>
+          <p className="text-center text-white mt-4">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-[#ea384c] hover:underline">
+              Sign up
+            </Link>
+          </p>
         </form>
       </div>
     </div>
