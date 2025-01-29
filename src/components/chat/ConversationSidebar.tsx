@@ -44,12 +44,24 @@ export const ConversationSidebar = ({
 
   const handleDeleteConversation = (convId: string, event: React.MouseEvent) => {
     event.stopPropagation();
+    
+    // Filter out the conversation to be deleted
     const remainingConversations = conversations.filter(conv => conv.id !== convId);
-    if (remainingConversations.length === 0) {
-      onNewChat();
-    } else if (convId === currentConversationId) {
-      onSelectConversation(remainingConversations[0].id);
+    
+    // If we're deleting the current conversation
+    if (convId === currentConversationId) {
+      if (remainingConversations.length > 0) {
+        // Select the first remaining conversation
+        onSelectConversation(remainingConversations[0].id);
+      } else {
+        // If no conversations remain, create a new one
+        onNewChat();
+      }
     }
+    
+    // Update localStorage to persist the deletion
+    localStorage.setItem('alu_chat_conversations', JSON.stringify(remainingConversations));
+    
     toast.success("Conversation deleted");
   };
 
