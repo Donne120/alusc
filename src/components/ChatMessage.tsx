@@ -9,6 +9,7 @@ import html2canvas from "html2canvas";
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import { ChatCard } from "./ui/chat-card";
 
 interface ChatMessageProps {
   message: string;
@@ -28,10 +29,39 @@ interface CodeProps {
   children: any;
 }
 
+const tryParseCard = (text: string) => {
+  if (!text.includes('Title:')) return null;
+  
+  try {
+    const title = text.match(/Title:\s*([^\n]+)/)?.[1] || '';
+    const subtitle = text.match(/Subtitle:\s*([^\n]+)/)?.[1];
+    const description = text.match(/Description:\s*([^\n]+)/)?.[1] || '';
+    
+    const buttonsMatch = text.match(/Buttons:\n((?:- [^\n]+\n?)*)/);
+    const buttons = buttonsMatch?.[1]
+      .split('\n')
+      .filter(line => line.startsWith('- '))
+      .map(button => {
+        const [icon, label, link] = button
+          .replace('- ', '')
+          .match(/([^\s]+)\s+([^(]+)\s*\(link:\s*([^)]+)\)/)
+          ?.slice(1) || [];
+        return { icon, label: label.trim(), link };
+      }) || [];
+
+    return { title, subtitle, description, buttons };
+  } catch (error) {
+    console.error('Error parsing card:', error);
+    return null;
+  }
+};
+
 export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }: ChatMessageProps) => {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedMessage, setEditedMessage] = useState(message);
+
+  const cardData = tryParseCard(message);
 
   const handleCopy = async () => {
     try {
@@ -109,6 +139,8 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                   onChange={(e) => setEditedMessage(e.target.value)}
                   className="w-full bg-gray-700 text-white rounded p-2 min-h-[100px]"
                 />
+              ) : cardData ? (
+                <ChatCard {...cardData} />
               ) : (
                 <ReactMarkdown
                   remarkPlugins={[remarkMath, remarkGfm]}
@@ -139,6 +171,42 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                         </code>
                       );
                     },
+                    h1: ({ children }) => (
+                      <h1 className="text-2xl font-bold mb-4">{children}</h1>
+                    ),
+                    h2: ({ children }) => (
+                      <h2 className="text-xl font-bold mb-3">{children}</h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 className="text-lg font-bold mb-2">{children}</h3>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc pl-6 mb-4 space-y-2">{children}</ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="list-decimal pl-6 mb-4 space-y-2">{children}</ol>
+                    ),
+                    li: ({ children }) => (
+                      <li className="mb-1">{children}</li>
+                    ),
+                    p: ({ children }) => (
+                      <p className="mb-4 leading-relaxed">{children}</p>
+                    ),
+                    a: ({ href, children }) => (
+                      <a 
+                        href={href} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        {children}
+                      </a>
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-gray-500 pl-4 italic my-4">
+                        {children}
+                      </blockquote>
+                    ),
                   }}
                 >
                   {message}
