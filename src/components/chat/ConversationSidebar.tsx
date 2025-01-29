@@ -10,6 +10,7 @@ interface ConversationSidebarProps {
   currentConversationId: string;
   onNewChat: () => void;
   onSelectConversation: (id: string) => void;
+  onDeleteConversation: (id: string) => void;
 }
 
 export const ConversationSidebar = ({
@@ -17,6 +18,7 @@ export const ConversationSidebar = ({
   currentConversationId,
   onNewChat,
   onSelectConversation,
+  onDeleteConversation,
 }: ConversationSidebarProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -44,25 +46,7 @@ export const ConversationSidebar = ({
 
   const handleDeleteConversation = (convId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    
-    // Filter out the conversation to be deleted
-    const remainingConversations = conversations.filter(conv => conv.id !== convId);
-    
-    // If we're deleting the current conversation
-    if (convId === currentConversationId) {
-      if (remainingConversations.length > 0) {
-        // Select the first remaining conversation
-        onSelectConversation(remainingConversations[0].id);
-      } else {
-        // If no conversations remain, create a new one
-        onNewChat();
-      }
-    }
-    
-    // Update localStorage to persist the deletion
-    localStorage.setItem('alu_chat_conversations', JSON.stringify(remainingConversations));
-    
-    toast.success("Conversation deleted");
+    onDeleteConversation(convId);
   };
 
   return (

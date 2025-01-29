@@ -79,6 +79,21 @@ export const ChatContainer = () => {
     setCurrentConversationId(newConversation.id);
   };
 
+  const handleDeleteConversation = (convId: string) => {
+    const remainingConversations = conversations.filter(conv => conv.id !== convId);
+    setConversations(remainingConversations);
+    
+    if (convId === currentConversationId) {
+      if (remainingConversations.length > 0) {
+        setCurrentConversationId(remainingConversations[0].id);
+      } else {
+        createNewConversation();
+      }
+    }
+    
+    toast.success("Conversation deleted");
+  };
+
   const handleSendMessage = async (message: string, files: File[]) => {
     const attachments = await Promise.all(
       files.map(async (file) => ({
@@ -193,6 +208,7 @@ export const ChatContainer = () => {
         currentConversationId={currentConversationId}
         onNewChat={createNewConversation}
         onSelectConversation={setCurrentConversationId}
+        onDeleteConversation={handleDeleteConversation}
       />
       <div className="pl-64">
         <div className="pb-32">
