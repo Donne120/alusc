@@ -4,6 +4,7 @@ import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import { Check, Copy } from 'lucide-react';
 
 interface CodeProps {
   node?: any;

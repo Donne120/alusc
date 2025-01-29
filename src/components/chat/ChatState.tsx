@@ -1,31 +1,28 @@
 import { useState, useEffect } from "react";
-import { Conversation, Message } from "@/types/chat";
+import { Conversation } from "@/types/chat";
 import { toast } from "sonner";
 
-const STORAGE_KEY = 'alu_chat_conversations';
-const MAX_CONTEXT_MESSAGES = 10;
+export const STORAGE_KEY = 'alu_chat_conversations';
+export const MAX_CONTEXT_MESSAGES = 10;
+
+export const initializeDefaultConversation = (): Conversation => {
+  return {
+    id: Date.now().toString(),
+    title: "New Chat",
+    timestamp: Date.now(),
+    messages: [{
+      id: "welcome",
+      text: `# Welcome to ALU Student Companion\n\nI'm here to help! I'll remember our conversation and provide relevant context-aware responses. Feel free to ask any questions!`,
+      isAi: true,
+      timestamp: Date.now()
+    }]
+  };
+};
 
 export const useChatState = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const initializeDefaultConversation = () => {
-    const defaultConversation: Conversation = {
-      id: Date.now().toString(),
-      title: "New Chat",
-      timestamp: Date.now(),
-      messages: [{
-        id: "welcome",
-        text: `# Welcome to ALU Student Companion\n\nI'm here to help! I'll remember our conversation and provide relevant context-aware responses. Feel free to ask any questions!`,
-        isAi: true,
-        timestamp: Date.now()
-      }]
-    };
-    setConversations([defaultConversation]);
-    setCurrentConversationId(defaultConversation.id);
-    return defaultConversation;
-  };
 
   useEffect(() => {
     const savedConversations = localStorage.getItem(STORAGE_KEY);
@@ -36,15 +33,21 @@ export const useChatState = () => {
           setConversations(parsed);
           setCurrentConversationId(parsed[0].id);
         } else {
-          initializeDefaultConversation();
+          const defaultConv = initializeDefaultConversation();
+          setConversations([defaultConv]);
+          setCurrentConversationId(defaultConv.id);
         }
       } catch (error) {
         console.error('Error loading conversations:', error);
         toast.error("Failed to load previous conversations");
-        initializeDefaultConversation();
+        const defaultConv = initializeDefaultConversation();
+        setConversations([defaultConv]);
+        setCurrentConversationId(defaultConv.id);
       }
     } else {
-      initializeDefaultConversation();
+      const defaultConv = initializeDefaultConversation();
+      setConversations([defaultConv]);
+      setCurrentConversationId(defaultConv.id);
     }
   }, []);
 
@@ -60,7 +63,6 @@ export const useChatState = () => {
     currentConversationId,
     setCurrentConversationId,
     isLoading,
-    setIsLoading,
-    initializeDefaultConversation
+    setIsLoading
   };
 };

@@ -1,5 +1,6 @@
 import { Conversation, Message } from "@/types/chat";
 import { toast } from "sonner";
+import { initializeDefaultConversation, MAX_CONTEXT_MESSAGES } from "./ChatState";
 
 interface ChatActionsProps {
   conversations: Conversation[];
@@ -34,7 +35,7 @@ export const useChatActions = ({
       messages: [],
       timestamp: Date.now()
     };
-    setConversations(prev => [newConversation, ...prev]);
+    setConversations([newConversation, ...conversations]);
     setCurrentConversationId(newConversation.id);
   };
 
@@ -70,7 +71,7 @@ export const useChatActions = ({
       attachments
     };
 
-    setConversations(prev => prev.map(conv => {
+    setConversations(conversations.map(conv => {
       if (conv.id === currentConversationId) {
         return {
           ...conv,
@@ -108,7 +109,7 @@ export const useChatActions = ({
       
       if (data.success) {
         const aiResponse = data.response;
-        setConversations(prev => prev.map(conv => {
+        setConversations(conversations.map(conv => {
           if (conv.id === currentConversationId) {
             const updatedMessages = [...conv.messages, {
               id: Date.now().toString(),
@@ -141,7 +142,7 @@ export const useChatActions = ({
   };
 
   const handleEditMessage = (messageId: string, newText: string) => {
-    setConversations(prev => prev.map(conv => {
+    setConversations(conversations.map(conv => {
       if (conv.id === currentConversationId) {
         return {
           ...conv,

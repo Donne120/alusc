@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Copy, Check, Edit, Camera } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
