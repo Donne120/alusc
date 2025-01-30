@@ -1,216 +1,206 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Moon, Sun, Bell, Globe, Shield } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { ArrowLeft, Moon, Sun, Bell, Globe, Lock, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const Settings = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [settings, setSettings] = useState({
-    theme: "light",
-    notifications: true,
-    language: "en",
-    privacy: {
-      saveHistory: true,
-      shareAnalytics: false,
-    },
-    display: {
-      showTimestamps: true,
-      compactMode: false,
-    },
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [language, setLanguage] = useState("en");
+  const [notifications, setNotifications] = useState(true);
+  const [privacy, setPrivacy] = useState({
+    saveHistory: true,
+    shareAnalytics: false,
+  });
+  const [display, setDisplay] = useState({
+    showTimestamps: true,
+    compactMode: false,
   });
 
-  const handleSave = (key: string, value: any) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+  const handleThemeChange = (newTheme: "light" | "dark") => {
+    setTheme(newTheme);
     toast({
-      description: "Settings updated successfully",
+      title: "Theme Updated",
+      description: `Theme changed to ${newTheme} mode`,
     });
   };
 
-  const handlePrivacyToggle = (key: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        [key]: !prev.privacy[key],
-      },
-    }));
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
     toast({
-      description: "Privacy settings updated",
-    });
-  };
-
-  const handleDisplayToggle = (key: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      display: {
-        ...prev.display,
-        [key]: !prev.display[key],
-      },
-    }));
-    toast({
-      description: "Display settings updated",
+      title: "Language Updated",
+      description: "Application language has been changed",
     });
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <Button
-        variant="ghost"
-        className="mb-6"
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
-      </Button>
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Link to="/">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold">Settings</h1>
+        </div>
 
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Sun className="mr-2 h-5 w-5" />
-              Theme & Display
-            </CardTitle>
-            <CardDescription>
-              Customize how the chat interface looks
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+            <Sun className="h-5 w-5" />
+            Theme & Display
+          </h2>
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="theme">Theme</Label>
-              <Select
-                value={settings.theme}
-                onValueChange={(value) => handleSave("theme", value)}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-0.5">
+                <Label>Dark Mode</Label>
+                <div className="text-sm text-muted-foreground">
+                  Switch between light and dark themes
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Sun className="h-4 w-4" />
+                <Switch
+                  checked={theme === "dark"}
+                  onCheckedChange={(checked) =>
+                    handleThemeChange(checked ? "dark" : "light")
+                  }
+                />
+                <Moon className="h-4 w-4" />
+              </div>
             </div>
+
             <div className="flex items-center justify-between">
-              <Label htmlFor="timestamps">Show Timestamps</Label>
+              <div className="space-y-0.5">
+                <Label>Show Timestamps</Label>
+                <div className="text-sm text-muted-foreground">
+                  Display message timestamps
+                </div>
+              </div>
               <Switch
-                id="timestamps"
-                checked={settings.display.showTimestamps}
-                onCheckedChange={() => handleDisplayToggle("showTimestamps")}
+                checked={display.showTimestamps}
+                onCheckedChange={(checked) =>
+                  setDisplay((prev) => ({ ...prev, showTimestamps: checked }))
+                }
               />
             </div>
+
             <div className="flex items-center justify-between">
-              <Label htmlFor="compact">Compact Mode</Label>
+              <div className="space-y-0.5">
+                <Label>Compact Mode</Label>
+                <div className="text-sm text-muted-foreground">
+                  Reduce spacing between messages
+                </div>
+              </div>
               <Switch
-                id="compact"
-                checked={settings.display.compactMode}
-                onCheckedChange={() => handleDisplayToggle("compactMode")}
+                checked={display.compactMode}
+                onCheckedChange={(checked) =>
+                  setDisplay((prev) => ({ ...prev, compactMode: checked }))
+                }
               />
             </div>
-          </CardContent>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Bell className="mr-2 h-5 w-5" />
-              Notifications
-            </CardTitle>
-            <CardDescription>
-              Manage your notification preferences
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="notifications">Enable Notifications</Label>
-              <Switch
-                id="notifications"
-                checked={settings.notifications}
-                onCheckedChange={(checked) => handleSave("notifications", checked)}
-              />
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+            <Bell className="h-5 w-5" />
+            Notifications
+          </h2>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Enable Notifications</Label>
+              <div className="text-sm text-muted-foreground">
+                Receive notifications for new messages
+              </div>
             </div>
-          </CardContent>
+            <Switch
+              checked={notifications}
+              onCheckedChange={setNotifications}
+            />
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Globe className="mr-2 h-5 w-5" />
-              Language
-            </CardTitle>
-            <CardDescription>
-              Choose your preferred language
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="language">Language</Label>
-              <Select
-                value={settings.language}
-                onValueChange={(value) => handleSave("language", value)}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="es">Español</SelectItem>
-                  <SelectItem value="fr">Français</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+            <Globe className="h-5 w-5" />
+            Language
+          </h2>
+          <div className="space-y-2">
+            <Label>Select Language</Label>
+            <Select value={language} onValueChange={handleLanguageChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="es">Español</SelectItem>
+                <SelectItem value="fr">Français</SelectItem>
+                <SelectItem value="de">Deutsch</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Shield className="mr-2 h-5 w-5" />
-              Privacy
-            </CardTitle>
-            <CardDescription>
-              Control your privacy settings
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+            <Lock className="h-5 w-5" />
+            Privacy
+          </h2>
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="history">Save Chat History</Label>
+              <div className="space-y-0.5">
+                <Label>Save Chat History</Label>
+                <div className="text-sm text-muted-foreground">
+                  Store conversation history locally
+                </div>
+              </div>
               <Switch
-                id="history"
-                checked={settings.privacy.saveHistory}
-                onCheckedChange={() => handlePrivacyToggle("saveHistory")}
+                checked={privacy.saveHistory}
+                onCheckedChange={(checked) =>
+                  setPrivacy((prev) => ({ ...prev, saveHistory: checked }))
+                }
               />
             </div>
+
             <div className="flex items-center justify-between">
-              <Label htmlFor="analytics">Share Analytics</Label>
+              <div className="space-y-0.5">
+                <Label>Share Analytics</Label>
+                <div className="text-sm text-muted-foreground">
+                  Help improve the chatbot with usage data
+                </div>
+              </div>
               <Switch
-                id="analytics"
-                checked={settings.privacy.shareAnalytics}
-                onCheckedChange={() => handlePrivacyToggle("shareAnalytics")}
+                checked={privacy.shareAnalytics}
+                onCheckedChange={(checked) =>
+                  setPrivacy((prev) => ({ ...prev, shareAnalytics: checked }))
+                }
               />
             </div>
-          </CardContent>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+            <MessageSquare className="h-5 w-5" />
+            Chat Settings
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto-scroll to Bottom</Label>
+                <div className="text-sm text-muted-foreground">
+                  Automatically scroll to new messages
+                </div>
+              </div>
+              <Switch defaultChecked />
+            </div>
+          </div>
         </Card>
       </div>
     </div>
