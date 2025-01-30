@@ -5,6 +5,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import { Check, Copy } from 'lucide-react';
+import 'katex/dist/katex.min.css';
 
 interface CodeProps {
   node?: any;
@@ -28,12 +29,19 @@ export const MarkdownRenderer = ({ content, onCopy, copied }: MarkdownRendererPr
         code: ({ node, inline, className, children, ...props }: CodeProps) => {
           const match = /language-(\w+)/.exec(className || '');
           return !inline && match ? (
-            <div className="relative group">
+            <div className="relative group my-4">
+              <div className="absolute top-2 right-2 text-xs text-gray-400">
+                {match[1]}
+              </div>
               <SyntaxHighlighter
                 style={atomDark}
                 language={match[1]}
                 PreTag="div"
-                customStyle={{ margin: 0 }}
+                customStyle={{ 
+                  margin: 0,
+                  borderRadius: '0.5rem',
+                  padding: '2.5rem 1rem 1rem 1rem'
+                }}
               >
                 {String(children).replace(/\n$/, '')}
               </SyntaxHighlighter>
@@ -45,7 +53,7 @@ export const MarkdownRenderer = ({ content, onCopy, copied }: MarkdownRendererPr
               </button>
             </div>
           ) : (
-            <code {...props} className={className}>
+            <code {...props} className="bg-gray-800 px-1.5 py-0.5 rounded text-sm">
               {children}
             </code>
           );
