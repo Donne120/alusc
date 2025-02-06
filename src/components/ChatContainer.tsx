@@ -41,7 +41,7 @@ export const ChatContainer = () => {
           onSelectConversation={setCurrentConversationId}
           onDeleteConversation={handleDeleteConversation}
         />
-        <div className="flex-1 pl-64 h-full flex flex-col bg-[#1A1F2C]/50 backdrop-blur-sm">
+        <div className="flex-1 pl-64 h-full flex flex-col bg-[#1A1F2C]">
           <div className="flex-1 overflow-y-auto pb-32 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
             <div className="max-w-4xl mx-auto">
               <ChatMessages
