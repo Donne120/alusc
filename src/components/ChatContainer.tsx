@@ -52,7 +52,7 @@ export const ChatContainer = () => {
             </div>
           </div>
           <div className="relative">
-            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#1A1F2C] to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#1A1F2C] to-[#1A1F2C]/0 pointer-events-none" />
             <div className="relative max-w-4xl mx-auto">
               <ChatInput onSend={handleSendMessage} disabled={isLoading} />
             </div>
