@@ -31,7 +31,7 @@ export const ChatContainer = () => {
   const currentConversation = getCurrentConversation();
 
   return (
-    <div className="min-h-screen bg-[#343541] font-inter text-white">
+    <div className="fixed inset-0 bg-[#343541] font-inter text-white">
       <ConversationSidebar
         conversations={conversations}
         currentConversationId={currentConversationId}
@@ -39,8 +39,8 @@ export const ChatContainer = () => {
         onSelectConversation={setCurrentConversationId}
         onDeleteConversation={handleDeleteConversation}
       />
-      <div className="pl-64">
-        <div className="pb-32">
+      <div className="pl-64 h-full flex flex-col">
+        <div className="flex-1 overflow-y-auto pb-32">
           <ChatMessages
             messages={currentConversation.messages}
             isLoading={isLoading}
