@@ -71,7 +71,8 @@ export const useChatActions = ({
       attachments
     };
 
-    setConversations(conversations.map(conv => {
+    // Update conversations with the user's message first
+    const updatedConversations = conversations.map(conv => {
       if (conv.id === currentConversationId) {
         return {
           ...conv,
@@ -79,7 +80,8 @@ export const useChatActions = ({
         };
       }
       return conv;
-    }));
+    });
+    setConversations(updatedConversations);
 
     setIsLoading(true);
 
@@ -109,27 +111,27 @@ export const useChatActions = ({
       
       if (data.success) {
         const aiResponse = data.response;
-        setConversations(conversations.map(conv => {
-          if (conv.id === currentConversationId) {
-            const updatedMessages = [...conv.messages, {
-              id: Date.now().toString(),
-              text: aiResponse,
-              isAi: true,
-              timestamp: Date.now()
-            }];
-            
-            const updatedTitle = conv.messages.length === 0 ? 
-              message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
-              conv.title;
-            
-            return {
-              ...conv,
-              title: updatedTitle,
-              messages: updatedMessages
-            };
-          }
-          return conv;
-        }));
+        setConversations(prevConversations => 
+          prevConversations.map(conv => {
+            if (conv.id === currentConversationId) {
+              const updatedMessages = [...conv.messages, {
+                id: Date.now().toString(),
+                text: aiResponse,
+                isAi: true,
+                timestamp: Date.now()
+              }];
+              
+              return {
+                ...conv,
+                title: conv.messages.length === 0 ? 
+                  message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
+                  conv.title,
+                messages: updatedMessages
+              };
+            }
+            return conv;
+          })
+        );
       } else {
         throw new Error('Failed to get valid response from model');
       }
