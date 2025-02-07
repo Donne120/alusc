@@ -63,7 +63,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
     <div
       className={cn(
         "py-8 px-4 md:px-8 w-full animate-message-fade-in border-b border-gray-700 group",
-        isAi ? "bg-[#444654]" : "bg-[#343541]"
+        isAi ? "bg-[#1A1F2C]" : "bg-[#1A1F2C]"
       )}
       id={`message-${message.slice(0, 10)}`}
     >
