@@ -56,12 +56,15 @@ export const useChatActions = ({
 
   const handleSendMessage = async (message: string, files: File[]) => {
     const attachments = await Promise.all(
-      files.map(async (file) => ({
-        type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
-        url: URL.createObjectURL(file),
-        name: file.name
-      }))
-    );
+      files.map(async (file) => {
+        if (!file) return null;
+        return {
+          type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
+          url: URL.createObjectURL(file),
+          name: file.name
+        };
+      })
+    ).then(results => results.filter((attachment): attachment is NonNullable<typeof attachment> => attachment !== null));
 
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -111,27 +114,26 @@ export const useChatActions = ({
       
       if (data.success) {
         const aiResponse = data.response;
-        setConversations(prevConversations => 
-          prevConversations.map(conv => {
-            if (conv.id === currentConversationId) {
-              const updatedMessages = [...conv.messages, {
-                id: Date.now().toString(),
-                text: aiResponse,
-                isAi: true,
-                timestamp: Date.now()
-              }];
-              
-              return {
-                ...conv,
-                title: conv.messages.length === 0 ? 
-                  message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
-                  conv.title,
-                messages: updatedMessages
-              };
-            }
-            return conv;
-          })
-        );
+        const newConversations = conversations.map(conv => {
+          if (conv.id === currentConversationId) {
+            const updatedMessages = [...conv.messages, {
+              id: Date.now().toString(),
+              text: aiResponse,
+              isAi: true,
+              timestamp: Date.now()
+            }];
+            
+            return {
+              ...conv,
+              title: conv.messages.length === 0 ? 
+                message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
+                conv.title,
+              messages: updatedMessages
+            };
+          }
+          return conv;
+        });
+        setConversations(newConversations);
       } else {
         throw new Error('Failed to get valid response from model');
       }
