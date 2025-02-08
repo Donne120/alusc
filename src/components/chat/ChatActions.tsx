@@ -1,3 +1,4 @@
+
 import { Conversation, Message } from "@/types/chat";
 import { toast } from "sonner";
 import { initializeDefaultConversation, MAX_CONTEXT_MESSAGES } from "./ChatState";
@@ -58,10 +59,16 @@ export const useChatActions = ({
     const attachments = await Promise.all(
       files.map(async (file) => {
         if (!file) return null;
+        const type = file.type.startsWith('image/') ? 'image' : 
+                    ['application/pdf', 'application/msword', 
+                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                     'text/plain'].includes(file.type) ? 'document' : 'file';
+        
         return {
-          type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
+          type: type as 'image' | 'document' | 'file',
           url: URL.createObjectURL(file),
-          name: file.name
+          name: file.name,
+          size: file.size
         };
       })
     ).then(results => results.filter((attachment): attachment is NonNullable<typeof attachment> => attachment !== null));
@@ -74,7 +81,6 @@ export const useChatActions = ({
       attachments
     };
 
-    // Update conversations with the user's message first
     const updatedConversations = conversations.map(conv => {
       if (conv.id === currentConversationId) {
         return {
