@@ -1,3 +1,4 @@
+
 import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
 
@@ -23,7 +24,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
   }
 
   return (
-    <div className="divide-y divide-gray-700">
+    <div className="flex flex-col-reverse divide-y divide-y-reverse divide-gray-700">
       {messages.map((message) => (
         <ChatMessage
           key={message.id}
