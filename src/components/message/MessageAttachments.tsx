@@ -13,7 +13,7 @@ interface MessageAttachmentsProps {
 }
 
 export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => {
-  if (attachments.length === 0) return null;
+  if (!attachments || attachments.length === 0) return null;
 
   const formatFileSize = (bytes: number = 0) => {
     if (bytes === 0) return '0 Bytes';
@@ -26,6 +26,8 @@ export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => 
   return (
     <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
       {attachments.map((attachment, index) => {
+        if (!attachment || !attachment.type) return null;
+
         if (attachment.type === 'image') {
           return (
             <img

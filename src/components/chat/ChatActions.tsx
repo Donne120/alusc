@@ -1,4 +1,3 @@
-
 import { Conversation, Message } from "@/types/chat";
 import { toast } from "sonner";
 import { initializeDefaultConversation, MAX_CONTEXT_MESSAGES } from "./ChatState";
@@ -57,15 +56,25 @@ export const useChatActions = ({
 
   const handleSendMessage = async (message: string, files: File[]) => {
     const attachments = await Promise.all(
-      files.map(async (file) => {
+      files.filter(file => file !== null).map(async (file) => {
         if (!file) return null;
-        const type = file.type.startsWith('image/') ? 'image' : 
-                    ['application/pdf', 'application/msword', 
-                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                     'text/plain'].includes(file.type) ? 'document' : 'file';
+        
+        const fileType = file.type.toLowerCase();
+        let type: 'image' | 'document' | 'file' = 'file';
+
+        if (fileType.startsWith('image/')) {
+          type = 'image';
+        } else if (
+          fileType === 'application/pdf' ||
+          fileType === 'application/msword' ||
+          fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+          fileType === 'text/plain'
+        ) {
+          type = 'document';
+        }
         
         return {
-          type: type as 'image' | 'document' | 'file',
+          type,
           url: URL.createObjectURL(file),
           name: file.name,
           size: file.size
@@ -77,8 +86,7 @@ export const useChatActions = ({
       id: Date.now().toString(),
       text: message,
       isAi: false,
-      timestamp: Date.now(),
-      attachments
+      attachments: attachments
     };
 
     const updatedConversations = conversations.map(conv => {
