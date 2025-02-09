@@ -44,7 +44,7 @@ export const ChatContainer = () => {
           onSelectConversation={setCurrentConversationId}
           onDeleteConversation={handleDeleteConversation}
         />
-        <div className={`flex-1 h-full flex flex-col bg-[#1A1F2C] ${isMobile ? 'pl-0' : 'pl-64'}`}>
+        <div className="flex-1 h-full flex flex-col bg-[#1A1F2C]">
           <div className="flex-1 overflow-y-auto pb-32 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
             <div className="max-w-4xl mx-auto px-4 md:px-0">
               <ChatMessages
