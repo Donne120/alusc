@@ -1,8 +1,10 @@
+
 import { ChatInput } from "./ChatInput";
 import { ConversationSidebar } from "./chat/ConversationSidebar";
 import { ChatMessages } from "./chat/ChatMessages";
 import { useChatState } from "./chat/ChatState";
 import { useChatActions } from "./chat/ChatActions";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const ChatContainer = () => {
   const {
@@ -28,6 +30,7 @@ export const ChatContainer = () => {
     setIsLoading
   });
 
+  const isMobile = useIsMobile();
   const currentConversation = getCurrentConversation();
 
   return (
@@ -41,9 +44,9 @@ export const ChatContainer = () => {
           onSelectConversation={setCurrentConversationId}
           onDeleteConversation={handleDeleteConversation}
         />
-        <div className="flex-1 pl-64 h-full flex flex-col bg-[#1A1F2C]">
+        <div className={`flex-1 h-full flex flex-col bg-[#1A1F2C] ${isMobile ? 'pl-0' : 'pl-64'}`}>
           <div className="flex-1 overflow-y-auto pb-32 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto px-4 md:px-0">
               <ChatMessages
                 messages={currentConversation.messages}
                 isLoading={isLoading}
@@ -53,7 +56,7 @@ export const ChatContainer = () => {
           </div>
           <div className="relative">
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#1A1F2C] to-transparent pointer-events-none" />
-            <div className="relative max-w-4xl mx-auto">
+            <div className="relative max-w-4xl mx-auto px-4 md:px-0">
               <ChatInput onSend={handleSendMessage} disabled={isLoading} />
             </div>
           </div>
