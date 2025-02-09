@@ -2,7 +2,7 @@
 import { FileText } from "lucide-react";
 
 interface Attachment {
-  type: 'image' | 'document' | 'file';
+  type: 'image' | 'file';
   url: string;
   name: string;
   size?: number;
@@ -46,11 +46,7 @@ export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => 
             download={attachment.name}
             className="flex items-center gap-2 p-3 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
           >
-            {attachment.type === 'document' ? (
-              <FileText className="h-5 w-5 text-blue-400" />
-            ) : (
-              <span>📎</span>
-            )}
+            <FileText className="h-5 w-5 text-blue-400" />
             <div className="flex flex-col">
               <span className="text-sm truncate max-w-[150px]">{attachment.name}</span>
               {attachment.size && (

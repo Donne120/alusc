@@ -1,3 +1,4 @@
+
 import { Conversation, Message } from "@/types/chat";
 import { toast } from "sonner";
 import { initializeDefaultConversation, MAX_CONTEXT_MESSAGES } from "./ChatState";
@@ -60,17 +61,10 @@ export const useChatActions = ({
         if (!file) return null;
         
         const fileType = file.type.toLowerCase();
-        let type: 'image' | 'document' | 'file' = 'file';
+        let type: 'image' | 'file' = 'file';
 
         if (fileType.startsWith('image/')) {
           type = 'image';
-        } else if (
-          fileType === 'application/pdf' ||
-          fileType === 'application/msword' ||
-          fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-          fileType === 'text/plain'
-        ) {
-          type = 'document';
         }
         
         return {
@@ -86,6 +80,7 @@ export const useChatActions = ({
       id: Date.now().toString(),
       text: message,
       isAi: false,
+      timestamp: Date.now(),
       attachments: attachments
     };
 
