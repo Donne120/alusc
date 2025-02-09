@@ -24,7 +24,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
   }
 
   return (
-    <div className="flex flex-col-reverse divide-y divide-y-reverse divide-gray-700">
+    <div className="divide-y divide-gray-700">
       {messages.map((message) => (
         <ChatMessage
           key={message.id}
