@@ -1,9 +1,11 @@
+
 import { Button } from "@/components/ui/button";
 import { Conversation } from "@/types/chat";
-import { Settings, Trash2, User, X } from "lucide-react";
+import { ChevronLeft, Menu, Settings, Trash2, User, X } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 
 interface ConversationSidebarProps {
   conversations: Conversation[];
@@ -22,6 +24,7 @@ export const ConversationSidebar = ({
 }: ConversationSidebarProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const currentConversation = conversations.find(conv => conv.id === currentConversationId);
   
   const handleClearChat = () => {
@@ -49,22 +52,45 @@ export const ConversationSidebar = ({
     onDeleteConversation(convId);
   };
 
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  if (isCollapsed) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="fixed left-4 top-4 z-50 bg-[#202123] hover:bg-[#40414f]"
+        onClick={toggleSidebar}
+      >
+        <Menu className="h-6 w-6" />
+      </Button>
+    );
+  }
+
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-[#202123] p-2 border-r border-gray-700 flex flex-col z-50">
+    <div className="fixed left-0 top-0 h-full w-64 bg-[#202123] p-2 border-r border-gray-700 flex flex-col z-50 transition-all duration-300">
+      <div className="flex items-center justify-between mb-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          className="hover:bg-[#40414f]"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleClearChat}
+          className="hover:bg-[#40414f]"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+
       <div className="flex-1 overflow-y-auto mb-2">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold text-white">
-            {currentConversation ? getConversationTitle(currentConversation) : 'New Chat'}
-          </h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleClearChat}
-            className="hover:bg-[#40414f]"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
         <button
           onClick={onNewChat}
           className="w-full p-3 mb-2 bg-[#40414f] hover:bg-[#4f505f] rounded-lg text-left flex items-center gap-2"
