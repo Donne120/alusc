@@ -9,7 +9,7 @@ interface Attachment {
 }
 
 interface MessageAttachmentsProps {
-  attachments: Attachment[];
+  attachments?: Attachment[];
 }
 
 export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => {
@@ -26,7 +26,13 @@ export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => 
   return (
     <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
       {attachments.map((attachment, index) => {
-        if (!attachment || !attachment.type) return null;
+        if (!attachment) return null;
+        
+        // Early return if attachment is invalid
+        if (!attachment.type || !attachment.url || !attachment.name) {
+          console.warn('Invalid attachment:', attachment);
+          return null;
+        }
 
         if (attachment.type === 'image') {
           return (
