@@ -23,12 +23,12 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
     );
   }
 
-  console.log('Messages to render:', messages); // Debug log to see messages
+  console.log('Messages to render:', messages);
 
   return (
     <div className="divide-y divide-gray-700">
       {messages.map((message) => {
-        console.log('Rendering message:', message); // Debug log for each message
+        console.log('Rendering message:', message);
         return (
           <ChatMessage
             key={message.id}
