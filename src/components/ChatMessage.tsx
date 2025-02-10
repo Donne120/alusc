@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { MessageControls } from "./message/MessageControls";
@@ -59,28 +60,32 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
   return (
     <div
       className={cn(
-        "py-4 md:py-8 px-4 md:px-8 w-full animate-message-fade-in border-b border-gray-700 group",
+        "py-4 md:py-8 px-4 md:px-8 w-full animate-message-fade-in border-b border-gray-700 group min-h-[100px]",
         isAi ? "bg-[#1A1F2C]" : "bg-[#1F242E]"
       )}
       id={`message-${message.slice(0, 10)}`}
     >
-      <div className="max-w-3xl mx-auto flex gap-4">
+      <div className="max-w-3xl mx-auto flex gap-2 md:gap-6">
         <div
           className={cn(
-            "w-8 h-8 rounded flex items-center justify-center text-white shrink-0",
+            "w-6 h-6 md:w-8 md:h-8 rounded flex items-center justify-center text-white shrink-0",
             isAi ? "bg-[#19c37d]" : "bg-[#9859f5]"
           )}
         >
           {isAi ? "SC" : "U"}
         </div>
         <div className="flex-1 min-w-0">
-          {!isAi && (
-            <div className="text-gray-300 font-medium mb-2">
-              {isEditing ? "Edit message" : message}
+          {isAi && (
+            <div className="mb-2">
+              <img 
+                src="/lovable-uploads/6a746a81-f095-4d25-8a43-e84122f6a4f9.png" 
+                alt="SC Logo" 
+                className="h-4 md:h-6 w-auto"
+              />
             </div>
           )}
           <div className="flex justify-between items-start gap-2">
-            <div className="flex-1 text-gray-100 prose prose-invert max-w-none">
+            <div className="flex-1 text-gray-100 prose prose-invert max-w-none text-sm md:text-base">
               {isEditing ? (
                 <textarea
                   value={editedMessage}
