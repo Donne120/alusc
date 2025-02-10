@@ -13,7 +13,8 @@ interface MessageAttachmentsProps {
 }
 
 export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => {
-  if (!attachments || attachments.length === 0) return null;
+  // Early return if attachments is undefined, null, or empty
+  if (!attachments?.length) return null;
 
   const formatFileSize = (bytes: number = 0) => {
     if (bytes === 0) return '0 Bytes';
@@ -23,17 +24,27 @@ export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Filter out invalid attachments before mapping
+  const validAttachments = attachments.filter((attachment): attachment is Attachment => {
+    if (!attachment || typeof attachment !== 'object') {
+      console.warn('Invalid attachment:', attachment);
+      return false;
+    }
+    
+    const isValid = attachment.type && attachment.url && attachment.name;
+    if (!isValid) {
+      console.warn('Attachment missing required properties:', attachment);
+      return false;
+    }
+    
+    return true;
+  });
+
+  if (validAttachments.length === 0) return null;
+
   return (
     <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-      {attachments.map((attachment, index) => {
-        if (!attachment) return null;
-        
-        // Early return if attachment is invalid
-        if (!attachment.type || !attachment.url || !attachment.name) {
-          console.warn('Invalid attachment:', attachment);
-          return null;
-        }
-
+      {validAttachments.map((attachment, index) => {
         if (attachment.type === 'image') {
           return (
             <img
