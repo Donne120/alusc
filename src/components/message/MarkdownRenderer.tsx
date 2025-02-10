@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import { Check, Copy } from 'lucide-react';
 import 'katex/dist/katex.min.css';
 
+// Types
 interface CodeProps {
   node?: any;
   inline?: boolean;
@@ -20,44 +21,47 @@ interface MarkdownRendererProps {
   copied: boolean;
 }
 
+// Code Block Component
+const CodeBlock = ({ inline, className, children, ...props }: CodeProps) => {
+  const match = /language-(\w+)/.exec(className || '');
+  
+  if (!inline && match) {
+    return (
+      <div className="relative group my-4">
+        <div className="absolute top-2 right-2 text-xs text-gray-400">
+          {match[1]}
+        </div>
+        <SyntaxHighlighter
+          style={atomDark}
+          language={match[1]}
+          PreTag="div"
+          customStyle={{ 
+            margin: 0,
+            borderRadius: '0.5rem',
+            padding: '2.5rem 1rem 1rem 1rem'
+          }}
+        >
+          {String(children).replace(/\n$/, '')}
+        </SyntaxHighlighter>
+      </div>
+    );
+  }
+
+  return (
+    <code {...props} className="bg-gray-800 px-1.5 py-0.5 rounded text-sm">
+      {children}
+    </code>
+  );
+};
+
+// Main Component
 export const MarkdownRenderer = ({ content, onCopy, copied }: MarkdownRendererProps) => {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkMath, remarkGfm]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        code: ({ node, inline, className, children, ...props }: CodeProps) => {
-          const match = /language-(\w+)/.exec(className || '');
-          return !inline && match ? (
-            <div className="relative group my-4">
-              <div className="absolute top-2 right-2 text-xs text-gray-400">
-                {match[1]}
-              </div>
-              <SyntaxHighlighter
-                style={atomDark}
-                language={match[1]}
-                PreTag="div"
-                customStyle={{ 
-                  margin: 0,
-                  borderRadius: '0.5rem',
-                  padding: '2.5rem 1rem 1rem 1rem'
-                }}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-              <button
-                onClick={onCopy}
-                className="absolute top-2 right-2 p-2 rounded bg-gray-800 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </button>
-            </div>
-          ) : (
-            <code {...props} className="bg-gray-800 px-1.5 py-0.5 rounded text-sm">
-              {children}
-            </code>
-          );
-        },
+        code: CodeBlock,
         h1: ({ children }) => (
           <h1 className="text-2xl font-bold mb-4">{children}</h1>
         ),
