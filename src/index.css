@@ -103,24 +103,10 @@
 /* KaTeX Math Formatting */
 .katex-display {
   @apply my-4 overflow-x-auto;
-  background: rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  border-radius: 0.5rem;
 }
 
 .katex {
   @apply text-white;
-  font-size: 1.1em !important;
-}
-
-.katex-display > .katex {
-  @apply text-lg;
-  white-space: normal;
-}
-
-/* Inline math */
-.math.math-inline {
-  @apply px-1;
 }
 
 /* Table Styles */
@@ -146,22 +132,4 @@
 
 .prose tr:hover {
   @apply bg-gray-700/50;
-}
-
-/* Code block styles */
-pre {
-  @apply rounded-lg overflow-hidden my-4;
-  background: #1e1e1e !important;
-}
-
-code {
-  font-family: 'Fira Code', monospace;
-}
-
-.prose code {
-  @apply text-sm;
-}
-
-.prose pre code {
-  @apply text-sm leading-relaxed;
 }
