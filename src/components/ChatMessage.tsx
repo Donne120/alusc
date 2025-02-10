@@ -75,13 +75,17 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
           {isAi ? "SC" : "U"}
         </div>
         <div className="flex-1 min-w-0">
-          {isAi && (
+          {isAi ? (
             <div className="mb-2">
               <img 
                 src="/lovable-uploads/6a746a81-f095-4d25-8a43-e84122f6a4f9.png" 
                 alt="SC Logo" 
                 className="h-4 md:h-6 w-auto"
               />
+            </div>
+          ) : (
+            <div className="text-gray-300 font-medium mb-2">
+              User Message
             </div>
           )}
           <div className="flex justify-between items-start gap-2">
