@@ -1,3 +1,4 @@
+
 import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
 
@@ -22,17 +23,22 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
     );
   }
 
+  console.log('Messages to render:', messages);
+
   return (
     <div className="divide-y divide-gray-700">
-      {messages.map((message) => (
-        <ChatMessage
-          key={message.id}
-          message={message.text}
-          isAi={message.isAi}
-          attachments={message.attachments}
-          onEdit={(newText) => onEditMessage(message.id, newText)}
-        />
-      ))}
+      {messages.map((message) => {
+        console.log('Rendering message:', message);
+        return (
+          <ChatMessage
+            key={message.id}
+            message={message.text}
+            isAi={message.isAi}
+            attachments={message.attachments}
+            onEdit={(newText) => onEditMessage(message.id, newText)}
+          />
+        );
+      })}
       {isLoading && (
         <div className="py-4 px-8 text-gray-400 animate-pulse bg-[#444654] border-b border-gray-700">
           <div className="max-w-3xl mx-auto flex gap-4 md:gap-6">

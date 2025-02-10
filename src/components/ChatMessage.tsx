@@ -5,16 +5,12 @@ import { MessageControls } from "./message/MessageControls";
 import { MarkdownRenderer } from "./message/MarkdownRenderer";
 import { MessageAttachments } from "./message/MessageAttachments";
 import { ChatCard } from "./ui/chat-card";
+import { Message } from "@/types/chat";
 
 interface ChatMessageProps {
   message: string;
   isAi?: boolean;
-  attachments?: Array<{
-    type: 'image' | 'document' | 'file';
-    url: string;
-    name: string;
-    size?: number;
-  }>;
+  attachments?: Message['attachments'];
   onEdit?: (newMessage: string) => void;
 }
 
@@ -64,8 +60,8 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
   return (
     <div
       className={cn(
-        "py-4 md:py-8 px-4 md:px-8 w-full animate-message-fade-in border-b border-gray-700 group",
-        isAi ? "bg-[#1A1F2C]" : "bg-[#1A1F2C]"
+        "py-4 md:py-8 px-4 md:px-8 w-full animate-message-fade-in border-b border-gray-700 group min-h-[100px]",
+        isAi ? "bg-[#1A1F2C]" : "bg-[#1F242E]"
       )}
       id={`message-${message.slice(0, 10)}`}
     >
