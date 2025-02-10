@@ -56,40 +56,22 @@ export const useChatActions = ({
 
   const handleSendMessage = async (message: string, files: File[]) => {
     const attachments = await Promise.all(
-      files.filter(file => file !== null).map(async (file) => {
-        if (!file) return null;
-        
-        const fileType = file.type.toLowerCase();
-        let type: 'image' | 'document' | 'file' = 'file';
-
-        if (fileType.startsWith('image/')) {
-          type = 'image';
-        } else if (
-          fileType === 'application/pdf' ||
-          fileType === 'application/msword' ||
-          fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-          fileType === 'text/plain'
-        ) {
-          type = 'document';
-        }
-        
-        return {
-          type,
-          url: URL.createObjectURL(file),
-          name: file.name,
-          size: file.size
-        };
-      })
-    ).then(results => results.filter((attachment): attachment is NonNullable<typeof attachment> => attachment !== null));
+      files.map(async (file) => ({
+        type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
+        url: URL.createObjectURL(file),
+        name: file.name
+      }))
+    );
 
     const newMessage: Message = {
       id: Date.now().toString(),
       text: message,
       isAi: false,
-      attachments: attachments
+      timestamp: Date.now(),
+      attachments
     };
 
-    const updatedConversations = conversations.map(conv => {
+    setConversations(conversations.map(conv => {
       if (conv.id === currentConversationId) {
         return {
           ...conv,
@@ -97,8 +79,7 @@ export const useChatActions = ({
         };
       }
       return conv;
-    });
-    setConversations(updatedConversations);
+    }));
 
     setIsLoading(true);
 
@@ -128,7 +109,7 @@ export const useChatActions = ({
       
       if (data.success) {
         const aiResponse = data.response;
-        const newConversations = conversations.map(conv => {
+        setConversations(conversations.map(conv => {
           if (conv.id === currentConversationId) {
             const updatedMessages = [...conv.messages, {
               id: Date.now().toString(),
@@ -137,17 +118,18 @@ export const useChatActions = ({
               timestamp: Date.now()
             }];
             
+            const updatedTitle = conv.messages.length === 0 ? 
+              message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
+              conv.title;
+            
             return {
               ...conv,
-              title: conv.messages.length === 0 ? 
-                message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
-                conv.title,
+              title: updatedTitle,
               messages: updatedMessages
             };
           }
           return conv;
-        });
-        setConversations(newConversations);
+        }));
       } else {
         throw new Error('Failed to get valid response from model');
       }

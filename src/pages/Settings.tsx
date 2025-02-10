@@ -3,23 +3,39 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, Moon, Sun, Bell, Globe, Lock, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useSettings } from "@/contexts/SettingsContext";
-import { toast } from "sonner";
+import { useState } from "react";
 
 const Settings = () => {
-  const settings = useSettings();
+  const { toast } = useToast();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [language, setLanguage] = useState("en");
+  const [notifications, setNotifications] = useState(true);
+  const [privacy, setPrivacy] = useState({
+    saveHistory: true,
+    shareAnalytics: false,
+  });
+  const [display, setDisplay] = useState({
+    showTimestamps: true,
+    compactMode: false,
+  });
 
-  const handleThemeChange = (checked: boolean) => {
-    const newTheme = checked ? "dark" : "light";
-    settings.updateSettings({ theme: newTheme });
-    toast.success(`Theme changed to ${newTheme} mode`);
+  const handleThemeChange = (newTheme: "light" | "dark") => {
+    setTheme(newTheme);
+    toast({
+      title: "Theme Updated",
+      description: `Theme changed to ${newTheme} mode`,
+    });
   };
 
   const handleLanguageChange = (value: string) => {
-    settings.updateSettings({ language: value });
-    toast.success("Language updated successfully");
+    setLanguage(value);
+    toast({
+      title: "Language Updated",
+      description: "Application language has been changed",
+    });
   };
 
   return (
@@ -50,8 +66,10 @@ const Settings = () => {
               <div className="flex items-center gap-2">
                 <Sun className="h-4 w-4" />
                 <Switch
-                  checked={settings.theme === "dark"}
-                  onCheckedChange={handleThemeChange}
+                  checked={theme === "dark"}
+                  onCheckedChange={(checked) =>
+                    handleThemeChange(checked ? "dark" : "light")
+                  }
                 />
                 <Moon className="h-4 w-4" />
               </div>
@@ -65,11 +83,9 @@ const Settings = () => {
                 </div>
               </div>
               <Switch
-                checked={settings.display.showTimestamps}
+                checked={display.showTimestamps}
                 onCheckedChange={(checked) =>
-                  settings.updateSettings({
-                    display: { ...settings.display, showTimestamps: checked }
-                  })
+                  setDisplay((prev) => ({ ...prev, showTimestamps: checked }))
                 }
               />
             </div>
@@ -82,11 +98,9 @@ const Settings = () => {
                 </div>
               </div>
               <Switch
-                checked={settings.display.compactMode}
+                checked={display.compactMode}
                 onCheckedChange={(checked) =>
-                  settings.updateSettings({
-                    display: { ...settings.display, compactMode: checked }
-                  })
+                  setDisplay((prev) => ({ ...prev, compactMode: checked }))
                 }
               />
             </div>
@@ -106,10 +120,8 @@ const Settings = () => {
               </div>
             </div>
             <Switch
-              checked={settings.notifications}
-              onCheckedChange={(checked) =>
-                settings.updateSettings({ notifications: checked })
-              }
+              checked={notifications}
+              onCheckedChange={setNotifications}
             />
           </div>
         </Card>
@@ -121,7 +133,7 @@ const Settings = () => {
           </h2>
           <div className="space-y-2">
             <Label>Select Language</Label>
-            <Select value={settings.language} onValueChange={handleLanguageChange}>
+            <Select value={language} onValueChange={handleLanguageChange}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a language" />
               </SelectTrigger>
@@ -149,11 +161,9 @@ const Settings = () => {
                 </div>
               </div>
               <Switch
-                checked={settings.privacy.saveHistory}
+                checked={privacy.saveHistory}
                 onCheckedChange={(checked) =>
-                  settings.updateSettings({
-                    privacy: { ...settings.privacy, saveHistory: checked }
-                  })
+                  setPrivacy((prev) => ({ ...prev, saveHistory: checked }))
                 }
               />
             </div>
@@ -166,11 +176,9 @@ const Settings = () => {
                 </div>
               </div>
               <Switch
-                checked={settings.privacy.shareAnalytics}
+                checked={privacy.shareAnalytics}
                 onCheckedChange={(checked) =>
-                  settings.updateSettings({
-                    privacy: { ...settings.privacy, shareAnalytics: checked }
-                  })
+                  setPrivacy((prev) => ({ ...prev, shareAnalytics: checked }))
                 }
               />
             </div>
