@@ -2,6 +2,7 @@
 import { Conversation, Message } from "@/types/chat";
 import { toast } from "sonner";
 import { initializeDefaultConversation, MAX_CONTEXT_MESSAGES } from "./ChatState";
+import { useState } from "react";
 
 interface ChatActionsProps {
   conversations: Conversation[];
@@ -18,6 +19,8 @@ export const useChatActions = ({
   setCurrentConversationId,
   setIsLoading
 }: ChatActionsProps) => {
+  const [apiKey, setApiKey] = useState(localStorage.getItem('perplexity_api_key') || '');
+
   const getCurrentConversation = (): Conversation => {
     const current = conversations.find(conv => conv.id === currentConversationId);
     if (!current && conversations.length > 0) {
@@ -56,6 +59,16 @@ export const useChatActions = ({
   };
 
   const handleSendMessage = async (message: string, files: File[]) => {
+    if (!apiKey) {
+      const key = prompt("Please enter your Perplexity API key to continue:");
+      if (!key) {
+        toast.error("API key is required");
+        return;
+      }
+      setApiKey(key);
+      localStorage.setItem('perplexity_api_key', key);
+    }
+
     const attachments = await Promise.all(
       files.filter(file => file !== null).map(async (file) => {
         if (!file) return null;
@@ -101,54 +114,64 @@ export const useChatActions = ({
       const currentConversation = getCurrentConversation();
       const recentMessages = currentConversation.messages.slice(-MAX_CONTEXT_MESSAGES);
       
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          message,
-          context: recentMessages.map(m => ({ 
-            role: m.isAi ? 'assistant' : 'user', 
-            content: m.text 
-          }))
+        body: JSON.stringify({
+          model: 'llama-3.1-sonar-small-128k-online',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful assistant providing precise and concise answers.'
+            },
+            ...recentMessages.map(m => ({
+              role: m.isAi ? 'assistant' : 'user',
+              content: m.text
+            })),
+            {
+              role: 'user',
+              content: message
+            }
+          ],
+          temperature: 0.2,
+          top_p: 0.9,
+          max_tokens: 1000
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response from Llama model');
+        throw new Error('Failed to get response from Perplexity API');
       }
 
       const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
       
-      if (data.success) {
-        const aiResponse = data.response;
-        const newConversations = conversations.map(conv => {
-          if (conv.id === currentConversationId) {
-            const updatedMessages = [...conv.messages, {
-              id: Date.now().toString(),
-              text: aiResponse,
-              isAi: true,
-              timestamp: Date.now()
-            }];
-            
-            return {
-              ...conv,
-              title: conv.messages.length === 0 ? 
-                message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
-                conv.title,
-              messages: updatedMessages
-            };
-          }
-          return conv;
-        });
-        setConversations(newConversations);
-      } else {
-        throw new Error('Failed to get valid response from model');
-      }
+      const newConversations = conversations.map(conv => {
+        if (conv.id === currentConversationId) {
+          const updatedMessages = [...conv.messages, {
+            id: Date.now().toString(),
+            text: aiResponse,
+            isAi: true,
+            timestamp: Date.now()
+          }];
+          
+          return {
+            ...conv,
+            title: conv.messages.length === 0 ? 
+              message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
+              conv.title,
+            messages: updatedMessages
+          };
+        }
+        return conv;
+      });
+      setConversations(newConversations);
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Failed to get response. Please ensure the Llama backend is running.");
+      toast.error("Failed to get response. Please check your API key and try again.");
     } finally {
       setIsLoading(false);
     }
