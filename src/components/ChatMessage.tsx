@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, Edit, Camera, Square, Volume2 } from "lucide-react";
+import { Copy, Check, Edit, Camera } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
@@ -60,62 +60,8 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedMessage, setEditedMessage] = useState(message);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const cardData = tryParseCard(message);
-
-  const playMessage = async () => {
-    try {
-      if (!message.trim()) return;
-
-      const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': localStorage.getItem('ELEVENLABS_API_KEY') || '',
-        },
-        body: JSON.stringify({
-          text: message,
-          model_id: "eleven_monolingual_v1",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate speech');
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        audioRef.current.play();
-        setIsPlaying(true);
-      }
-    } catch (error) {
-      console.error('Error playing message:', error);
-      toast.error('Failed to play message. Please check your ElevenLabs API key in settings.');
-    }
-  };
-
-  const stopPlaying = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-    }
-  };
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.onended = () => setIsPlaying(false);
-    }
-  }, []);
 
   const handleCopy = async () => {
     try {
@@ -277,16 +223,6 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                 </button>
               )}
               <button
-                onClick={isPlaying ? stopPlaying : playMessage}
-                className="p-2 rounded hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                {isPlaying ? (
-                  <Square className="h-4 w-4" />
-                ) : (
-                  <Volume2 className="h-4 w-4" />
-                )}
-              </button>
-              <button
                 onClick={handleScreenshot}
                 className="p-2 rounded hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
               >
@@ -300,7 +236,6 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
               </button>
             </div>
           </div>
-          <audio ref={audioRef} className="hidden" />
           {attachments.length > 0 && (
             <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
               {attachments.map((attachment, index) => (
