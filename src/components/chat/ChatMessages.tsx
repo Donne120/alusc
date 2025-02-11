@@ -1,3 +1,4 @@
+
 import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
 
@@ -10,7 +11,7 @@ interface ChatMessagesProps {
 export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessagesProps) => {
   if (messages.length === 0) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center text-gray-400 px-4">
+      <div className="h-screen flex flex-col items-center justify-center text-gray-400 px-4 bg-[#1A1F2C]">
         <h1 className="text-3xl font-bold mb-8">ALU Student Companion</h1>
         <div className="max-w-xl text-center space-y-4">
           <p className="text-lg">Welcome! How can I help you today?</p>
@@ -34,7 +35,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
         />
       ))}
       {isLoading && (
-        <div className="py-4 px-8 text-gray-400 animate-pulse bg-[#444654] border-b border-gray-700">
+        <div className="py-4 px-8 text-gray-400 animate-pulse bg-[#2A2F3C] border-b border-gray-700">
           <div className="max-w-3xl mx-auto flex gap-4 md:gap-6">
             <div className="w-8 h-8 rounded bg-[#19c37d] flex items-center justify-center text-white shrink-0">
               SC

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ChatInput } from "./ChatInput";
@@ -202,7 +203,7 @@ export const ChatContainer = () => {
   const currentConversation = getCurrentConversation();
 
   return (
-    <div className="min-h-screen bg-[#343541] font-inter text-white">
+    <div className="min-h-screen bg-[#1A1F2C] font-inter text-white">
       <ConversationSidebar
         conversations={conversations}
         currentConversationId={currentConversationId}
