@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -7,10 +6,13 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Moon, Sun, Monitor } from "lucide-react";
+import { ArrowLeft, Moon, Sun, Monitor, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/hooks/use-theme";
 import { toast } from "sonner";
+
+// Sound file for testing message sounds
+const messageSound = new Audio("/message.mp3");
 
 export default function Settings() {
   const { user } = useAuth();
@@ -23,17 +25,21 @@ export default function Settings() {
   const [sendWithEnter, setSendWithEnter] = useState(
     localStorage.getItem("sendWithEnter") !== "false"
   );
+  const [selfImprovement, setSelfImprovement] = useState(
+    localStorage.getItem("selfImprovement") === "true"
+  );
   const { theme, setTheme } = useTheme();
 
-  const handleNotificationsChange = (checked: boolean) => {
-    setNotificationsEnabled(checked);
-    localStorage.setItem("notifications", String(checked));
-    toast.success(`Notifications ${checked ? "enabled" : "disabled"}`);
-  };
-
+  // Test sound when enabling message sounds
   const handleMessageSoundChange = (checked: boolean) => {
     setMessageSound(checked);
     localStorage.setItem("messageSound", String(checked));
+    if (checked) {
+      // Play test sound
+      messageSound.play().catch(error => {
+        console.error("Error playing sound:", error);
+      });
+    }
     toast.success(`Message sound ${checked ? "enabled" : "disabled"}`);
   };
 
@@ -41,6 +47,18 @@ export default function Settings() {
     setSendWithEnter(checked);
     localStorage.setItem("sendWithEnter", String(checked));
     toast.success(`Send with Enter ${checked ? "enabled" : "disabled"}`);
+  };
+
+  const handleNotificationsChange = (checked: boolean) => {
+    setNotificationsEnabled(checked);
+    localStorage.setItem("notifications", String(checked));
+    toast.success(`Notifications ${checked ? "enabled" : "disabled"}`);
+  };
+
+  const handleSelfImprovementChange = (checked: boolean) => {
+    setSelfImprovement(checked);
+    localStorage.setItem("selfImprovement", String(checked));
+    toast.success(`Self-improvement mode ${checked ? "enabled" : "disabled"}`);
   };
 
   return (
@@ -128,6 +146,24 @@ export default function Settings() {
                 <Switch
                   checked={sendWithEnter}
                   onCheckedChange={handleSendWithEnterChange}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="flex items-center gap-2">
+                    Self-Improvement Mode
+                    <Sparkles className="h-4 w-4 text-yellow-400" />
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Allow the chat to learn and improve from your conversations
+                  </p>
+                </div>
+                <Switch
+                  checked={selfImprovement}
+                  onCheckedChange={handleSelfImprovementChange}
                 />
               </div>
             </CardContent>
