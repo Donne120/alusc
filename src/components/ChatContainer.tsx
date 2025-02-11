@@ -210,7 +210,7 @@ export const ChatContainer = () => {
         onSelectConversation={setCurrentConversationId}
         onDeleteConversation={handleDeleteConversation}
       />
-      <div className="pl-64">
+      <div className="pl-16 transition-all duration-300 md:pl-64">
         <div className="pb-32">
           <ChatMessages
             messages={currentConversation.messages}
