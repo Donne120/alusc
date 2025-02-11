@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +13,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { toast } from "sonner";
 
 // Sound file for testing message sounds
-const messageSound = new Audio("/message.mp3");
+const notificationSound = new Audio("/message.mp3");
 
 export default function Settings() {
   const { user } = useAuth();
@@ -36,8 +37,9 @@ export default function Settings() {
     localStorage.setItem("messageSound", String(checked));
     if (checked) {
       // Play test sound
-      messageSound.play().catch(error => {
+      notificationSound.play().catch(error => {
         console.error("Error playing sound:", error);
+        toast.error("Failed to play notification sound");
       });
     }
     toast.success(`Message sound ${checked ? "enabled" : "disabled"}`);
