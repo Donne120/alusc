@@ -1,6 +1,7 @@
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SendHorizontal, Paperclip, X } from "lucide-react";
+import { SendHorizontal, Paperclip, X, Mic, MicOff } from "lucide-react";
 import { useState, KeyboardEvent, useRef, useEffect, ChangeEvent } from "react";
 import { toast } from "sonner";
 
@@ -12,8 +13,67 @@ interface ChatInputProps {
 export const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [isListening, setIsListening] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+        
+        setMessage(transcript);
+        if (textareaRef.current) {
+          textareaRef.current.style.height = 'auto';
+          textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        toast.error('Error with speech recognition');
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleListening = async () => {
+    if (!recognitionRef.current) {
+      toast.error('Speech recognition is not supported in your browser');
+      return;
+    }
+
+    try {
+      if (isListening) {
+        recognitionRef.current.stop();
+        setIsListening(false);
+      } else {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        recognitionRef.current.start();
+        setIsListening(true);
+        toast.success('Listening...');
+      }
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      toast.error('Error accessing microphone');
+      setIsListening(false);
+    }
+  };
 
   const handleSend = () => {
     if ((message.trim() || attachments.length > 0) && !disabled) {
@@ -37,7 +97,7 @@ export const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
     const files = Array.from(e.target.files || []);
     const totalSize = files.reduce((acc, file) => acc + file.size, 0);
     
-    if (totalSize > 25 * 1024 * 1024) { // 25MB limit
+    if (totalSize > 25 * 1024 * 1024) {
       toast.error("Total file size exceeds 25MB limit");
       return;
     }
@@ -99,6 +159,15 @@ export const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
             disabled={disabled}
           >
             <Paperclip className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={toggleListening}
+            variant="ghost"
+            size="icon"
+            className={`shrink-0 ${isListening ? 'bg-red-500 hover:bg-red-600' : ''}`}
+            disabled={disabled}
+          >
+            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
           <Textarea
             ref={textareaRef}

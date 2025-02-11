@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Moon, Sun, Monitor, Sparkles } from "lucide-react";
+import { ArrowLeft, Moon, Sun, Monitor, Sparkles, Volume2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/hooks/use-theme";
 import { toast } from "sonner";
@@ -29,14 +30,15 @@ export default function Settings() {
   const [selfImprovement, setSelfImprovement] = useState(
     localStorage.getItem("selfImprovement") === "true"
   );
+  const [elevenLabsApiKey, setElevenLabsApiKey] = useState(
+    localStorage.getItem("ELEVENLABS_API_KEY") || ""
+  );
   const { theme, setTheme } = useTheme();
 
-  // Test sound when enabling message sounds
   const handleMessageSoundChange = (checked: boolean) => {
     setMessageSound(checked);
     localStorage.setItem("messageSound", String(checked));
     if (checked) {
-      // Play test sound
       notificationSound.play().catch(error => {
         console.error("Error playing sound:", error);
         toast.error("Failed to play notification sound");
@@ -63,6 +65,15 @@ export default function Settings() {
     toast.success(`Self-improvement mode ${checked ? "enabled" : "disabled"}`);
   };
 
+  const handleElevenLabsApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newKey = e.target.value;
+    setElevenLabsApiKey(newKey);
+    localStorage.setItem("ELEVENLABS_API_KEY", newKey);
+    if (newKey) {
+      toast.success("ElevenLabs API key saved");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container max-w-4xl mx-auto py-8 px-4">
@@ -75,6 +86,38 @@ export default function Settings() {
         </Link>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Voice Settings</CardTitle>
+              <CardDescription>
+                Configure text-to-speech and voice recognition settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <Label>ElevenLabs API Key</Label>
+                <Input
+                  type="password"
+                  value={elevenLabsApiKey}
+                  onChange={handleElevenLabsApiKeyChange}
+                  placeholder="Enter your ElevenLabs API key"
+                  className="max-w-md"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Required for text-to-speech functionality. Get your API key from{" "}
+                  <a
+                    href="https://elevenlabs.io"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    ElevenLabs
+                  </a>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Appearance</CardTitle>
