@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, Edit, Camera } from "lucide-react";
+import { Copy, Check, Edit, Camera, Brain } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import remarkMath from 'remark-math';
@@ -113,35 +112,37 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
   return (
     <div
       className={cn(
-        "py-6 px-4 md:px-8 w-full animate-message-fade-in relative",
-        isAi ? "bg-[#1A1F2C]" : "bg-[#1A1F2C]"
+        "py-6 px-4 md:px-8 w-full animate-message-fade-in relative backdrop-blur-sm",
+        isAi ? "bg-[#1A1F2C]/50" : "bg-[#1A1F2C]/30"
       )}
       id={`message-${message.slice(0, 10)}`}
     >
       <div className="max-w-3xl mx-auto flex gap-4">
         {isAi ? (
-          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-            <img 
-              src="/lovable-uploads/6a746a81-f095-4d25-8a43-e84122f6a4f9.png"
-              alt="ALU Logo"
-              className="w-full h-full object-cover"
-            />
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-tr from-[#9b87f5] to-[#8B5CF6] p-0.5">
+            <div className="bg-[#1A1F2C] w-full h-full rounded-xl p-2">
+              <Brain className="w-full h-full text-white" />
+            </div>
           </div>
         ) : (
-          <div className="w-8 h-8 rounded-full bg-[#ea384c] flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-sm">U</span>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#D946EF] to-[#8B5CF6] flex items-center justify-center flex-shrink-0 p-0.5">
+            <div className="bg-[#1A1F2C] w-full h-full rounded-xl flex items-center justify-center">
+              <span className="text-white font-medium">U</span>
+            </div>
           </div>
         )}
-        <div className="flex-1 space-y-1">
+        <div className="flex-1 space-y-2">
           <div className={cn(
-            "p-3 rounded-lg max-w-[85%] text-white",
-            isAi ? "bg-[#2A2F3C]" : "bg-[#ea384c]"
+            "p-4 rounded-xl max-w-[85%] text-white shadow-lg",
+            isAi ? 
+              "bg-gradient-to-br from-[#2A2F3C] to-[#1A1F2C] border border-[#9b87f5]/10" : 
+              "bg-gradient-to-br from-[#D946EF] to-[#8B5CF6]"
           )}>
             {isEditing ? (
               <textarea
                 value={editedMessage}
                 onChange={(e) => setEditedMessage(e.target.value)}
-                className="w-full bg-gray-700 text-white rounded p-2 min-h-[100px]"
+                className="w-full bg-[#1A1F2C] text-white rounded-lg p-3 min-h-[100px] border border-[#9b87f5]/20"
               />
             ) : cardData ? (
               <ChatCard {...cardData} />
@@ -153,24 +154,32 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                   code: ({ node, inline, className, children, ...props }: CodeProps) => {
                     const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
-                      <div className="relative group">
+                      <div className="relative group my-4">
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] rounded-lg blur opacity-20"></div>
                         <SyntaxHighlighter
                           style={atomDark}
                           language={match[1]}
                           PreTag="div"
-                          customStyle={{ margin: 0 }}
+                          customStyle={{ 
+                            margin: 0,
+                            background: '#1A1F2C',
+                            borderRadius: '0.5rem',
+                          }}
                         >
                           {String(children).replace(/\n$/, '')}
                         </SyntaxHighlighter>
                         <button
                           onClick={handleCopy}
-                          className="absolute top-2 right-2 p-2 rounded bg-gray-800 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 p-2 rounded-lg bg-[#2A2F3C] opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                         </button>
                       </div>
                     ) : (
-                      <code {...props} className={className}>
+                      <code {...props} className={cn(
+                        className,
+                        "bg-[#2A2F3C] px-1.5 py-0.5 rounded-md"
+                      )}>
                         {children}
                       </code>
                     );
@@ -181,49 +190,58 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
               </ReactMarkdown>
             )}
           </div>
-          <div className="text-xs text-gray-400 ml-1">{timestamp}</div>
+          <div className="text-xs text-gray-400 ml-1 flex items-center gap-2">
+            <span>{timestamp}</span>
+            <div className="h-1 w-1 rounded-full bg-gray-500"></div>
+            <span>{isAi ? 'AI Assistant' : 'You'}</span>
+          </div>
         </div>
         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           {!isAi && (
             <button
               onClick={handleEdit}
-              className="p-2 rounded hover:bg-gray-700"
+              className="p-2 rounded-lg hover:bg-[#2A2F3C] text-gray-400 hover:text-white transition-colors"
             >
               {isEditing ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
             </button>
           )}
           <button
             onClick={handleScreenshot}
-            className="p-2 rounded hover:bg-gray-700"
+            className="p-2 rounded-lg hover:bg-[#2A2F3C] text-gray-400 hover:text-white transition-colors"
           >
             <Camera className="h-4 w-4" />
           </button>
           <button
             onClick={handleCopy}
-            className="p-2 rounded hover:bg-gray-700"
+            className="p-2 rounded-lg hover:bg-[#2A2F3C] text-gray-400 hover:text-white transition-colors"
           >
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </button>
         </div>
       </div>
       {attachments.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
           {attachments.map((attachment, index) => (
             attachment.type === 'image' ? (
-              <img
-                key={index}
-                src={attachment.url}
-                alt={attachment.name}
-                className="rounded-lg max-h-64 object-cover w-full"
-              />
+              <div key={index} className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                <img
+                  src={attachment.url}
+                  alt={attachment.name}
+                  className="relative rounded-lg max-h-64 object-cover w-full border border-[#9b87f5]/10"
+                />
+              </div>
             ) : (
               <a
                 key={index}
                 href={attachment.url}
                 download={attachment.name}
-                className="flex items-center gap-2 p-3 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
+                className="relative group"
               >
-                📎 {attachment.name}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                <div className="relative flex items-center gap-2 p-3 rounded-lg bg-[#2A2F3C] hover:bg-[#343B4C] transition-colors border border-[#9b87f5]/10">
+                  📎 {attachment.name}
+                </div>
               </a>
             )
           ))}
