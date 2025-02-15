@@ -1,11 +1,12 @@
 
-import { Newspaper } from "lucide-react";
+import { Newspaper, ExternalLink } from "lucide-react";
 
 interface NewsItem {
   title: string;
   date: string;
   category: string;
   description: string;
+  url: string;
 }
 
 export const NewsUpdate = () => {
@@ -15,19 +16,22 @@ export const NewsUpdate = () => {
       title: "New Leadership Program Launch",
       date: "2024-02-20",
       category: "Academic",
-      description: "ALU introduces an innovative leadership development program focused on African entrepreneurship."
+      description: "ALU introduces an innovative leadership development program focused on African entrepreneurship.",
+      url: "https://www.alueducation.com/news/leadership-program-2024"
     },
     {
       title: "Campus Sustainability Initiative",
       date: "2024-02-19",
       category: "Campus",
-      description: "ALU commits to 100% renewable energy usage by 2025 across all campuses."
+      description: "ALU commits to 100% renewable energy usage by 2025 across all campuses.",
+      url: "https://www.alueducation.com/news/sustainability-2025"
     },
     {
       title: "Tech Innovation Challenge",
       date: "2024-02-18",
       category: "Events",
-      description: "Join the upcoming pan-African tech innovation challenge with prizes worth $10,000."
+      description: "Join the upcoming pan-African tech innovation challenge with prizes worth $10,000.",
+      url: "https://www.alueducation.com/events/tech-challenge"
     }
   ];
 
@@ -46,9 +50,12 @@ export const NewsUpdate = () => {
 
       <div className="space-y-4">
         {news.map((item, index) => (
-          <div
+          <a
             key={index}
-            className="p-4 rounded-xl bg-[#2A2F3C]/50 border border-[#9b87f5]/10 hover:border-[#9b87f5]/20 transition-colors group"
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block p-4 rounded-xl bg-[#2A2F3C]/50 border border-[#9b87f5]/10 hover:border-[#9b87f5]/20 transition-all hover:bg-[#2A2F3C]/70 group"
           >
             <div className="flex items-start justify-between mb-2">
               <span className="px-2 py-1 text-xs rounded-full bg-[#9b87f5]/10 text-[#9b87f5]">
@@ -56,13 +63,18 @@ export const NewsUpdate = () => {
               </span>
               <span className="text-xs text-gray-400">{new Date(item.date).toLocaleDateString()}</span>
             </div>
-            <h3 className="font-medium text-white mb-2 group-hover:text-[#9b87f5] transition-colors">
-              {item.title}
-            </h3>
-            <p className="text-sm text-gray-400 line-clamp-2">
-              {item.description}
-            </p>
-          </div>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1">
+                <h3 className="font-medium text-white mb-2 group-hover:text-[#9b87f5] transition-colors flex items-center gap-2">
+                  {item.title}
+                  <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </h3>
+                <p className="text-sm text-gray-400 line-clamp-2">
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          </a>
         ))}
       </div>
 
