@@ -24,7 +24,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
   }
 
   return (
-    <div className="divide-y divide-gray-700">
+    <div className="bg-[#1A1F2C] min-h-screen">
       {messages.map((message) => (
         <ChatMessage
           key={message.id}
@@ -35,14 +35,18 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
         />
       ))}
       {isLoading && (
-        <div className="py-4 px-8 text-gray-400 animate-pulse bg-[#2A2F3C] border-b border-gray-700">
-          <div className="max-w-3xl mx-auto flex gap-4 md:gap-6">
-            <div className="w-8 h-8 rounded bg-[#19c37d] flex items-center justify-center text-white shrink-0">
-              SC
+        <div className="py-6 px-8 text-gray-400 animate-pulse bg-[#1A1F2C]">
+          <div className="max-w-3xl mx-auto flex gap-4">
+            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+              <img 
+                src="/lovable-uploads/6a746a81-f095-4d25-8a43-e84122f6a4f9.png" 
+                alt="ALU Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex-1">
-              <div className="h-4 bg-gray-600 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-600 rounded w-1/2 mt-2"></div>
+              <div className="h-4 bg-[#2A2F3C] rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-[#2A2F3C] rounded w-1/2"></div>
             </div>
           </div>
         </div>
