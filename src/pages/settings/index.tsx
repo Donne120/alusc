@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,13 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 
 export default function Settings() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleGoBack = () => {
-    router.back();
+    navigate(-1);
   };
 
   const [geminiApiKey, setGeminiApiKey] = useState(
