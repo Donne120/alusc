@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { ChatInput } from "./ChatInput";
 import { ConversationSidebar } from "./chat/ConversationSidebar";
 import { ChatMessages } from "./chat/ChatMessages";
+import { NewsUpdate } from "./news/NewsUpdate";
 import { Conversation, Message } from "@/types/chat";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -194,7 +195,7 @@ export const ChatContainer = () => {
   const currentConversation = getCurrentConversation();
 
   return (
-    <div className="min-h-screen bg-[#1A1F2C] font-inter text-white">
+    <div className="min-h-screen bg-[#1A1F2C] font-inter text-white flex">
       <ConversationSidebar
         conversations={conversations}
         currentConversationId={currentConversationId}
@@ -202,15 +203,20 @@ export const ChatContainer = () => {
         onSelectConversation={setCurrentConversationId}
         onDeleteConversation={handleDeleteConversation}
       />
-      <div className="pl-16 transition-all duration-300 md:pl-64">
-        <div className="pb-32">
-          <ChatMessages
-            messages={currentConversation.messages}
-            isLoading={isLoading}
-            onEditMessage={handleEditMessage}
-          />
+      <div className="flex-1 pl-16 transition-all duration-300 md:pl-64 flex">
+        <div className="flex-1 relative">
+          <div className="pb-32">
+            <ChatMessages
+              messages={currentConversation.messages}
+              isLoading={isLoading}
+              onEditMessage={handleEditMessage}
+            />
+          </div>
+          <ChatInput onSend={handleSendMessage} disabled={isLoading} />
         </div>
-        <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+        <div className="hidden lg:block w-80 h-screen sticky top-0">
+          <NewsUpdate />
+        </div>
       </div>
     </div>
   );
