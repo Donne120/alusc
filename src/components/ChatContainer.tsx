@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ChatInput } from "./ChatInput";
 import { ConversationSidebar } from "./chat/ConversationSidebar";
 import { ChatMessages } from "./chat/ChatMessages";
 import { Conversation, Message } from "@/types/chat";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const STORAGE_KEY = 'alu_chat_conversations';
 const MAX_CONTEXT_MESSAGES = 10;
@@ -125,59 +125,50 @@ export const ChatContainer = () => {
     setIsLoading(true);
 
     try {
+      const apiKey = localStorage.getItem('GEMINI_API_KEY');
+      if (!apiKey) {
+        throw new Error('Gemini API key not found. Please add it in settings.');
+      }
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
       const currentConversation = getCurrentConversation();
       const recentMessages = currentConversation.messages.slice(-MAX_CONTEXT_MESSAGES);
       
-      const response = await fetch('http://localhost:8000/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          message,
-          context: recentMessages.map(m => ({ 
-            role: m.isAi ? 'assistant' : 'user', 
-            content: m.text 
-          }))
-        }),
-      });
+      const prompt = recentMessages.map(m => 
+        `${m.isAi ? 'Assistant' : 'User'}: ${m.text}`
+      ).join('\n') + `\nUser: ${message}\nAssistant:`;
 
-      if (!response.ok) {
-        throw new Error('Failed to get response from Llama model');
-      }
-
-      const data = await response.json();
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const aiResponse = response.text();
       
-      if (data.success) {
-        const aiResponse = data.response;
-        setConversations(prev => prev.map(conv => {
-          if (conv.id === currentConversationId) {
-            const updatedMessages = [...conv.messages, {
-              id: Date.now().toString(),
-              text: aiResponse,
-              isAi: true,
-              timestamp: Date.now()
-            }];
-            
-            // Update conversation title if it's a new conversation
-            const updatedTitle = conv.messages.length === 0 ? 
-              message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
-              conv.title;
-            
-            return {
-              ...conv,
-              title: updatedTitle,
-              messages: updatedMessages
-            };
-          }
-          return conv;
-        }));
-      } else {
-        throw new Error('Failed to get valid response from model');
-      }
+      setConversations(prev => prev.map(conv => {
+        if (conv.id === currentConversationId) {
+          const updatedMessages = [...conv.messages, {
+            id: Date.now().toString(),
+            text: aiResponse,
+            isAi: true,
+            timestamp: Date.now()
+          }];
+          
+          const updatedTitle = conv.messages.length === 0 ? 
+            message.slice(0, 30) + (message.length > 30 ? '...' : '') : 
+            conv.title;
+          
+          return {
+            ...conv,
+            title: updatedTitle,
+            messages: updatedMessages
+          };
+        }
+        return conv;
+      }));
+
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Failed to get response. Please ensure the Llama backend is running.");
+      toast.error(error instanceof Error ? error.message : "Failed to get response from Gemini");
     } finally {
       setIsLoading(false);
     }
