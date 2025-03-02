@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Conversation } from "@/types/chat";
-import { ChevronLeft, Settings, Trash2, User, X } from "lucide-react";
+import { ChevronLeft, Settings, Trash2, User, X, Database } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +21,7 @@ export const ConversationSidebar = ({
   onSelectConversation,
   onDeleteConversation,
 }: ConversationSidebarProps) => {
+  
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -56,6 +56,8 @@ export const ConversationSidebar = ({
 
   return (
     <div className={`fixed left-0 top-0 h-full ${sidebarWidth} bg-[#202123] p-2 border-r border-gray-700 flex flex-col z-50 transition-all duration-300`}>
+      
+      
       <div className="absolute -right-4 top-2">
         <Button
           variant="ghost"
@@ -121,6 +123,13 @@ export const ConversationSidebar = ({
       </div>
       
       <div className="mt-auto border-t border-gray-700 pt-2 sticky bottom-0 bg-[#202123]">
+        <button
+          onClick={() => navigate('/documents')}
+          className={`w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300 ${isCollapsed ? 'justify-center' : ''}`}
+        >
+          <Database className="h-4 w-4" />
+          {!isCollapsed && <span>Knowledge Base</span>}
+        </button>
         <button
           onClick={() => navigate('/profile')}
           className={`w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300 ${isCollapsed ? 'justify-center' : ''}`}

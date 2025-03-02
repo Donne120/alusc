@@ -7,6 +7,7 @@ import { ChatMessages } from "./chat/ChatMessages";
 import { NewsUpdate } from "./news/NewsUpdate";
 import { Conversation, Message } from "@/types/chat";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { documentService } from "@/services/documentService";
 
 const STORAGE_KEY = 'alu_chat_conversations';
 const MAX_CONTEXT_MESSAGES = 10;
@@ -132,8 +133,16 @@ export const ChatContainer = () => {
         throw new Error('Gemini API key not found. Please add it in settings.');
       }
 
+      // Check if message is ALU related by looking for keywords
+      const isAluRelated = /\balu\b|\bafrican leadership university\b|\bstudent\b|\bcourse\b|\bprogram\b|\bdegree\b/i.test(message);
+      
+      // If ALU related, search our document repository for relevant content
+      let contextualInfo = '';
+      if (isAluRelated) {
+        contextualInfo = documentService.searchDocuments(message);
+      }
+
       const genAI = new GoogleGenerativeAI(apiKey);
-      // Update to use the correct model name for the current Gemini API version
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const currentConversation = getCurrentConversation();
@@ -145,6 +154,13 @@ export const ChatContainer = () => {
         parts: [{ text: m.text }]
       }));
       
+      // Prepare system prompt with contextual info if available
+      let systemPrompt = "You are an AI assistant for African Leadership University (ALU) students.";
+      
+      if (contextualInfo) {
+        systemPrompt += "\n\nHere is some relevant context from ALU documentation that may help you answer:\n" + contextualInfo;
+      }
+      
       // Use the chat method for proper conversation context
       const chat = model.startChat({
         history,
@@ -155,6 +171,11 @@ export const ChatContainer = () => {
           maxOutputTokens: 1024,
         },
       });
+      
+      // Add system prompt to the chat
+      if (contextualInfo) {
+        await chat.sendMessage(systemPrompt);
+      }
       
       // Send the user's message to the chat
       const result = await chat.sendMessage(message);
