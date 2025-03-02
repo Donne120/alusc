@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ChatInput } from "./ChatInput";
@@ -132,16 +133,31 @@ export const ChatContainer = () => {
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      // Update to use the correct model name for the current Gemini API version
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const currentConversation = getCurrentConversation();
       const recentMessages = currentConversation.messages.slice(-MAX_CONTEXT_MESSAGES);
       
-      const prompt = recentMessages.map(m => 
-        `${m.isAi ? 'Assistant' : 'User'}: ${m.text}`
-      ).join('\n') + `\nUser: ${message}\nAssistant:`;
-
-      const result = await model.generateContent(prompt);
+      // Create a conversation history in the format expected by Gemini
+      const history = recentMessages.map(m => ({
+        role: m.isAi ? 'model' : 'user',
+        parts: [{ text: m.text }]
+      }));
+      
+      // Use the chat method for proper conversation context
+      const chat = model.startChat({
+        history,
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        },
+      });
+      
+      // Send the user's message to the chat
+      const result = await chat.sendMessage(message);
       const response = await result.response;
       const aiResponse = response.text();
       
