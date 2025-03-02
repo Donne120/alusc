@@ -22,27 +22,29 @@ export const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
+      if (recognitionRef.current) {
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
 
-      recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join('');
-        
-        setMessage(transcript);
-        if (textareaRef.current) {
-          textareaRef.current.style.height = 'auto';
-          textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-        }
-      };
+        recognitionRef.current.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join('');
+          
+          setMessage(transcript);
+          if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+          }
+        };
 
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        toast.error('Error with speech recognition');
-        setIsListening(false);
-      };
+        recognitionRef.current.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          toast.error('Error with speech recognition');
+          setIsListening(false);
+        };
+      }
     }
 
     return () => {
@@ -94,17 +96,19 @@ export const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const totalSize = files.reduce((acc, file) => acc + file.size, 0);
-    
-    if (totalSize > 25 * 1024 * 1024) {
-      toast.error("Total file size exceeds 25MB limit");
-      return;
-    }
+    if (e.target.files) {
+      const files = Array.from(e.target.files || []);
+      const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+      
+      if (totalSize > 25 * 1024 * 1024) {
+        toast.error("Total file size exceeds 25MB limit");
+        return;
+      }
 
-    setAttachments(prev => [...prev, ...files]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      setAttachments(prev => [...prev, ...files]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 

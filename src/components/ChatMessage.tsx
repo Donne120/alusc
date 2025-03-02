@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -219,10 +220,10 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
           </button>
         </div>
       </div>
-      {attachments.length > 0 && (
+      {attachments && attachments.length > 0 && (
         <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
           {attachments.map((attachment, index) => (
-            attachment.type === 'image' ? (
+            attachment && attachment.type === 'image' ? (
               <div key={index} className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
                 <img
@@ -231,7 +232,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                   className="relative rounded-lg max-h-64 object-cover w-full border border-[#9b87f5]/10"
                 />
               </div>
-            ) : (
+            ) : attachment ? (
               <a
                 key={index}
                 href={attachment.url}
@@ -243,7 +244,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                   📎 {attachment.name}
                 </div>
               </a>
-            )
+            ) : null
           ))}
         </div>
       )}
