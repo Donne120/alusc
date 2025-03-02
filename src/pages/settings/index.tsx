@@ -26,7 +26,7 @@ import {
   Volume2,
   MessageSquare,
   LucideIcon,
-  Settings,
+  Settings as SettingsIcon,
   Lightbulb,
   Accessibility,
   GraduationCap,
@@ -163,7 +163,7 @@ export default function Settings() {
 
         <div className="space-y-6">
           <SettingSection 
-            icon={Settings} 
+            icon={SettingsIcon} 
             title="AI Configuration" 
             description="Configure your AI model settings and behavior"
           >
