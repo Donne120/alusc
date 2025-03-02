@@ -8,14 +8,14 @@ import Settings from "./pages/settings";
 import Documents from "./pages/documents";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./contexts/AuthContext";
-import { ThemeProvider } from "./hooks/use-theme";
+import { ThemeProvider as NextThemeProvider } from "next-themes";
 
 import "./App.css";
 
 function App() {
   return (
     <AuthProvider>
-      <ThemeProvider>
+      <NextThemeProvider attribute="class" defaultTheme="dark">
         <Router>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -27,7 +27,7 @@ function App() {
           </Routes>
           <Toaster position="top-center" richColors />
         </Router>
-      </ThemeProvider>
+      </NextThemeProvider>
     </AuthProvider>
   );
 }
