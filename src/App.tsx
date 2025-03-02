@@ -9,6 +9,7 @@ import Documents from "./pages/documents";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
+import { MiniChatbot } from "./components/mini-chatbot/MiniChatbot";
 
 import "./App.css";
 
@@ -25,6 +26,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/documents" element={<Documents />} />
           </Routes>
+          <MiniChatbot />
           <Toaster position="top-center" richColors />
         </Router>
       </NextThemeProvider>
