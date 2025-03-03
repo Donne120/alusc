@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Calendar, Users, School, ArrowRight, Loader2, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,12 @@ type Stage = "initial" | "department-selection" | "selection-list" | "booking" |
 
 // Sample data for learning coaches
 const learningCoaches = [
-  { id: 1, name: "Dr. Amina Diallo", course: "Leadership Development" },
+  { 
+    id: 1, 
+    name: "Mr. Marvin Muyonga Ogore", 
+    course: "Machine Learning",
+    calendarLink: "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3IinSwaZGWuW1XZJAv7Mkiwokt8Pl_k1STcIWjMF_wXw5pzfY-SEECflnGm-2dhO7QAWFIOtcd"
+  },
   { id: 2, name: "Prof. Kwame Osei", course: "Entrepreneurship" },
   { id: 3, name: "Dr. Fatima Nkosi", course: "Data Science" },
   { id: 4, name: "Prof. Thabo Mbeki", course: "African Political History" },
@@ -34,20 +38,70 @@ const learningCoaches = [
 
 // Sample data for departments
 const departments = [
-  { id: 1, name: "Computer Science Department", head: "Prof. Ada Obi" },
-  { id: 2, name: "Business School", head: "Dr. James Mwangi" },
-  { id: 3, name: "Global Challenges", head: "Prof. Graça Machel" },
-  { id: 4, name: "Entrepreneurship", head: "Dr. Ashish Thakkar" },
-  { id: 5, name: "Engineering", head: "Prof. Venansius Baryamureeba" }
+  { 
+    id: 1, 
+    name: "Computer Science Department", 
+    head: "Prof. Ada Obi",
+    calendarLink: "https://calendar.google.com/calendar/appointments"
+  },
+  { 
+    id: 2, 
+    name: "Business School", 
+    head: "Dr. James Mwangi",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  },
+  { 
+    id: 3, 
+    name: "Global Challenges", 
+    head: "Prof. Graça Machel",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  },
+  { 
+    id: 4, 
+    name: "Entrepreneurship", 
+    head: "Dr. Ashish Thakkar",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  },
+  { 
+    id: 5, 
+    name: "Engineering", 
+    head: "Prof. Venansius Baryamureeba",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  }
 ];
 
 // Sample data for administration
 const administrationOffices = [
-  { id: 1, name: "Registrar's Office", contact: "registrar@alu.edu" },
-  { id: 2, name: "Financial Aid", contact: "finaid@alu.edu" },
-  { id: 3, name: "Student Affairs", contact: "studentaffairs@alu.edu" },
-  { id: 4, name: "Career Development", contact: "careers@alu.edu" },
-  { id: 5, name: "International Student Services", contact: "international@alu.edu" }
+  { 
+    id: 1, 
+    name: "Registrar's Office", 
+    contact: "registrar@alu.edu",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  },
+  { 
+    id: 2, 
+    name: "Financial Aid", 
+    contact: "finaid@alu.edu",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  },
+  { 
+    id: 3, 
+    name: "Student Affairs", 
+    contact: "studentaffairs@alu.edu",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  },
+  { 
+    id: 4, 
+    name: "Career Development", 
+    contact: "careers@alu.edu",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  },
+  { 
+    id: 5, 
+    name: "International Student Services", 
+    contact: "international@alu.edu",
+    calendarLink: "https://calendar.google.com/calendar/appointments" 
+  }
 ];
 
 export const MiniChatbotContent = () => {
@@ -66,6 +120,14 @@ export const MiniChatbotContent = () => {
 
   const handlePersonSelect = (person: any) => {
     setSelectedPerson(person);
+    
+    // If person has a calendarLink, redirect to it
+    if (person.calendarLink) {
+      window.open(person.calendarLink, '_blank');
+      return;
+    }
+    
+    // Otherwise continue with the standard booking flow
     setStage("department-selection");
   };
 
@@ -171,10 +233,13 @@ export const MiniChatbotContent = () => {
                     key={coach.id}
                     variant="outline"
                     className="w-full justify-start flex-col items-start p-3 h-auto"
-                    onClick={() => openCalendar(coach)}
+                    onClick={() => handlePersonSelect(coach)}
                   >
                     <div className="font-medium text-left">{coach.name}</div>
                     <div className="text-xs text-muted-foreground text-left">{coach.course}</div>
+                    {coach.calendarLink && (
+                      <div className="text-xs text-blue-500 mt-1">Click to book office hours</div>
+                    )}
                   </Button>
                 ))}
                 
@@ -183,10 +248,13 @@ export const MiniChatbotContent = () => {
                     key={dept.id}
                     variant="outline"
                     className="w-full justify-start flex-col items-start p-3 h-auto"
-                    onClick={() => openCalendar(dept)}
+                    onClick={() => handlePersonSelect(dept)}
                   >
                     <div className="font-medium text-left">{dept.name}</div>
                     <div className="text-xs text-muted-foreground text-left">Head: {dept.head}</div>
+                    {dept.calendarLink && (
+                      <div className="text-xs text-blue-500 mt-1">Click to book department consultation</div>
+                    )}
                   </Button>
                 ))}
                 
@@ -195,10 +263,13 @@ export const MiniChatbotContent = () => {
                     key={office.id}
                     variant="outline"
                     className="w-full justify-start flex-col items-start p-3 h-auto"
-                    onClick={() => openCalendar(office)}
+                    onClick={() => handlePersonSelect(office)}
                   >
                     <div className="font-medium text-left">{office.name}</div>
                     <div className="text-xs text-muted-foreground text-left">{office.contact}</div>
+                    {office.calendarLink && (
+                      <div className="text-xs text-blue-500 mt-1">Click to book an appointment</div>
+                    )}
                   </Button>
                 ))}
               </div>
