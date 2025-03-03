@@ -10,6 +10,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import { ChatCard } from "./ui/chat-card";
 import { cn } from "@/lib/utils";
+
 interface ChatMessageProps {
   message: string;
   isAi?: boolean;
@@ -20,12 +21,14 @@ interface ChatMessageProps {
   }>;
   onEdit?: (newMessage: string) => void;
 }
+
 interface CodeProps {
   node?: any;
   inline?: boolean;
   className?: string;
   children: any;
 }
+
 const tryParseCard = (text: string) => {
   if (!text.includes('Title:')) return null;
   try {
@@ -52,6 +55,7 @@ const tryParseCard = (text: string) => {
     return null;
   }
 };
+
 export const ChatMessage = ({
   message,
   isAi = false,
@@ -66,7 +70,9 @@ export const ChatMessage = ({
     minute: 'numeric',
     hour12: true
   });
+
   const cardData = tryParseCard(message);
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(message);
@@ -77,6 +83,7 @@ export const ChatMessage = ({
       toast.error("Failed to copy message");
     }
   };
+
   const handleEdit = () => {
     if (isEditing) {
       onEdit?.(editedMessage);
@@ -85,6 +92,7 @@ export const ChatMessage = ({
       setIsEditing(true);
     }
   };
+
   const handleScreenshot = async () => {
     try {
       const messageElement = document.getElementById(`message-${message.slice(0, 10)}`);
@@ -103,6 +111,7 @@ export const ChatMessage = ({
       toast.error("Failed to take screenshot");
     }
   };
+
   return <div className={cn("py-6 px-2 md:px-4 w-full animate-message-fade-in relative backdrop-blur-sm", isAi ? "bg-[#1A1F2C]/50" : "bg-[#1A1F2C]/30")} id={`message-${message.slice(0, 10)}`}>
       <div className="max-w-5xl mx-auto flex gap-4">
         {isAi ? <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-tr from-[#9b87f5] to-[#8B5CF6] p-0.5">
@@ -126,7 +135,7 @@ export const ChatMessage = ({
             }: CodeProps) => {
               const match = /language-(\w+)/.exec(className || '');
               return !inline && match ? <div className="relative group my-6">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] rounded-lg blur opacity-20"></div>
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
                         <div className="relative rounded-lg overflow-hidden">
                           <div className="bg-[#2A2F3C] text-xs text-gray-400 px-4 py-1 flex justify-between items-center">
                             <span>{match[1].toUpperCase()}</span>
@@ -150,7 +159,7 @@ export const ChatMessage = ({
             },
             p: ({
               children
-            }) => <p className="mb-4 leading-7">{children}</p>,
+            }) => <p className="mb-4 leading-7 text-justify">{children}</p>,
             ul: ({
               children
             }) => <ul className="mb-4 pl-6 list-disc space-y-2">{children}</ul>,
@@ -159,34 +168,34 @@ export const ChatMessage = ({
             }) => <ol className="mb-4 pl-6 list-decimal space-y-2">{children}</ol>,
             li: ({
               children
-            }) => <li className="leading-7">{children}</li>,
+            }) => <li className="leading-7 text-justify">{children}</li>,
             h1: ({
               children
-            }) => <h1 className="text-2xl font-bold mb-4 mt-6">{children}</h1>,
+            }) => <h1 className="text-2xl font-bold mb-4 mt-6 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] bg-clip-text text-transparent">{children}</h1>,
             h2: ({
               children
-            }) => <h2 className="text-xl font-bold mb-3 mt-5">{children}</h2>,
+            }) => <h2 className="text-xl font-bold mb-3 mt-5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] bg-clip-text text-transparent">{children}</h2>,
             h3: ({
               children
-            }) => <h3 className="text-lg font-bold mb-3 mt-5">{children}</h3>,
+            }) => <h3 className="text-lg font-bold mb-3 mt-5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] bg-clip-text text-transparent">{children}</h3>,
             h4: ({
               children
-            }) => <h4 className="text-base font-bold mb-2 mt-4">{children}</h4>,
+            }) => <h4 className="text-base font-bold mb-2 mt-4 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] bg-clip-text text-transparent">{children}</h4>,
             blockquote: ({
               children
-            }) => <blockquote className="border-l-4 border-[#9b87f5] pl-4 italic my-4 text-gray-300">
+            }) => <blockquote className="border-l-4 border-[#9b87f5] pl-4 italic my-4 text-gray-300 bg-[#2A2F3C]/50 py-2 rounded-r-md">
                       {children}
                     </blockquote>,
             a: ({
               href,
               children
-            }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#9b87f5] hover:underline">
+            }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#9b87f5] hover:underline font-medium">
                       {children}
                     </a>,
             table: ({
               children
-            }) => <div className="overflow-x-auto my-4">
-                      <table className="min-w-full border border-[#2A2F3C] rounded-lg overflow-hidden">
+            }) => <div className="overflow-x-auto my-6 rounded-lg border border-[#9b87f5]/20">
+                      <table className="min-w-full rounded-lg overflow-hidden">
                         {children}
                       </table>
                     </div>,
@@ -195,16 +204,23 @@ export const ChatMessage = ({
             }) => <thead className="bg-[#2A2F3C]">{children}</thead>,
             tbody: ({
               children
-            }) => <tbody>{children}</tbody>,
+            }) => <tbody className="divide-y divide-[#2A2F3C]">{children}</tbody>,
             tr: ({
               children
-            }) => <tr className="border-b border-[#2A2F3C]">{children}</tr>,
+            }) => <tr className="hover:bg-[#2A2F3C]/50 transition-colors">{children}</tr>,
             th: ({
               children
-            }) => <th className="px-4 py-2 text-left font-semibold">{children}</th>,
+            }) => <th className="px-4 py-3 text-left font-semibold text-[#9b87f5]">{children}</th>,
             td: ({
               children
-            }) => <td className="px-4 py-2">{children}</td>
+            }) => <td className="px-4 py-3">{children}</td>,
+            img: ({
+              src,
+              alt
+            }) => <div className="my-4">
+                      <img src={src} alt={alt} className="rounded-lg max-w-full h-auto border border-[#9b87f5]/20 shadow-lg" />
+                      {alt && <p className="text-center text-sm text-gray-400 mt-2">{alt}</p>}
+                    </div>
           }} className="prose prose-invert max-w-none">
                 {message}
               </ReactMarkdown>}
@@ -222,6 +238,10 @@ export const ChatMessage = ({
           
           <button onClick={handleCopy} className="p-2 rounded-lg hover:bg-[#2A2F3C] text-gray-400 hover:text-white transition-colors">
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          </button>
+          
+          <button onClick={handleScreenshot} className="p-2 rounded-lg hover:bg-[#2A2F3C] text-gray-400 hover:text-white transition-colors">
+            <Camera className="h-4 w-4" />
           </button>
         </div>
       </div>
