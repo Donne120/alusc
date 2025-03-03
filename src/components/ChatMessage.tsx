@@ -10,7 +10,6 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import { ChatCard } from "./ui/chat-card";
 import { cn } from "@/lib/utils";
-
 interface ChatMessageProps {
   message: string;
   isAi?: boolean;
@@ -21,14 +20,12 @@ interface ChatMessageProps {
   }>;
   onEdit?: (newMessage: string) => void;
 }
-
 interface CodeProps {
   node?: any;
   inline?: boolean;
   className?: string;
   children: any;
 }
-
 const tryParseCard = (text: string) => {
   if (!text.includes('Title:')) return null;
   try {
@@ -55,7 +52,6 @@ const tryParseCard = (text: string) => {
     return null;
   }
 };
-
 export const ChatMessage = ({
   message,
   isAi = false,
@@ -70,9 +66,7 @@ export const ChatMessage = ({
     minute: 'numeric',
     hour12: true
   });
-
   const cardData = tryParseCard(message);
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(message);
@@ -83,7 +77,6 @@ export const ChatMessage = ({
       toast.error("Failed to copy message");
     }
   };
-
   const handleEdit = () => {
     if (isEditing) {
       onEdit?.(editedMessage);
@@ -92,7 +85,6 @@ export const ChatMessage = ({
       setIsEditing(true);
     }
   };
-
   const handleScreenshot = async () => {
     try {
       const messageElement = document.getElementById(`message-${message.slice(0, 10)}`);
@@ -111,7 +103,6 @@ export const ChatMessage = ({
       toast.error("Failed to take screenshot");
     }
   };
-
   return <div className={cn("py-6 px-2 md:px-4 w-full animate-message-fade-in relative backdrop-blur-sm", isAi ? "bg-[#1A1F2C]/50" : "bg-[#1A1F2C]/30")} id={`message-${message.slice(0, 10)}`}>
       <div className="max-w-5xl mx-auto flex gap-4">
         {isAi ? <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-tr from-[#9b87f5] to-[#8B5CF6] p-0.5">
@@ -240,9 +231,7 @@ export const ChatMessage = ({
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </button>
           
-          <button onClick={handleScreenshot} className="p-2 rounded-lg hover:bg-[#2A2F3C] text-gray-400 hover:text-white transition-colors">
-            <Camera className="h-4 w-4" />
-          </button>
+          
         </div>
       </div>
       {attachments && attachments.length > 0 && <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
