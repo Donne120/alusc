@@ -113,12 +113,12 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
   return (
     <div
       className={cn(
-        "py-6 px-4 md:px-8 w-full animate-message-fade-in relative backdrop-blur-sm",
+        "py-6 px-2 md:px-4 w-full animate-message-fade-in relative backdrop-blur-sm",
         isAi ? "bg-[#1A1F2C]/50" : "bg-[#1A1F2C]/30"
       )}
       id={`message-${message.slice(0, 10)}`}
     >
-      <div className="max-w-3xl mx-auto flex gap-4">
+      <div className="max-w-5xl mx-auto flex gap-4">
         {isAi ? (
           <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-tr from-[#9b87f5] to-[#8B5CF6] p-0.5">
             <div className="bg-[#1A1F2C] w-full h-full rounded-xl p-2">
@@ -134,7 +134,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
         )}
         <div className="flex-1 space-y-2">
           <div className={cn(
-            "p-4 rounded-xl max-w-[85%] text-white shadow-lg",
+            "p-4 rounded-xl text-white shadow-lg",
             isAi ? 
               "bg-gradient-to-br from-[#2A2F3C] to-[#1A1F2C] border border-[#9b87f5]/10" : 
               "bg-gradient-to-br from-[#D946EF] to-[#8B5CF6]"
@@ -155,37 +155,80 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
                   code: ({ node, inline, className, children, ...props }: CodeProps) => {
                     const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
-                      <div className="relative group my-4">
+                      <div className="relative group my-6">
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] rounded-lg blur opacity-20"></div>
-                        <SyntaxHighlighter
-                          style={atomDark}
-                          language={match[1]}
-                          PreTag="div"
-                          customStyle={{ 
-                            margin: 0,
-                            background: '#1A1F2C',
-                            borderRadius: '0.5rem',
-                          }}
-                        >
-                          {String(children).replace(/\n$/, '')}
-                        </SyntaxHighlighter>
-                        <button
-                          onClick={handleCopy}
-                          className="absolute top-2 right-2 p-2 rounded-lg bg-[#2A2F3C] opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                        </button>
+                        <div className="relative rounded-lg overflow-hidden">
+                          <div className="bg-[#2A2F3C] text-xs text-gray-400 px-4 py-1 flex justify-between items-center">
+                            <span>{match[1].toUpperCase()}</span>
+                            <button
+                              onClick={handleCopy}
+                              className="p-1 hover:bg-[#1A1F2C] rounded"
+                            >
+                              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                            </button>
+                          </div>
+                          <SyntaxHighlighter
+                            style={atomDark}
+                            language={match[1]}
+                            PreTag="div"
+                            customStyle={{ 
+                              margin: 0,
+                              background: '#1A1F2C',
+                              padding: '1rem',
+                              fontSize: '0.9rem',
+                              borderRadius: '0 0 0.5rem 0.5rem',
+                            }}
+                          >
+                            {String(children).replace(/\n$/, '')}
+                          </SyntaxHighlighter>
+                        </div>
                       </div>
                     ) : (
                       <code {...props} className={cn(
                         className,
-                        "bg-[#2A2F3C] px-1.5 py-0.5 rounded-md"
+                        "bg-[#2A2F3C] px-1.5 py-0.5 rounded-md font-mono text-sm"
                       )}>
                         {children}
                       </code>
                     );
                   },
+                  p: ({ children }) => <p className="mb-4 leading-7">{children}</p>,
+                  ul: ({ children }) => <ul className="mb-4 pl-6 list-disc space-y-2">{children}</ul>,
+                  ol: ({ children }) => <ol className="mb-4 pl-6 list-decimal space-y-2">{children}</ol>,
+                  li: ({ children }) => <li className="leading-7">{children}</li>,
+                  h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 mt-6">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-xl font-bold mb-3 mt-5">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-lg font-bold mb-3 mt-5">{children}</h3>,
+                  h4: ({ children }) => <h4 className="text-base font-bold mb-2 mt-4">{children}</h4>,
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-4 border-[#9b87f5] pl-4 italic my-4 text-gray-300">
+                      {children}
+                    </blockquote>
+                  ),
+                  a: ({ href, children }) => (
+                    <a 
+                      href={href} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-[#9b87f5] hover:underline"
+                    >
+                      {children}
+                    </a>
+                  ),
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto my-4">
+                      <table className="min-w-full border border-[#2A2F3C] rounded-lg overflow-hidden">
+                        {children}
+                      </table>
+                    </div>
+                  ),
+                  thead: ({ children }) => <thead className="bg-[#2A2F3C]">{children}</thead>,
+                  tbody: ({ children }) => <tbody>{children}</tbody>,
+                  tr: ({ children }) => <tr className="border-b border-[#2A2F3C]">{children}</tr>,
+                  th: ({ children }) => <th className="px-4 py-2 text-left font-semibold">{children}</th>,
+                  td: ({ children }) => <td className="px-4 py-2">{children}</td>,
                 }}
+                className="prose prose-invert max-w-none"
               >
                 {message}
               </ReactMarkdown>
@@ -197,7 +240,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
             <span>{isAi ? 'AI Assistant' : 'You'}</span>
           </div>
         </div>
-        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex flex-col gap-2">
           {!isAi && (
             <button
               onClick={handleEdit}
@@ -221,7 +264,7 @@ export const ChatMessage = ({ message, isAi = false, attachments = [], onEdit }:
         </div>
       </div>
       {attachments && attachments.length > 0 && (
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {attachments.map((attachment, index) => (
             attachment && attachment.type === 'image' ? (
               <div key={index} className="relative group">
