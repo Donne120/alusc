@@ -1,7 +1,7 @@
 
 import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
-import { Brain } from "lucide-react";
+import { Loader } from "lucide-react";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -14,7 +14,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
     return (
       <div className="h-screen flex flex-col items-center justify-center text-gray-300 px-4 bg-gradient-to-b from-[#1A1F2C] to-[#2A2F3C]">
         <div className="flex items-center justify-center w-16 h-16 mb-8 rounded-2xl bg-gradient-to-tr from-[#9b87f5] to-[#8B5CF6]">
-          <Brain className="w-8 h-8 text-white" />
+          <div className="w-8 h-8 rounded-full border-2 border-current border-t-transparent animate-spin" />
         </div>
         <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#9b87f5] to-[#D946EF] text-transparent bg-clip-text">
           ALU Student Companion
@@ -41,16 +41,16 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
         />
       ))}
       {isLoading && (
-        <div className="py-6 px-8 text-gray-400 animate-pulse">
-          <div className="max-w-3xl mx-auto flex gap-4">
-            <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-tr from-[#9b87f5] to-[#8B5CF6] p-0.5">
-              <div className="bg-[#1A1F2C] w-full h-full rounded-xl p-2">
-                <Brain className="w-full h-full text-white" />
-              </div>
-            </div>
+        <div className="py-6 px-8 text-gray-400">
+          <div className="max-w-3xl mx-auto flex gap-4 items-start">
+            <div className="w-2 h-2 rounded-full bg-gradient-to-tr from-[#9b87f5] to-[#8B5CF6] animate-pulse mt-2" />
             <div className="flex-1">
-              <div className="h-4 bg-[#2A2F3C] rounded-lg w-3/4 mb-2"></div>
-              <div className="h-4 bg-[#2A2F3C] rounded-lg w-1/2"></div>
+              <div className="flex space-x-2 items-center">
+                <div className="w-8 h-8">
+                  <Loader className="w-full h-full animate-spin text-[#9b87f5]" />
+                </div>
+                <span className="text-sm text-gray-400">AI is thinking...</span>
+              </div>
             </div>
           </div>
         </div>
