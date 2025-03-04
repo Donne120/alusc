@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { Calendar, Users, School, ArrowRight, Loader2, ChevronLeft, Mail, HeadsetIcon, Send } from "lucide-react";
+import { Calendar, Users, School, ArrowRight, Loader2, ChevronLeft, Mail, HeadsetIcon, Send, FileText, AlertCircle, GraduationCap, Receipt, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,6 +8,7 @@ import { toast } from "sonner";
 
 type Department = "learning-coach" | "department" | "administration";
 type Stage = "initial" | "department-selection" | "selection-list" | "booking" | "confirmation" | "human-chat" | "email-inquiry" | "human-chat-active" | "email-sent";
+type EmailTemplate = "general" | "assignment" | "finance" | "technical" | "academic" | "custom";
 
 // Sample data for learning coaches
 const learningCoaches = [
@@ -123,6 +123,52 @@ const emailDepartments = [
   { id: 5, name: "Technical Support", email: "itsupport@alu.edu" },
 ];
 
+// Email templates
+const emailTemplates = [
+  {
+    id: "general",
+    name: "General Inquiry",
+    icon: <HelpCircle size={16} />,
+    subject: "General Inquiry - [Your Name]",
+    body: "Dear [Department],\n\nMy name is [Your Name], a [Your Year/Program] student. I am writing to inquire about [Brief Description].\n\n[Your Question or Request]\n\nThank you for your assistance.\n\nBest regards,\n[Your Name]\n[Your Student ID]"
+  },
+  {
+    id: "assignment",
+    name: "Assignment Help",
+    icon: <FileText size={16} />,
+    subject: "Assignment Clarification - [Course Code]",
+    body: "Dear Professor/Department,\n\nI am a student in [Course Name] (Course Code: [Course Code]). I am writing regarding the assignment due on [Due Date].\n\n[Specific Questions about Assignment]\n\nThank you for your guidance.\n\nBest regards,\n[Your Name]\n[Your Student ID]"
+  },
+  {
+    id: "academic",
+    name: "Academic Advising",
+    icon: <GraduationCap size={16} />,
+    subject: "Academic Advising Request - [Your Name]",
+    body: "Dear Academic Advisor,\n\nI hope this email finds you well. I am [Your Name], a [Your Year/Program] student (ID: [Your Student ID]).\n\nI would like to request guidance on [Course Selection/Program Requirements/Career Planning].\n\n[Specific Details about Your Situation]\n\nWhen would be a good time to schedule a meeting to discuss this?\n\nThank you for your support.\n\nBest regards,\n[Your Name]"
+  },
+  {
+    id: "finance",
+    name: "Financial Aid",
+    icon: <Receipt size={16} />,
+    subject: "Financial Aid Inquiry - [Your Name]",
+    body: "Dear Financial Aid Office,\n\nI am [Your Name], a [Your Year/Program] student (ID: [Your Student ID]).\n\nI am writing regarding [Scholarship/Tuition Payment/Financial Aid Application].\n\n[Specific Details about Your Financial Query]\n\nThank you for your assistance with this matter.\n\nBest regards,\n[Your Name]\n[Your Contact Information]"
+  },
+  {
+    id: "technical",
+    name: "Technical Support",
+    icon: <AlertCircle size={16} />,
+    subject: "Technical Support Request - [Brief Issue Description]",
+    body: "Dear IT Support Team,\n\nI am experiencing technical difficulties with [System/Platform/Service].\n\nIssue Details:\n- Issue: [Brief Description]\n- When it started: [Date/Time]\n- Steps I've already taken: [Any troubleshooting steps]\n- Error messages: [Any error messages received]\n\nPlease advise on how to resolve this issue.\n\nThank you,\n[Your Name]\n[Your Student ID]\n[Your Contact Information]"
+  },
+  {
+    id: "custom",
+    name: "Custom Email",
+    icon: <Mail size={16} />,
+    subject: "",
+    body: ""
+  }
+];
+
 export const MiniChatbotContent = () => {
   const [stage, setStage] = useState<Stage>("initial");
   const [department, setDepartment] = useState<Department | null>(null);
@@ -138,6 +184,7 @@ export const MiniChatbotContent = () => {
   const [emailBody, setEmailBody] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
   const [humanChatInput, setHumanChatInput] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
 
   const handleDepartmentSelect = (dept: Department) => {
     setDepartment(dept);
@@ -193,6 +240,17 @@ export const MiniChatbotContent = () => {
       setStage("initial");
     } else if (stage === "human-chat-active") {
       setStage("human-chat");
+    }
+  };
+
+  // Function to handle template selection
+  const handleTemplateSelect = (templateId: EmailTemplate) => {
+    setSelectedTemplate(templateId);
+    const template = emailTemplates.find(t => t.id === templateId);
+    
+    if (template) {
+      setEmailSubject(template.subject);
+      setEmailBody(template.body);
     }
   };
 
@@ -567,7 +625,7 @@ export const MiniChatbotContent = () => {
           </div>
         )}
 
-        {/* Email Inquiry Form */}
+        {/* Email Inquiry Form with Templates */}
         {stage === "email-inquiry" && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
@@ -578,6 +636,29 @@ export const MiniChatbotContent = () => {
             </div>
             
             <div className="space-y-3">
+              {/* Email Templates Section */}
+              <div>
+                <p className="text-xs font-medium mb-1">Choose a Template:</p>
+                <ScrollArea className="h-24 pr-4 mb-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    {emailTemplates.map((template) => (
+                      <Button
+                        key={template.id}
+                        variant={selectedTemplate === template.id ? "default" : "outline"}
+                        size="sm"
+                        className="justify-start h-auto py-2"
+                        onClick={() => handleTemplateSelect(template.id as EmailTemplate)}
+                      >
+                        <span className="flex items-center gap-1">
+                          {template.icon}
+                          <span className="text-xs">{template.name}</span>
+                        </span>
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+              
               <div>
                 <p className="text-xs font-medium mb-1">Select Department:</p>
                 <ScrollArea className="h-24 pr-4">
@@ -613,8 +694,11 @@ export const MiniChatbotContent = () => {
                   placeholder="Type your message here..."
                   value={emailBody}
                   onChange={(e) => setEmailBody(e.target.value)}
-                  className="min-h-[80px] resize-none"
+                  className="min-h-[120px] resize-none"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Replace [bracketed text] with your specific information.
+                </p>
               </div>
             </div>
             
