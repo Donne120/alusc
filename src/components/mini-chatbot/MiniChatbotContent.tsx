@@ -1,11 +1,14 @@
+
 import React, { useState } from "react";
-import { Calendar, Users, School, ArrowRight, Loader2, ChevronLeft } from "lucide-react";
+import { Calendar, Users, School, ArrowRight, Loader2, ChevronLeft, Mail, HeadsetIcon, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 type Department = "learning-coach" | "department" | "administration";
-type Stage = "initial" | "department-selection" | "selection-list" | "booking" | "confirmation";
+type Stage = "initial" | "department-selection" | "selection-list" | "booking" | "confirmation" | "human-chat" | "email-inquiry" | "human-chat-active" | "email-sent";
 
 // Sample data for learning coaches
 const learningCoaches = [
@@ -104,6 +107,22 @@ const administrationOffices = [
   }
 ];
 
+// Sample data for human chat agents
+const chatAgents = [
+  { id: 1, name: "Sarah Kimani", department: "Student Support", status: "Online" },
+  { id: 2, name: "John Okafor", department: "Technical Support", status: "Online" },
+  { id: 3, name: "Amina Hassan", department: "Admissions", status: "Away" },
+];
+
+// Email inquiry departments
+const emailDepartments = [
+  { id: 1, name: "General Inquiries", email: "info@alu.edu" },
+  { id: 2, name: "Admissions", email: "admissions@alu.edu" },
+  { id: 3, name: "Student Affairs", email: "studentaffairs@alu.edu" },
+  { id: 4, name: "Financial Aid", email: "financial.aid@alu.edu" },
+  { id: 5, name: "Technical Support", email: "itsupport@alu.edu" },
+];
+
 export const MiniChatbotContent = () => {
   const [stage, setStage] = useState<Stage>("initial");
   const [department, setDepartment] = useState<Department | null>(null);
@@ -112,6 +131,13 @@ export const MiniChatbotContent = () => {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedPerson, setSelectedPerson] = useState<any>(null);
+  const [chatMessages, setChatMessages] = useState<Array<{text: string, isUser: boolean}>>([
+    { text: "Hi there! I'm a support representative. How can I help you today?", isUser: false }
+  ]);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
+  const [humanChatInput, setHumanChatInput] = useState("");
 
   const handleDepartmentSelect = (dept: Department) => {
     setDepartment(dept);
@@ -147,6 +173,13 @@ export const MiniChatbotContent = () => {
     setSelectedDate("");
     setSelectedTime("");
     setSelectedPerson(null);
+    setChatMessages([
+      { text: "Hi there! I'm a support representative. How can I help you today?", isUser: false }
+    ]);
+    setEmailSubject("");
+    setEmailBody("");
+    setSelectedDepartment(null);
+    setHumanChatInput("");
   };
 
   const goBack = () => {
@@ -156,25 +189,65 @@ export const MiniChatbotContent = () => {
     } else if (stage === "department-selection") {
       setStage("selection-list");
       setSelectedPerson(null);
+    } else if (stage === "human-chat" || stage === "email-inquiry") {
+      setStage("initial");
+    } else if (stage === "human-chat-active") {
+      setStage("human-chat");
     }
+  };
+
+  // Function to handle sending a message in human chat
+  const sendHumanChatMessage = () => {
+    if (humanChatInput.trim() === "") return;
+    
+    // Add user message
+    setChatMessages(prev => [...prev, { text: humanChatInput, isUser: true }]);
+    setHumanChatInput("");
+    
+    // Simulate agent typing
+    setIsLoading(true);
+    
+    // Simulate response after a delay
+    setTimeout(() => {
+      const responses = [
+        "I understand your concern. Let me check that for you.",
+        "Thanks for providing that information. I'll help you resolve this issue.",
+        "That's a great question. Here's what you need to know...",
+        "I'm looking into this matter for you. Can you provide more details?",
+        "Let me connect you with the appropriate department for further assistance."
+      ];
+      
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      setChatMessages(prev => [...prev, { text: randomResponse, isUser: false }]);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  // Function to handle sending an email inquiry
+  const sendEmailInquiry = () => {
+    if (!selectedDepartment || !emailSubject || !emailBody) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Simulate sending email
+    setTimeout(() => {
+      setIsLoading(false);
+      setStage("email-sent");
+    }, 1500);
   };
 
   // Example available times
   const availableTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
-
-  // Function to open calendar in new tab (simulated)
-  const openCalendar = (person: any) => {
-    handlePersonSelect(person);
-    // In a real implementation, this would redirect to an actual calendar page
-    console.log(`Opening calendar for ${person.name}`);
-  };
 
   return (
     <div className="flex flex-col h-96">
       <div className="flex-1 overflow-y-auto p-4">
         {stage === "initial" && (
           <div className="space-y-4">
-            <p className="text-center text-sm">Who would you like to connect with?</p>
+            <p className="text-center text-sm">How can we assist you today?</p>
             <div className="grid grid-cols-1 gap-2">
               <Button 
                 variant="outline" 
@@ -206,6 +279,28 @@ export const MiniChatbotContent = () => {
                 <span className="flex items-center gap-2">
                   <Calendar size={16} />
                   Administration
+                </span>
+                <ArrowRight size={16} />
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex justify-between"
+                onClick={() => setStage("human-chat")}
+              >
+                <span className="flex items-center gap-2">
+                  <HeadsetIcon size={16} />
+                  Chat with a Human
+                </span>
+                <ArrowRight size={16} />
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex justify-between"
+                onClick={() => setStage("email-inquiry")}
+              >
+                <span className="flex items-center gap-2">
+                  <Mail size={16} />
+                  Send an Email Inquiry
                 </span>
                 <ArrowRight size={16} />
               </Button>
@@ -369,6 +464,202 @@ export const MiniChatbotContent = () => {
             </p>
             <Button className="w-full" onClick={resetChat}>
               Book Another Session
+            </Button>
+          </div>
+        )}
+
+        {/* Human Chat Agent Selection */}
+        {stage === "human-chat" && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={goBack}>
+                <ChevronLeft size={16} />
+              </Button>
+              <h3 className="text-sm font-medium">Select an Agent to Chat With</h3>
+            </div>
+            
+            <ScrollArea className="h-64 pr-4">
+              <div className="space-y-2">
+                {chatAgents.map((agent) => (
+                  <Button
+                    key={agent.id}
+                    variant="outline"
+                    className="w-full justify-start flex-col items-start p-3 h-auto"
+                    onClick={() => {
+                      setSelectedPerson(agent);
+                      setStage("human-chat-active");
+                    }}
+                    disabled={agent.status === "Away"}
+                  >
+                    <div className="font-medium text-left flex items-center gap-2">
+                      {agent.name}
+                      <span className={`w-2 h-2 rounded-full ${agent.status === "Online" ? "bg-green-500" : "bg-amber-500"}`}></span>
+                    </div>
+                    <div className="text-xs text-muted-foreground text-left">{agent.department}</div>
+                    <div className="text-xs text-muted-foreground text-left">Status: {agent.status}</div>
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
+
+        {/* Active Human Chat */}
+        {stage === "human-chat-active" && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={goBack}>
+                <ChevronLeft size={16} />
+              </Button>
+              <h3 className="text-sm font-medium">
+                Chat with {selectedPerson?.name}
+              </h3>
+            </div>
+            
+            <ScrollArea className="h-48 pr-4 mb-2">
+              <div className="space-y-3">
+                {chatMessages.map((msg, index) => (
+                  <div key={index} className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}>
+                    <div className={`rounded-lg px-3 py-2 max-w-[80%] text-sm ${
+                      msg.isUser 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-secondary text-secondary-foreground"
+                    }`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="rounded-lg px-3 py-2 bg-secondary text-secondary-foreground">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 rounded-full bg-current animate-bounce"></div>
+                        <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                        <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+            
+            <div className="flex gap-2">
+              <Input
+                value={humanChatInput}
+                onChange={(e) => setHumanChatInput(e.target.value)}
+                placeholder="Type your message..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendHumanChatMessage();
+                  }
+                }}
+                disabled={isLoading}
+              />
+              <Button 
+                size="sm"
+                onClick={sendHumanChatMessage}
+                disabled={!humanChatInput.trim() || isLoading}
+              >
+                <Send size={16} />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Email Inquiry Form */}
+        {stage === "email-inquiry" && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={goBack}>
+                <ChevronLeft size={16} />
+              </Button>
+              <h3 className="text-sm font-medium">Send Email Inquiry</h3>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-medium mb-1">Select Department:</p>
+                <ScrollArea className="h-24 pr-4">
+                  <div className="space-y-2">
+                    {emailDepartments.map((dept) => (
+                      <Button
+                        key={dept.id}
+                        variant={selectedDepartment?.id === dept.id ? "default" : "outline"}
+                        size="sm"
+                        className="w-full justify-between text-left h-auto py-2"
+                        onClick={() => setSelectedDepartment(dept)}
+                      >
+                        <span>{dept.name}</span>
+                        <span className="text-xs text-muted-foreground">{dept.email}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+              
+              <div>
+                <p className="text-xs font-medium mb-1">Subject:</p>
+                <Input
+                  placeholder="Enter subject"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <p className="text-xs font-medium mb-1">Message:</p>
+                <Textarea
+                  placeholder="Type your message here..."
+                  value={emailBody}
+                  onChange={(e) => setEmailBody(e.target.value)}
+                  className="min-h-[80px] resize-none"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-between">
+              <Button variant="outline" size="sm" onClick={goBack}>
+                Back
+              </Button>
+              <Button 
+                size="sm"
+                onClick={sendEmailInquiry}
+                disabled={!selectedDepartment || !emailSubject || !emailBody || isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} className="mr-2" />
+                    Send Email
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Email Sent Confirmation */}
+        {stage === "email-sent" && (
+          <div className="space-y-4 text-center">
+            <div className="py-4">
+              <div className="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <Mail className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+            <h3 className="font-medium">Email Sent Successfully!</h3>
+            <p className="text-sm">
+              Your inquiry has been sent to {selectedDepartment?.name} ({selectedDepartment?.email}).
+            </p>
+            <p className="text-xs text-muted-foreground">
+              You should receive a response within 24-48 hours.
+            </p>
+            <Button className="w-full" onClick={resetChat}>
+              Return to Menu
             </Button>
           </div>
         )}
