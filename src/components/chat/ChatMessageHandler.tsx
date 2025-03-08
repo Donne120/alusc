@@ -57,7 +57,7 @@ export const useChatMessageHandler = ({
         text: aiResponse,
         isAi: true,
         timestamp: Date.now(),
-        model: activeModel // Now properly typed
+        model: activeModel // Store which model generated this response
       };
       
       onAddMessage(currentConversationId, aiMessage);
