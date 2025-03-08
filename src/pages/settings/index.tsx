@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -121,10 +120,18 @@ export default function Settings() {
 
   const handleDeepseekApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newKey = e.target.value;
-    setDeepseekApiKey(newKey);
-    localStorage.setItem("DEEPSEEK_API_KEY", newKey);
-    if (newKey) {
-      toast.success("DeepSeek API key saved");
+    // If the user clears the input, use the default key
+    if (!newKey || newKey.trim() === '') {
+      const defaultKey = "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";
+      setDeepseekApiKey(defaultKey);
+      localStorage.setItem("DEEPSEEK_API_KEY", defaultKey);
+      toast.success("Default DeepSeek API key restored");
+    } else {
+      setDeepseekApiKey(newKey);
+      localStorage.setItem("DEEPSEEK_API_KEY", newKey);
+      if (newKey) {
+        toast.success("DeepSeek API key saved");
+      }
     }
   };
 
@@ -246,7 +253,8 @@ export default function Settings() {
                   disabled={selectedModel !== 'deepseek'}
                 />
                 <p className="text-sm text-muted-foreground mt-1.5">
-                  Required for DeepSeek responses. We've provided a key as an example: "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"
+                  Required for DeepSeek responses. A default key has been provided for testing:
+                  "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"
                 </p>
               </div>
 

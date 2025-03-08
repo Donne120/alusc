@@ -19,10 +19,19 @@ export const aiService = {
       }
       return this.generateGeminiResponse(apiKey, userMessage, recentMessages);
     } else if (selectedModel === 'deepseek') {
+      // Use the hardcoded DeepSeek API key for immediate testing
+      const hardcodedKey = "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";
+      
+      // First try the user's custom key if provided
       apiKey = localStorage.getItem('DEEPSEEK_API_KEY');
-      if (!apiKey) {
-        throw new Error('DeepSeek API key not found. Please add it in settings.');
+      
+      // If no custom key, use the hardcoded key
+      if (!apiKey || apiKey.trim() === '') {
+        apiKey = hardcodedKey;
+        // Store it in localStorage for future use
+        localStorage.setItem('DEEPSEEK_API_KEY', hardcodedKey);
       }
+      
       return this.generateDeepSeekResponse(apiKey, userMessage, recentMessages);
     } else {
       throw new Error('Unknown AI model selected.');
@@ -111,6 +120,8 @@ export const aiService = {
     messages.push({ role: "user", content: userMessage });
 
     try {
+      console.log('Using DeepSeek API key:', apiKey.substring(0, 10) + '...');
+      
       const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
         method: "POST",
         headers: {
