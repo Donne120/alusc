@@ -7,12 +7,41 @@ const MAX_CONTEXT_MESSAGES = 10;
 
 export const aiService = {
   async generateResponse(userMessage: string, recentMessages: Message[]): Promise<string> {
-    // Get the API key from localStorage
-    const apiKey = localStorage.getItem('GEMINI_API_KEY');
-    if (!apiKey) {
-      throw new Error('Gemini API key not found. Please add it in settings.');
+    // Check if user wants to use the local backend service or the Gemini API
+    const useLocalBackend = localStorage.getItem('USE_LOCAL_BACKEND') === 'true';
+    
+    if (useLocalBackend) {
+      return this.generateLocalBackendResponse(userMessage);
+    } else {
+      // Get the API key from localStorage
+      const apiKey = localStorage.getItem('GEMINI_API_KEY');
+      if (!apiKey) {
+        throw new Error('Gemini API key not found. Please add it in settings.');
+      }
+      return this.generateGeminiResponse(apiKey, userMessage, recentMessages);
     }
-    return this.generateGeminiResponse(apiKey, userMessage, recentMessages);
+  },
+
+  async generateLocalBackendResponse(userMessage: string): Promise<string> {
+    try {
+      const response = await fetch("http://localhost:8000/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: userMessage }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Backend API returned status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.response;
+    } catch (error) {
+      console.error("Error fetching from local backend:", error);
+      throw new Error(`Failed to connect to local backend: ${error.message}`);
+    }
   },
 
   async generateGeminiResponse(apiKey: string, userMessage: string, recentMessages: Message[]): Promise<string> {

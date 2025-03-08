@@ -6,6 +6,7 @@ import { ConversationSidebar } from "./chat/ConversationSidebar";
 import { ChatMessages } from "./chat/ChatMessages";
 import { NewsUpdate } from "./news/NewsUpdate";
 import { Conversation } from "@/types/chat";
+import { BackendStatus } from "./chat/BackendStatus";
 
 export const ChatContainer = () => {
   const {
@@ -59,6 +60,9 @@ export const ChatContainer = () => {
       />
       <div className="flex-1 pl-16 transition-all duration-300 md:pl-64 flex">
         <div className="flex-1 relative">
+          <div className="absolute top-4 right-4 z-10">
+            <BackendStatus />
+          </div>
           <div className="pb-32">
             <ChatMessages
               messages={currentConversation.messages}
