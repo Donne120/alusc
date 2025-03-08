@@ -34,7 +34,6 @@ export const ChatContainer = () => {
 
   const {
     isLoading,
-    activeModel,
     handleSendMessage,
     handleEditMessage
   } = useChatMessageHandler({
@@ -65,7 +64,6 @@ export const ChatContainer = () => {
               messages={currentConversation.messages}
               isLoading={isLoading}
               onEditMessage={handleEditMessageWrapper}
-              activeModel={activeModel}
             />
           </div>
           <ChatInput onSend={handleSendMessage} disabled={isLoading} />
