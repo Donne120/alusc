@@ -18,8 +18,12 @@ export const useChatMessageHandler = ({
   onUpdateTitle
 }: ChatMessageHandlerProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [activeModel, setActiveModel] = useState(localStorage.getItem("SELECTED_AI_MODEL") || "gemini");
 
   const handleSendMessage = async (message: string, files: File[]) => {
+    // Update the active model for proper loading message
+    setActiveModel(localStorage.getItem("SELECTED_AI_MODEL") || "gemini");
+    
     const attachments = await Promise.all(
       files.map(async (file) => ({
         type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
@@ -52,7 +56,8 @@ export const useChatMessageHandler = ({
         id: Date.now().toString(),
         text: aiResponse,
         isAi: true,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        model: activeModel // Store which model generated this response
       };
       
       onAddMessage(currentConversationId, aiMessage);
@@ -64,7 +69,8 @@ export const useChatMessageHandler = ({
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to get response from Gemini");
+      const modelName = activeModel === 'gemini' ? 'Gemini' : 'DeepSeek';
+      toast.error(error instanceof Error ? error.message : `Failed to get response from ${modelName}`);
     } finally {
       setIsLoading(false);
     }
@@ -79,6 +85,7 @@ export const useChatMessageHandler = ({
 
   return {
     isLoading,
+    activeModel,
     handleSendMessage,
     handleEditMessage
   };

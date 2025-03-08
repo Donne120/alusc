@@ -1,15 +1,16 @@
 
 import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
-import { Loader } from "lucide-react";
+import { Loader, Bot, Stars } from "lucide-react";
 
 interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
   onEditMessage: (messageId: string, newText: string) => void;
+  activeModel?: string;
 }
 
-export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessagesProps) => {
+export const ChatMessages = ({ messages, isLoading, onEditMessage, activeModel = "gemini" }: ChatMessagesProps) => {
   if (messages.length === 0) {
     return (
       <div className="h-screen flex flex-col items-center justify-center text-gray-300 px-4 bg-gradient-to-b from-[#1A1F2C] to-[#2A2F3C]">
@@ -56,6 +57,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
           isAi={message.isAi}
           attachments={message.attachments}
           onEdit={(newText) => onEditMessage(message.id, newText)}
+          model={message.model}
         />
       ))}
       {isLoading && (
@@ -65,9 +67,17 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage }: ChatMessage
             <div className="flex-1">
               <div className="flex space-x-2 items-center">
                 <div className="w-8 h-8">
-                  <Loader className="w-full h-full animate-spin text-[#9b87f5]" />
+                  {activeModel === 'deepseek' ? (
+                    <Stars className="w-full h-full animate-pulse text-[#00a3ff]" />
+                  ) : (
+                    <Loader className="w-full h-full animate-spin text-[#9b87f5]" />
+                  )}
                 </div>
-                <span className="text-sm text-gray-400">AI is thinking...</span>
+                <span className="text-sm text-gray-400">
+                  {activeModel === 'deepseek' ? 
+                    'DeepSeek AI is generating a response...' : 
+                    'Gemini AI is thinking...'}
+                </span>
               </div>
             </div>
           </div>

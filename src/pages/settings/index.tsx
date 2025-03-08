@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "@/hooks/use-theme";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Bell,
   ChevronLeft,
@@ -30,6 +31,7 @@ import {
   Lightbulb,
   Accessibility,
   GraduationCap,
+  Bot,
 } from "lucide-react";
 
 interface SettingSectionProps {
@@ -65,6 +67,12 @@ export default function Settings() {
   
   const [geminiApiKey, setGeminiApiKey] = useState(
     localStorage.getItem("GEMINI_API_KEY") || ""
+  );
+  const [deepseekApiKey, setDeepseekApiKey] = useState(
+    localStorage.getItem("DEEPSEEK_API_KEY") || ""
+  );
+  const [selectedModel, setSelectedModel] = useState(
+    localStorage.getItem("SELECTED_AI_MODEL") || "gemini"
   );
   const [customPrompt, setCustomPrompt] = useState(
     localStorage.getItem("CUSTOM_PROMPT") || ""
@@ -109,6 +117,21 @@ export default function Settings() {
     if (newKey) {
       toast.success("Gemini API key saved");
     }
+  };
+
+  const handleDeepseekApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newKey = e.target.value;
+    setDeepseekApiKey(newKey);
+    localStorage.setItem("DEEPSEEK_API_KEY", newKey);
+    if (newKey) {
+      toast.success("DeepSeek API key saved");
+    }
+  };
+
+  const handleModelChange = (value: string) => {
+    setSelectedModel(value);
+    localStorage.setItem("SELECTED_AI_MODEL", value);
+    toast.success(`${value === 'gemini' ? 'Gemini' : 'DeepSeek'} model selected`);
   };
 
   const handleCustomPromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -163,12 +186,31 @@ export default function Settings() {
 
         <div className="space-y-6">
           <SettingSection 
-            icon={SettingsIcon} 
-            title="AI Configuration" 
-            description="Configure your AI model settings and behavior"
+            icon={Bot} 
+            title="AI Model Settings" 
+            description="Choose and configure your preferred AI model"
           >
-            <div className="space-y-4">
-              <div>
+            <div className="space-y-6">
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <Label htmlFor="ai-model" className="mb-3 block font-medium">Select AI Model</Label>
+                <RadioGroup 
+                  id="ai-model" 
+                  value={selectedModel} 
+                  onValueChange={handleModelChange}
+                  className="flex flex-col gap-2 md:flex-row md:gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="gemini" id="gemini" />
+                    <Label htmlFor="gemini" className="cursor-pointer">Google Gemini</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="deepseek" id="deepseek" />
+                    <Label htmlFor="deepseek" className="cursor-pointer">DeepSeek AI</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div className={`space-y-4 transition-opacity ${selectedModel === 'gemini' ? 'opacity-100' : 'opacity-50'}`}>
                 <Label htmlFor="gemini-key">Google Gemini API Key</Label>
                 <Input
                   id="gemini-key"
@@ -177,9 +219,10 @@ export default function Settings() {
                   onChange={handleGeminiApiKeyChange}
                   placeholder="Enter your Gemini API key"
                   className="max-w-md mt-1.5"
+                  disabled={selectedModel !== 'gemini'}
                 />
                 <p className="text-sm text-muted-foreground mt-1.5">
-                  Required for AI responses. Get your API key from{" "}
+                  Required for Gemini responses. Get your API key from{" "}
                   <a
                     href="https://makersuite.google.com/app/apikey"
                     target="_blank"
@@ -188,6 +231,22 @@ export default function Settings() {
                   >
                     Google AI Studio
                   </a>
+                </p>
+              </div>
+
+              <div className={`space-y-4 transition-opacity ${selectedModel === 'deepseek' ? 'opacity-100' : 'opacity-50'}`}>
+                <Label htmlFor="deepseek-key">DeepSeek API Key</Label>
+                <Input
+                  id="deepseek-key"
+                  type="password"
+                  value={deepseekApiKey}
+                  onChange={handleDeepseekApiKeyChange}
+                  placeholder="Enter your DeepSeek API key"
+                  className="max-w-md mt-1.5"
+                  disabled={selectedModel !== 'deepseek'}
+                />
+                <p className="text-sm text-muted-foreground mt-1.5">
+                  Required for DeepSeek responses. We've provided a key as an example: "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"
                 </p>
               </div>
 
