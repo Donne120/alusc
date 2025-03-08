@@ -1,3 +1,4 @@
+
 export interface Message {
   id: string;
   text: string;
@@ -8,6 +9,7 @@ export interface Message {
     url: string;
     name: string;
   }>;
+  model?: string; // Optional model field to track which AI model generated the response
 }
 
 export interface Conversation {

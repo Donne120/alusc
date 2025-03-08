@@ -118,7 +118,8 @@ export const aiService = {
           "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: "deepseek-chat",
+          // Updated the model name to the one specified by the user
+          model: "deepseek/deepseek-r1-distill-llama-70b:free",
           messages,
           temperature: 0.7,
           max_tokens: 1024
