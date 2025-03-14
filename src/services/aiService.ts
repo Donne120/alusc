@@ -20,7 +20,7 @@ export const aiService = {
     // If ALU related, try local backend first (if enabled)
     if (isAluRelated && useLocalBackend) {
       try {
-        return await this.generateLocalBackendResponse(userMessage, userRole);
+        return await this.generateLocalBackendResponse(userMessage, recentMessages, userRole);
       } catch (error) {
         console.log("Local backend failed, falling back to Gemini:", error);
         // Fall back to Gemini on error
@@ -45,8 +45,14 @@ export const aiService = {
     return this.generateGeminiResponse(apiKey, userMessage, recentMessages, userRole);
   },
 
-  async generateLocalBackendResponse(userMessage: string, userRole = 'student'): Promise<string> {
+  async generateLocalBackendResponse(userMessage: string, recentMessages: Message[] = [], userRole = 'student'): Promise<string> {
     try {
+      // Format the conversation history for the backend
+      const conversationHistory = recentMessages.map(msg => ({
+        role: msg.isAi ? 'assistant' : 'user',
+        text: msg.text
+      }));
+
       const response = await fetch("http://localhost:8000/generate", {
         method: "POST",
         headers: {
@@ -54,7 +60,8 @@ export const aiService = {
         },
         body: JSON.stringify({ 
           query: userMessage,
-          role: userRole
+          role: userRole,
+          conversation_history: conversationHistory
         }),
       });
       
