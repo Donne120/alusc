@@ -119,7 +119,6 @@ export const ChatMessage = ({
       id={`message-${message.slice(0, 10)}`}
     >
       <div className="max-w-5xl mx-auto flex gap-4">
-        {/* Avatar Indicator */}
         <div 
           className={cn(
             "w-2 h-2 mt-2 rounded-full flex-shrink-0",
@@ -281,7 +280,6 @@ export const ChatMessage = ({
         </div>
       </div>
 
-      {/* Attachments section */}
       {attachments && attachments.length > 0 && (
         <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {attachments.map((attachment, index) => 

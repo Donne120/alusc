@@ -1,4 +1,3 @@
-
 import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
 import { Loader, Bot, Stars } from "lucide-react";
@@ -57,7 +56,6 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage, activeModel =
           isAi={message.isAi}
           attachments={message.attachments}
           onEdit={(newText) => onEditMessage(message.id, newText)}
-          model={message.model}
         />
       ))}
       {isLoading && (

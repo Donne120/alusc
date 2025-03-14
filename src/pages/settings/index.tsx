@@ -12,9 +12,9 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } fr
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Separator } from "@/components/ui/separator";
 import { 
-  Settings, User, School, Building2, FileText, Globe, 
+  User, School, Building2, FileText, Globe, 
   BookOpen, Bell, MessageSquare, Lock, Database, 
-  BrainCircuit, Clock, ArrowLeft
+  BrainCircuit, Clock, ArrowLeft, Settings as SettingsIcon
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -92,10 +92,10 @@ export default function Settings() {
             <BackendStatus />
           </div>
           
-          <Tabs defaultValue="general" className="w-full">
+          <Tabs defaultValue="general">
             <TabsList className="grid grid-cols-5 mb-8">
               <TabsTrigger value="general" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
+                <SettingsIcon className="h-4 w-4" />
                 <span className="hidden sm:inline">General</span>
               </TabsTrigger>
               <TabsTrigger value="account" className="flex items-center gap-2">
