@@ -1,3 +1,4 @@
+
 import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
 import { Loader, Bot, Stars } from "lucide-react";

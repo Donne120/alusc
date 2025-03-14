@@ -7,8 +7,21 @@ import { ChatMessages } from "./chat/ChatMessages";
 import { NewsUpdate } from "./news/NewsUpdate";
 import { Conversation } from "@/types/chat";
 import { BackendStatus } from "./chat/BackendStatus";
+import { useEffect, useState } from "react";
 
 export const ChatContainer = () => {
+  const [activeModel, setActiveModel] = useState("gemini");
+  const [accessibilityMode, setAccessibilityMode] = useState(false);
+  
+  useEffect(() => {
+    // Load settings from localStorage
+    const savedModel = localStorage.getItem("ACTIVE_MODEL") || "gemini";
+    const savedAccessibilityMode = localStorage.getItem("ACCESSIBILITY_MODE") === "true";
+    
+    setActiveModel(savedModel);
+    setAccessibilityMode(savedAccessibilityMode);
+  }, []);
+
   const {
     conversations,
     currentConversationId,
@@ -49,8 +62,12 @@ export const ChatContainer = () => {
     updateMessageInConversation(currentConversationId, messageId, newText);
   };
 
+  // Apply accessibility classes if enabled
+  const containerClasses = `min-h-screen bg-[#1A1F2C] font-inter text-white flex 
+    ${accessibilityMode ? 'text-lg leading-relaxed' : ''}`;
+
   return (
-    <div className="min-h-screen bg-[#1A1F2C] font-inter text-white flex">
+    <div className={containerClasses}>
       <ConversationSidebar
         conversations={conversations}
         currentConversationId={currentConversationId}
@@ -68,6 +85,7 @@ export const ChatContainer = () => {
               messages={currentConversation.messages}
               isLoading={isLoading}
               onEditMessage={handleEditMessageWrapper}
+              activeModel={activeModel}
             />
           </div>
           <ChatInput onSend={handleSendMessage} disabled={isLoading} />
