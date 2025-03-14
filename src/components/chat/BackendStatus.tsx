@@ -28,12 +28,12 @@ export const BackendStatus = () => {
         
         setIsConnected(response.ok);
         if (!response.ok) {
-          toast.error("Local backend is not responding correctly");
+          toast.error("Local ALU backend is not responding correctly");
         }
       } catch (error) {
         console.error("Error connecting to backend:", error);
         setIsConnected(false);
-        toast.error("Could not connect to local backend");
+        toast.error("Could not connect to local ALU backend");
       } finally {
         setIsLoading(false);
       }
@@ -53,8 +53,8 @@ export const BackendStatus = () => {
         }`} 
       />
       <span>
-        {isLoading ? "Connecting..." : 
-         isConnected ? "Backend: Connected" : "Backend: Disconnected"}
+        {isLoading ? "Connecting to ALU backend..." : 
+         isConnected ? "ALU Backend: Connected" : "ALU Backend: Disconnected"}
       </span>
     </div>
   );

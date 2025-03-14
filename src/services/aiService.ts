@@ -7,19 +7,28 @@ const MAX_CONTEXT_MESSAGES = 10;
 
 export const aiService = {
   async generateResponse(userMessage: string, recentMessages: Message[]): Promise<string> {
-    // Check if user wants to use the local backend service or the Gemini API
+    // Check if message is ALU related by looking for keywords
+    const isAluRelated = /\balu\b|\bafrican leadership university\b|\bstudent\b|\bcourse\b|\bprogram\b|\bdegree\b/i.test(userMessage);
+    
+    // Check if user wants to use the local backend service
     const useLocalBackend = localStorage.getItem('USE_LOCAL_BACKEND') === 'true';
     
-    if (useLocalBackend) {
-      return this.generateLocalBackendResponse(userMessage);
-    } else {
-      // Get the API key from localStorage
-      const apiKey = localStorage.getItem('GEMINI_API_KEY');
-      if (!apiKey) {
-        throw new Error('Gemini API key not found. Please add it in settings.');
+    // If ALU related, try local backend first (if enabled)
+    if (isAluRelated && useLocalBackend) {
+      try {
+        return await this.generateLocalBackendResponse(userMessage);
+      } catch (error) {
+        console.log("Local backend failed, falling back to Gemini:", error);
+        // Fall back to Gemini on error
       }
-      return this.generateGeminiResponse(apiKey, userMessage, recentMessages);
     }
+    
+    // Use Gemini API as fallback
+    const apiKey = localStorage.getItem('GEMINI_API_KEY');
+    if (!apiKey) {
+      throw new Error('Gemini API key not found. Please add it in settings.');
+    }
+    return this.generateGeminiResponse(apiKey, userMessage, recentMessages);
   },
 
   async generateLocalBackendResponse(userMessage: string): Promise<string> {
