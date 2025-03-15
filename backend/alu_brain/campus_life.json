@@ -1,0 +1,26 @@
+
+{
+  "category": "campus_life",
+  "description": "Information about student life, housing, activities, and campus facilities",
+  "entries": [
+    {
+      "id": "camp_001",
+      "type": "short_response",
+      "question": "Where are ALU campuses located?",
+      "answer": "ALU has campuses in Rwanda (Kigali) and Mauritius (Beau Plan)."
+    },
+    {
+      "id": "camp_002",
+      "type": "procedural_response",
+      "question": "How do I apply for on-campus housing?",
+      "answer": "To apply for on-campus housing at ALU:\n1. Log in to your student portal\n2. Navigate to the 'Housing' section\n3. Complete the housing application form\n4. Submit your housing preferences\n5. Pay the housing deposit to secure your spot\n6. Wait for confirmation from the housing office",
+      "deadline": "Housing applications typically open 3 months before the start of each term"
+    },
+    {
+      "id": "camp_003",
+      "type": "paragraph_response",
+      "question": "What student clubs are available?",
+      "answer": "ALU offers a diverse range of student clubs and organizations catering to various interests. These include academic clubs like the Coding Club and Debate Society; cultural clubs celebrating different African traditions; athletic clubs for sports enthusiasts; and social impact groups working on community projects. Students are also encouraged to start their own clubs if they identify an interest not currently represented. Club activities are coordinated through the Student Life Office, which provides resources and support for club events and initiatives."
+    }
+  ]
+}

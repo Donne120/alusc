@@ -1,4 +1,3 @@
-
 import os
 import json
 import uvicorn
@@ -9,7 +8,7 @@ from typing import List, Optional, Dict, Any
 
 # Import the modules
 from document_processor import DocumentProcessor
-from retrieval_engine import RetrievalEngine
+from retrieval_engine_extended import ExtendedRetrievalEngine
 from prompt_engine import PromptEngine
 
 # Create FastAPI app
@@ -26,7 +25,7 @@ app.add_middleware(
 
 # Initialize components
 document_processor = DocumentProcessor()
-retrieval_engine = RetrievalEngine()
+retrieval_engine = ExtendedRetrievalEngine()
 prompt_engine = PromptEngine()
 
 # Define request models

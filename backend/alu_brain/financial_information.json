@@ -1,0 +1,38 @@
+
+{
+  "category": "financial_information",
+  "description": "Information about tuition, fees, payment plans, and financial aid",
+  "entries": [
+    {
+      "id": "fin_001",
+      "type": "table_response",
+      "question": "What are the tuition fees?",
+      "answer": "ALU tuition fees vary by campus and program:",
+      "table": {
+        "headers": ["Campus", "Program", "Annual Tuition (USD)"],
+        "rows": [
+          ["Rwanda", "Computer Science", "$12,000"],
+          ["Rwanda", "Global Challenges", "$12,000"],
+          ["Rwanda", "Business Management", "$12,000"],
+          ["Mauritius", "Computer Science", "$15,000"],
+          ["Mauritius", "Global Challenges", "$15,000"],
+          ["Mauritius", "International Business & Trade", "$15,000"]
+        ]
+      },
+      "note": "Additional fees for housing, meals, and student services may apply. Scholarships may significantly reduce these costs."
+    },
+    {
+      "id": "fin_002",
+      "type": "short_response",
+      "question": "When are tuition payments due?",
+      "answer": "Tuition payments are due at the beginning of each term. Fall term payments are due by August 15, and Spring term payments are due by January 15."
+    },
+    {
+      "id": "fin_003",
+      "type": "procedural_response",
+      "question": "How do I set up a payment plan?",
+      "answer": "To set up a tuition payment plan at ALU:\n1. Contact the Finance Office at finance@alueducation.com\n2. Request the payment plan application form\n3. Complete the form with your preferred payment schedule\n4. Submit the form along with the first installment payment\n5. Await approval confirmation (usually within 5 business days)\n6. Follow the approved payment schedule for remaining installments",
+      "contact": "For questions about payment plans, contact the Finance Office at +250 788 123 456"
+    }
+  ]
+}

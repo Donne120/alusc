@@ -1,152 +1,97 @@
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { documentService } from "@/services/documentService";
 import { Message } from "@/types/chat";
 
-const MAX_CONTEXT_MESSAGES = 10;
+interface BackendResponse {
+  response: string;
+  sources?: Array<{
+    title: string;
+    source: string;
+    date?: string;
+  }>;
+}
 
 export const aiService = {
-  async generateResponse(userMessage: string, recentMessages: Message[]): Promise<string> {
-    // Get active model and user role from settings
-    const activeModel = localStorage.getItem('ACTIVE_MODEL') || 'gemini';
-    const userRole = localStorage.getItem('USER_ROLE') || 'student';
+  // Main function to generate responses
+  async generateResponse(query: string, conversationHistory: Message[] = []): Promise<string> {
+    // Check if backend is available
+    const backendAvailable = await this.isBackendAvailable();
     
-    // Check if message is ALU related by looking for keywords
-    const isAluRelated = /\balu\b|\bafrican leadership university\b|\bstudent\b|\bcourse\b|\bprogram\b|\bdegree\b/i.test(userMessage);
-    
-    // Check if user wants to use the local backend
-    const useLocalBackend = localStorage.getItem('USE_LOCAL_BACKEND') === 'true';
-    
-    // If ALU related, try local backend first (if enabled)
-    if (isAluRelated && useLocalBackend) {
+    if (backendAvailable) {
       try {
-        return await this.generateLocalBackendResponse(userMessage, recentMessages, userRole);
+        return await this.getResponseFromBackend(query, conversationHistory);
       } catch (error) {
-        console.log("Local backend failed, falling back to Gemini:", error);
-        // Fall back to Gemini on error
+        console.error("Backend error:", error);
+        throw new Error("Could not get response from backend");
       }
+    } else {
+      console.warn("Backend not available, using fallback");
+      return this.getFallbackResponse(query);
     }
-    
-    // If DeepSeek is selected as the model, use it
-    if (activeModel === 'deepseek') {
-      try {
-        return await this.generateDeepSeekResponse(userMessage, recentMessages, userRole);
-      } catch (error) {
-        console.log("DeepSeek API failed, falling back to Gemini:", error);
-        // Fall back to Gemini on error
-      }
-    }
-    
-    // Use Gemini API as fallback
-    const apiKey = localStorage.getItem('GEMINI_API_KEY');
-    if (!apiKey) {
-      throw new Error('Gemini API key not found. Please add it in settings.');
-    }
-    return this.generateGeminiResponse(apiKey, userMessage, recentMessages, userRole);
   },
-
-  async generateLocalBackendResponse(userMessage: string, recentMessages: Message[] = [], userRole = 'student'): Promise<string> {
+  
+  // Check if the backend is available
+  async isBackendAvailable(): Promise<boolean> {
     try {
-      // Format the conversation history for the backend
-      const conversationHistory = recentMessages.map(msg => ({
-        role: msg.isAi ? 'assistant' : 'user',
-        text: msg.text
-      }));
-
-      const response = await fetch("http://localhost:8000/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          query: userMessage,
-          role: userRole,
-          conversation_history: conversationHistory
-        }),
+      const response = await fetch('http://localhost:8000', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(2000) // 2 second timeout
       });
       
-      if (!response.ok) {
-        throw new Error(`Backend API returned status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.response;
+      return response.ok;
     } catch (error) {
-      console.error("Error fetching from local backend:", error);
-      throw new Error(`Failed to connect to local backend: ${error.message}`);
+      console.warn("Backend check failed:", error);
+      return false;
     }
   },
-
-  async generateDeepSeekResponse(userMessage: string, recentMessages: Message[], userRole = 'student'): Promise<string> {
-    // This is a placeholder for DeepSeek API implementation
-    // In a real implementation, you would call the DeepSeek API here
-    throw new Error('DeepSeek API not yet implemented');
-  },
-
-  async generateGeminiResponse(apiKey: string, userMessage: string, recentMessages: Message[], userRole = 'student'): Promise<string> {
-    // Check if message is ALU related by looking for keywords
-    const isAluRelated = /\balu\b|\bafrican leadership university\b|\bstudent\b|\bcourse\b|\bprogram\b|\bdegree\b/i.test(userMessage);
-    
-    // If ALU related, search our document repository for relevant content
-    let contextualInfo = '';
-    if (isAluRelated) {
-      contextualInfo = documentService.searchDocuments(userMessage);
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // Get model configuration from settings
-    const responseStyle = localStorage.getItem('RESPONSE_STYLE') || 'balanced';
-    const temperature = responseStyle === 'creative' ? 0.9 : responseStyle === 'precise' ? 0.3 : 0.7;
-    
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        temperature: temperature,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      },
-    });
-    
-    // Create a conversation history in the format expected by Gemini
-    const history = recentMessages.map(m => ({
-      role: m.isAi ? 'model' : 'user',
-      parts: [{ text: m.text }]
+  
+  // Get response from the backend
+  async getResponseFromBackend(query: string, conversationHistory: Message[]): Promise<string> {
+    // Format conversation history for the backend
+    const formattedHistory = conversationHistory.map(msg => ({
+      role: msg.isAi ? "assistant" : "user",
+      text: msg.text
     }));
     
-    // Prepare system prompt with contextual info and user role
-    let systemPrompt = `You are an AI assistant for African Leadership University (ALU) ${userRole}s.`;
-    
-    if (userRole === 'admin') {
-      systemPrompt += " You have access to administrative information and can assist with management tasks.";
-    } else if (userRole === 'faculty') {
-      systemPrompt += " You can help with course materials, teaching resources, and student management.";
-    }
-    
-    if (contextualInfo) {
-      systemPrompt += "\n\nHere is some relevant context from ALU documentation that may help you answer:\n" + contextualInfo;
-    }
-    
-    // Use the chat method for proper conversation context
-    const chat = model.startChat({
-      history,
-      generationConfig: {
-        temperature: temperature,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      },
+    const response = await fetch('http://localhost:8000/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        conversation_history: formattedHistory,
+        role: "student", // Default to student role
+        options: { temperature: 0.7 }
+      })
     });
     
-    // Add system prompt to the chat
-    if (contextualInfo || userRole !== 'student') {
-      await chat.sendMessage(systemPrompt);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Backend error (${response.status}): ${errorText}`);
     }
     
-    // Send the user's message to the chat
-    const result = await chat.sendMessage(userMessage);
-    const response = await result.response;
-    return response.text();
+    const data: BackendResponse = await response.json();
+    
+    // If there are sources, append them to the response
+    if (data.sources && data.sources.length > 0) {
+      let responseWithSources = data.response;
+      
+      responseWithSources += "\n\n**Sources:**\n";
+      data.sources.forEach((source, index) => {
+        responseWithSources += `${index + 1}. ${source.title} (${source.source})\n`;
+      });
+      
+      return responseWithSources;
+    }
+    
+    return data.response;
+  },
+  
+  // Fallback response when backend is not available
+  getFallbackResponse(query: string): string {
+    return `I'm sorry, but I'm currently unable to connect to the ALU knowledge base. Here's a general response to your query about "${query}".
+
+As an ALU student companion, I typically provide information about courses, campus life, administrative procedures, and academic resources. When our systems are fully operational, I can give you specific information from ALU's knowledge base.
+
+Please try again later when the connection to our backend systems has been restored.`;
   }
 };

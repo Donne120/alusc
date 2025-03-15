@@ -201,19 +201,48 @@ class PromptEngine:
         )
         
         # In a real implementation, this would call an actual LLM service
-        # For now, we'll just create a placeholder response
-        response = self._generate_placeholder_response(query, context, role)
+        # For now, we'll use our enhanced placeholder response that leverages ALU Brain
+        response = self._generate_enhanced_response(query, context, role)
         
         return response
     
-    def _generate_placeholder_response(self, query: str, context: List[Document], role: str) -> str:
+    def _generate_enhanced_response(self, query: str, context: List[Document], role: str) -> str:
         """
-        Generate a placeholder response for development
-        In production, this would be replaced with a call to a real LLM service
+        Generate an enhanced response that leverages the ALU Brain
+        This is an improved version of the placeholder response generator
         """
         # Simulate thinking time
         time.sleep(0.5)
         
+        # Look for ALU Brain content in the context
+        brain_content = ""
+        alu_brain_docs = [doc for doc in context if "ALU Brain" in doc.metadata.get('source', '')]
+        
+        if alu_brain_docs:
+            # Use the structured content from ALU Brain
+            selected_doc = random.choice(alu_brain_docs)
+            brain_content = selected_doc.text
+            source_category = selected_doc.metadata.get('source', '').replace('ALU Brain: ', '')
+            
+            # Format response based on document type
+            doc_type = selected_doc.metadata.get('type', 'text')
+            
+            if 'link' in doc_type:
+                return f"Here's information about your query on {query}:\n\n{brain_content}\n\nYou can find more details on the ALU website."
+            
+            elif 'table' in doc_type or 'statistical' in doc_type:
+                return f"Based on ALU data regarding {query}:\n\n{brain_content}\n\nThese figures are from our official records."
+            
+            elif 'procedural' in doc_type:
+                return f"Here's the process you asked about:\n\n{brain_content}\n\nIf you need further assistance, please contact the relevant department."
+            
+            elif 'long' in doc_type:
+                return f"Here's a comprehensive answer to your question about {query}:\n\n{brain_content}\n\nI hope this detailed explanation helps!"
+            
+            else:
+                return f"Regarding your question about {query}:\n\n{brain_content}\n\nThis information is from our {source_category.replace('_', ' ')} knowledge base."
+        
+        # Fall back to the original response generation if no ALU Brain content is found
         query_lower = query.lower()
         
         # Add some relevant context if available
