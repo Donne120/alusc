@@ -2,6 +2,7 @@
 import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
 import { Loader, Bot, Stars } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -11,6 +12,13 @@ interface ChatMessagesProps {
 }
 
 export const ChatMessages = ({ messages, isLoading, onEditMessage, activeModel = "gemini" }: ChatMessagesProps) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
+
   if (messages.length === 0) {
     return (
       <div className="h-screen flex flex-col items-center justify-center text-gray-300 px-4 bg-gradient-to-b from-[#1A1F2C] to-[#2A2F3C]">
@@ -82,6 +90,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage, activeModel =
           </div>
         </div>
       )}
+      <div ref={messagesEndRef} />
     </div>
   );
 };

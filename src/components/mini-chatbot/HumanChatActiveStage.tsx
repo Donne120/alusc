@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,6 +25,16 @@ export const HumanChatActiveStage: React.FC<HumanChatActiveStageProps> = ({
   onSendMessage,
   onGoBack
 }) => {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-scroll to bottom when messages change or on component mount
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollArea = scrollAreaRef.current;
+      scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+  }, [chatMessages, isLoading]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
@@ -36,7 +46,7 @@ export const HumanChatActiveStage: React.FC<HumanChatActiveStageProps> = ({
         </h3>
       </div>
       
-      <ScrollArea className="h-48 pr-4 mb-2">
+      <ScrollArea className="h-48 pr-4 mb-2" viewportRef={scrollAreaRef}>
         <div className="space-y-3">
           {chatMessages.map((msg, index) => (
             <div key={index} className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}>
