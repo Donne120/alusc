@@ -1,6 +1,6 @@
 
 from retrieval_engine import RetrievalEngine, Document
-from alu_brain_utils import ALUBrainManager
+from alu_brain import ALUBrainManager
 from typing import List, Dict, Any, Optional
 
 class ExtendedRetrievalEngine(RetrievalEngine):
