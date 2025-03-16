@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Stage, Department, Person, ChatMessage, EmailTemplate } from "./types";
 import { InitialStage } from "./InitialStage";
@@ -19,14 +19,58 @@ export const MiniChatbotContent = () => {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { text: "Hi there! I'm a support representative. How can I help you today?", isUser: false }
-  ]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<Person | null>(null);
   const [humanChatInput, setHumanChatInput] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
+  const [aiPersona, setAiPersona] = useState({
+    name: "Academic Advisor",
+    traits: { helpfulness: 85, creativity: 40, precision: 90, friendliness: 75 }
+  });
+
+  useEffect(() => {
+    loadAiPersonaSettings();
+    initializeChat();
+  }, []);
+
+  const loadAiPersonaSettings = () => {
+    const savedPersona = localStorage.getItem("AI_PERSONA") || "academic";
+    const savedTraits = JSON.parse(localStorage.getItem("AI_TRAITS") || JSON.stringify({ 
+      helpfulness: 75, creativity: 50, precision: 85, friendliness: 70 
+    }));
+    
+    const personaNames: {[key: string]: string} = {
+      academic: "Academic Advisor",
+      creative: "Creative Coach",
+      technical: "Technical Assistant",
+      supportive: "Supportive Guide",
+      custom: "Custom AI"
+    };
+    
+    setAiPersona({
+      name: personaNames[savedPersona] || "Academic Advisor",
+      traits: savedTraits
+    });
+  };
+
+  const initializeChat = () => {
+    const greetings = [
+      "Hi there! I'm your academic advisor. How can I help with your educational journey today?",
+      "Hello! I'm here to assist with any questions about your courses, schedules, or academic resources.",
+      "Welcome to ALU support! I'm your AI assistant. What can I help you with today?"
+    ];
+
+    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    
+    setChatMessages([
+      { 
+        text: `Hi there! I'm your ${aiPersona.name}. How can I help you today?`, 
+        isUser: false 
+      }
+    ]);
+  };
 
   const handleDepartmentSelect = (dept: Department) => {
     setDepartment(dept);
@@ -36,19 +80,16 @@ export const MiniChatbotContent = () => {
   const handlePersonSelect = (person: Person) => {
     setSelectedPerson(person);
     
-    // If person has a calendarLink, redirect to it
     if (person.calendarLink) {
       window.open(person.calendarLink, '_blank');
       return;
     }
     
-    // Otherwise continue with the standard booking flow
     setStage("department-selection");
   };
 
   const handleBooking = () => {
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       setStage("confirmation");
@@ -62,9 +103,7 @@ export const MiniChatbotContent = () => {
     setSelectedDate("");
     setSelectedTime("");
     setSelectedPerson(null);
-    setChatMessages([
-      { text: "Hi there! I'm a support representative. How can I help you today?", isUser: false }
-    ]);
+    initializeChat();
     setEmailSubject("");
     setEmailBody("");
     setSelectedDepartment(null);
@@ -85,7 +124,6 @@ export const MiniChatbotContent = () => {
     }
   };
 
-  // Function to handle template selection
   const handleTemplateSelect = (templateId: EmailTemplate) => {
     setSelectedTemplate(templateId);
     const template = emailTemplates.find(t => t.id === templateId);
@@ -96,26 +134,49 @@ export const MiniChatbotContent = () => {
     }
   };
 
-  // Function to handle sending a message in human chat
   const sendHumanChatMessage = () => {
     if (humanChatInput.trim() === "") return;
     
-    // Add user message
     setChatMessages(prev => [...prev, { text: humanChatInput, isUser: true }]);
     setHumanChatInput("");
     
-    // Simulate agent typing
     setIsLoading(true);
     
-    // Simulate response after a delay
     setTimeout(() => {
-      const responses = [
-        "I understand your concern. Let me check that for you.",
-        "Thanks for providing that information. I'll help you resolve this issue.",
-        "That's a great question. Here's what you need to know...",
-        "I'm looking into this matter for you. Can you provide more details?",
-        "Let me connect you with the appropriate department for further assistance."
-      ];
+      const { helpfulness, creativity, precision, friendliness } = aiPersona.traits;
+      
+      let responses: string[] = [];
+      
+      if (precision > 80) {
+        responses = [
+          "I understand your inquiry. Here are the specific details you need...",
+          "Based on the ALU guidelines, the exact procedure for this is...",
+          "According to our records, here's the precise information about your request...",
+          "Let me provide you with the accurate details on this matter..."
+        ];
+      } else if (creativity > 80) {
+        responses = [
+          "That's an interesting question! Here's a creative approach we could take...",
+          "I see several possibilities here. Let's explore some unique solutions...",
+          "Your question opens up some fascinating avenues of thought. Consider this perspective...",
+          "What if we looked at this from a completely different angle? Here's an idea..."
+        ];
+      } else if (friendliness > 80) {
+        responses = [
+          "I'm really glad you asked about this! I'd be happy to help you with that.",
+          "That's a great question! I'm excited to work through this with you.",
+          "I completely understand how important this is to you. Let's figure it out together.",
+          "Thank you for bringing this up! I'm here to support you every step of the way."
+        ];
+      } else {
+        responses = [
+          "I understand your concern. Let me check that for you.",
+          "Thanks for providing that information. I'll help you resolve this issue.",
+          "That's a good question. Here's what you need to know...",
+          "I'm looking into this matter for you. Can you provide more details?",
+          "Let me connect you with the appropriate department for further assistance."
+        ];
+      }
       
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
       setChatMessages(prev => [...prev, { text: randomResponse, isUser: false }]);
@@ -123,7 +184,6 @@ export const MiniChatbotContent = () => {
     }, 1500);
   };
 
-  // Function to handle sending an email inquiry
   const sendEmailInquiry = () => {
     if (!selectedDepartment || !emailSubject || !emailBody) {
       toast.error("Please fill in all fields");
@@ -132,7 +192,6 @@ export const MiniChatbotContent = () => {
     
     setIsLoading(true);
     
-    // Simulate sending email
     setTimeout(() => {
       setIsLoading(false);
       setStage("email-sent");

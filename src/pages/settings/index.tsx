@@ -11,14 +11,34 @@ import { BackendStatus } from "@/components/chat/BackendStatus";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   User, School, Building2, FileText, Globe, 
   BookOpen, Bell, MessageSquare, Lock, Database, 
-  BrainCircuit, Clock, ArrowLeft, Settings as SettingsIcon
+  BrainCircuit, Clock, ArrowLeft, Settings as SettingsIcon,
+  Sparkles, Bot, PersonStanding, PaintBucket, Sliders, 
+  MousePointer, Zap, Award, Lightbulb, Heart
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// AI Persona types
+type AiPersona = {
+  id: string;
+  name: string;
+  description: string;
+  icon: JSX.Element;
+  traits: {
+    helpfulness: number;
+    creativity: number;
+    precision: number;
+    friendliness: number;
+  }
+};
 
 export default function Settings() {
+  // Original settings state
   const [geminiKey, setGeminiKey] = useState("");
   const [useLocalBackend, setUseLocalBackend] = useState(false);
   const [userRole, setUserRole] = useState("student"); // student, faculty, admin
@@ -29,6 +49,66 @@ export default function Settings() {
   const [accessibilityMode, setAccessibilityMode] = useState(false);
   const [historyRetention, setHistoryRetention] = useState("30days");
   const [adminFeatures, setAdminFeatures] = useState(false);
+
+  // New AI persona settings
+  const [selectedPersona, setSelectedPersona] = useState<string>("academic");
+  const [customPrompt, setCustomPrompt] = useState("");
+  const [aiPersonalization, setAiPersonalization] = useState(true);
+  const [aiTraits, setAiTraits] = useState({
+    helpfulness: 75,
+    creativity: 50,
+    precision: 85,
+    friendliness: 70
+  });
+  const [aiVoice, setAiVoice] = useState("natural");
+  const [aiTheme, setAiTheme] = useState("default");
+  const [analyticsDashboard, setAnalyticsDashboard] = useState(true);
+  const [continuousLearning, setContinuousLearning] = useState(true);
+  const [integrationProgress, setIntegrationProgress] = useState<Record<string, boolean>>({
+    calendar: true,
+    assignments: true,
+    library: false,
+    courses: true
+  });
+
+  // AI personas
+  const aiPersonas: AiPersona[] = [
+    {
+      id: "academic",
+      name: "Academic Advisor",
+      description: "Focuses on academic information, course guidance, and educational resources",
+      icon: <School className="w-8 h-8 text-blue-500" />,
+      traits: { helpfulness: 85, creativity: 40, precision: 90, friendliness: 75 }
+    },
+    {
+      id: "creative",
+      name: "Creative Coach",
+      description: "Encourages creative thinking, exploration, and unique perspectives",
+      icon: <Sparkles className="w-8 h-8 text-purple-500" />,
+      traits: { helpfulness: 70, creativity: 95, precision: 60, friendliness: 80 }
+    },
+    {
+      id: "technical",
+      name: "Technical Assistant",
+      description: "Provides precise, technical information with detailed explanations",
+      icon: <BrainCircuit className="w-8 h-8 text-green-500" />,
+      traits: { helpfulness: 85, creativity: 35, precision: 95, friendliness: 65 }
+    },
+    {
+      id: "supportive",
+      name: "Supportive Guide",
+      description: "Emphasizes emotional support, motivation, and encouragement",
+      icon: <Heart className="w-8 h-8 text-red-500" />,
+      traits: { helpfulness: 90, creativity: 65, precision: 75, friendliness: 95 }
+    },
+    {
+      id: "custom",
+      name: "Custom AI",
+      description: "Fully customized AI assistant with your preferred traits",
+      icon: <Sliders className="w-8 h-8 text-amber-500" />,
+      traits: { helpfulness: 75, creativity: 50, precision: 85, friendliness: 70 }
+    }
+  ];
 
   // Load settings from localStorage on component mount
   useEffect(() => {
@@ -43,6 +123,18 @@ export default function Settings() {
     const savedHistoryRetention = localStorage.getItem("HISTORY_RETENTION") || "30days";
     const savedAdminFeatures = localStorage.getItem("ADMIN_FEATURES") === "true";
     
+    // Load AI-specific settings
+    const savedPersona = localStorage.getItem("AI_PERSONA") || "academic";
+    const savedCustomPrompt = localStorage.getItem("CUSTOM_PROMPT") || "";
+    const savedAiTraits = JSON.parse(localStorage.getItem("AI_TRAITS") || JSON.stringify(aiTraits));
+    const savedAiPersonalization = localStorage.getItem("AI_PERSONALIZATION") !== "false";
+    const savedAiVoice = localStorage.getItem("AI_VOICE") || "natural";
+    const savedAiTheme = localStorage.getItem("AI_THEME") || "default";
+    const savedAnalyticsDashboard = localStorage.getItem("ANALYTICS_DASHBOARD") !== "false";
+    const savedContinuousLearning = localStorage.getItem("CONTINUOUS_LEARNING") !== "false";
+    const savedIntegrations = JSON.parse(localStorage.getItem("INTEGRATION_PROGRESS") || JSON.stringify(integrationProgress));
+    
+    // Set original settings
     setGeminiKey(savedGeminiKey);
     setUseLocalBackend(savedUseLocalBackend);
     setUserRole(savedUserRole);
@@ -53,10 +145,21 @@ export default function Settings() {
     setAccessibilityMode(savedAccessibilityMode);
     setHistoryRetention(savedHistoryRetention);
     setAdminFeatures(savedAdminFeatures);
+    
+    // Set AI-specific settings
+    setSelectedPersona(savedPersona);
+    setCustomPrompt(savedCustomPrompt);
+    setAiTraits(savedAiTraits);
+    setAiPersonalization(savedAiPersonalization);
+    setAiVoice(savedAiVoice);
+    setAiTheme(savedAiTheme);
+    setAnalyticsDashboard(savedAnalyticsDashboard);
+    setContinuousLearning(savedContinuousLearning);
+    setIntegrationProgress(savedIntegrations);
   }, []);
 
   const saveSettings = () => {
-    // Save all settings
+    // Save all original settings
     if (geminiKey) {
       localStorage.setItem("GEMINI_API_KEY", geminiKey);
     }
@@ -71,12 +174,42 @@ export default function Settings() {
     localStorage.setItem("HISTORY_RETENTION", historyRetention);
     localStorage.setItem("ADMIN_FEATURES", adminFeatures.toString());
     
-    toast.success("Settings saved successfully");
+    // Save AI-specific settings
+    localStorage.setItem("AI_PERSONA", selectedPersona);
+    localStorage.setItem("CUSTOM_PROMPT", customPrompt);
+    localStorage.setItem("AI_TRAITS", JSON.stringify(aiTraits));
+    localStorage.setItem("AI_PERSONALIZATION", aiPersonalization.toString());
+    localStorage.setItem("AI_VOICE", aiVoice);
+    localStorage.setItem("AI_THEME", aiTheme);
+    localStorage.setItem("ANALYTICS_DASHBOARD", analyticsDashboard.toString());
+    localStorage.setItem("CONTINUOUS_LEARNING", continuousLearning.toString());
+    localStorage.setItem("INTEGRATION_PROGRESS", JSON.stringify(integrationProgress));
+    
+    toast.success("Settings saved successfully", {
+      description: "Your preferences have been updated"
+    });
   };
 
   const toggleUseLocalBackend = (checked: boolean) => {
     setUseLocalBackend(checked);
   };
+
+  const handleTraitChange = (trait: keyof typeof aiTraits, value: number[]) => {
+    setAiTraits(prev => ({
+      ...prev,
+      [trait]: value[0]
+    }));
+  };
+
+  const toggleIntegration = (key: string) => {
+    setIntegrationProgress(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  // Get current persona
+  const currentPersona = aiPersonas.find(p => p.id === selectedPersona) || aiPersonas[0];
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,8 +225,12 @@ export default function Settings() {
             <BackendStatus />
           </div>
           
-          <Tabs defaultValue="general">
-            <TabsList className="grid grid-cols-5 mb-8">
+          <Tabs defaultValue="ai-persona">
+            <TabsList className="grid grid-cols-6 mb-8">
+              <TabsTrigger value="ai-persona" className="flex items-center gap-2">
+                <Bot className="h-4 w-4" />
+                <span className="hidden sm:inline">AI Persona</span>
+              </TabsTrigger>
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <SettingsIcon className="h-4 w-4" />
                 <span className="hidden sm:inline">General</span>
@@ -115,6 +252,286 @@ export default function Settings() {
                 <span className="hidden sm:inline">Admin</span>
               </TabsTrigger>
             </TabsList>
+
+            {/* AI Persona Settings */}
+            <TabsContent value="ai-persona" className="space-y-6">
+              <Card className="border-t-4 border-t-primary">
+                <CardHeader>
+                  <CardTitle className="flex justify-between items-center">
+                    <span>AI Persona Configuration</span>
+                    <Sparkles className="h-5 w-5 text-amber-500" />
+                  </CardTitle>
+                  <CardDescription>
+                    Customize the AI assistant's personality, responses, and behavior
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                    {/* Persona Selection */}
+                    <div className="space-y-4 md:col-span-2">
+                      <h3 className="text-lg font-medium">Choose Your AI Persona</h3>
+                      <div className="grid grid-cols-1 gap-3">
+                        {aiPersonas.map(persona => (
+                          <div 
+                            key={persona.id}
+                            className={`relative flex items-center space-x-3 rounded-lg border p-3 cursor-pointer transition-all ${
+                              selectedPersona === persona.id 
+                                ? "border-primary bg-primary/5" 
+                                : "hover:border-primary/50"
+                            }`}
+                            onClick={() => {
+                              setSelectedPersona(persona.id);
+                              if (persona.id !== "custom") {
+                                setAiTraits(persona.traits);
+                              }
+                            }}
+                          >
+                            {persona.icon}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium">{persona.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{persona.description}</p>
+                            </div>
+                            {selectedPersona === persona.id && (
+                              <div className="h-2 w-2 rounded-full bg-primary"></div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Persona Preview & Customization */}
+                    <div className="md:col-span-3 space-y-4">
+                      <h3 className="text-lg font-medium">Persona Preview</h3>
+                      <div className="border rounded-lg p-4 bg-card">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Avatar className="h-12 w-12 border-2 border-primary">
+                            <AvatarImage src="" />
+                            <AvatarFallback className="bg-primary/10 text-primary">
+                              {currentPersona.name.substring(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h4 className="font-semibold">{currentPersona.name}</h4>
+                            <p className="text-xs text-muted-foreground">{currentPersona.description}</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          {Object.entries(currentPersona.traits).map(([trait, value]) => (
+                            <div key={trait} className="text-sm">
+                              <span className="capitalize">{trait}:</span>
+                              <div className="w-full bg-secondary h-2 rounded-full mt-1">
+                                <div 
+                                  className="bg-primary h-2 rounded-full" 
+                                  style={{ width: `${value}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="text-sm p-3 rounded bg-muted mt-3">
+                          <p className="italic">
+                            "Hello! I'm your {currentPersona.name.toLowerCase()}. I'm here to assist you with 
+                            {currentPersona.id === 'academic' && " academic guidance and educational resources"}
+                            {currentPersona.id === 'creative' && " creative exploration and unique perspectives"}
+                            {currentPersona.id === 'technical' && " technical problems and detailed explanations"}
+                            {currentPersona.id === 'supportive' && " motivation, support, and encouragement"}
+                            {currentPersona.id === 'custom' && " your custom needs as configured"}."
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Custom Traits - only shown for Custom persona */}
+                      {selectedPersona === "custom" && (
+                        <div className="space-y-4 p-4 border rounded-lg">
+                          <h3 className="text-md font-medium">Customize Traits</h3>
+                          <div className="space-y-4">
+                            {Object.entries(aiTraits).map(([trait, value]) => (
+                              <div key={trait} className="space-y-2">
+                                <div className="flex justify-between">
+                                  <Label className="capitalize">{trait}</Label>
+                                  <span className="text-sm">{value}%</span>
+                                </div>
+                                <Slider 
+                                  value={[value]} 
+                                  min={0} 
+                                  max={100}
+                                  step={5}
+                                  onValueChange={(val) => handleTraitChange(trait as keyof typeof aiTraits, val)}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Custom System Prompt */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium">Advanced Customization</h3>
+                      <Switch 
+                        checked={aiPersonalization} 
+                        onCheckedChange={setAiPersonalization}
+                      />
+                    </div>
+                    
+                    {aiPersonalization && (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="custom-prompt">Custom System Prompt</Label>
+                          <Textarea 
+                            id="custom-prompt"
+                            placeholder="You are an AI assistant for ALU students and faculty. You help with..."
+                            value={customPrompt}
+                            onChange={(e) => setCustomPrompt(e.target.value)}
+                            className="min-h-[100px]"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Define custom instructions for the AI assistant. This will override the default persona behavior.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>AI Voice Style</Label>
+                            <ToggleGroup 
+                              type="single" 
+                              value={aiVoice} 
+                              onValueChange={(value) => value && setAiVoice(value)}
+                              className="justify-start"
+                            >
+                              <ToggleGroupItem value="natural">Natural</ToggleGroupItem>
+                              <ToggleGroupItem value="formal">Formal</ToggleGroupItem>
+                              <ToggleGroupItem value="casual">Casual</ToggleGroupItem>
+                            </ToggleGroup>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Chat Theme</Label>
+                            <ToggleGroup 
+                              type="single" 
+                              value={aiTheme} 
+                              onValueChange={(value) => value && setAiTheme(value)}
+                              className="justify-start"
+                            >
+                              <ToggleGroupItem value="default">Default</ToggleGroupItem>
+                              <ToggleGroupItem value="academic">Academic</ToggleGroupItem>
+                              <ToggleGroupItem value="professional">Professional</ToggleGroupItem>
+                            </ToggleGroup>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Integration Settings */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Educational Integrations</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Enable the AI to access and help with various educational systems
+                    </p>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex items-center justify-between border rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`rounded-full p-1 ${integrationProgress.calendar ? "bg-green-100 text-green-600" : "bg-muted text-muted-foreground"}`}>
+                            <Clock className="h-4 w-4" />
+                          </div>
+                          <span>Calendar & Deadlines</span>
+                        </div>
+                        <Switch 
+                          checked={integrationProgress.calendar} 
+                          onCheckedChange={() => toggleIntegration('calendar')}
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between border rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`rounded-full p-1 ${integrationProgress.assignments ? "bg-amber-100 text-amber-600" : "bg-muted text-muted-foreground"}`}>
+                            <FileText className="h-4 w-4" />
+                          </div>
+                          <span>Assignments</span>
+                        </div>
+                        <Switch 
+                          checked={integrationProgress.assignments} 
+                          onCheckedChange={() => toggleIntegration('assignments')}
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between border rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`rounded-full p-1 ${integrationProgress.library ? "bg-blue-100 text-blue-600" : "bg-muted text-muted-foreground"}`}>
+                            <BookOpen className="h-4 w-4" />
+                          </div>
+                          <span>Library Resources</span>
+                        </div>
+                        <Switch 
+                          checked={integrationProgress.library} 
+                          onCheckedChange={() => toggleIntegration('library')}
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between border rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`rounded-full p-1 ${integrationProgress.courses ? "bg-purple-100 text-purple-600" : "bg-muted text-muted-foreground"}`}>
+                            <School className="h-4 w-4" />
+                          </div>
+                          <span>Course Materials</span>
+                        </div>
+                        <Switch 
+                          checked={integrationProgress.courses} 
+                          onCheckedChange={() => toggleIntegration('courses')}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Advanced AI Features */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Advanced AI Features</h3>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>Learning Analytics Dashboard</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Get insights on your learning patterns and AI interactions
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={analyticsDashboard} 
+                        onCheckedChange={setAnalyticsDashboard}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>Continuous Learning</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow the AI to remember your preferences and adapt to your needs
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={continuousLearning} 
+                        onCheckedChange={setContinuousLearning}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={saveSettings} className="gap-2">
+                    <Zap className="h-4 w-4" />
+                    Save AI Settings
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
 
             {/* General Settings */}
             <TabsContent value="general" className="space-y-6">
