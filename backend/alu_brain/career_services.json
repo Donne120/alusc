@@ -57,6 +57,35 @@
           "url": "https://www.alueducation.com/alumni/directory"
         }
       ]
+    },
+    {
+      "id": "car_004",
+      "type": "procedural_response",
+      "question": "How do I schedule a career counseling session?",
+      "answer": "To schedule a career counseling session at ALU:\n1. Log in to the ALU Career Portal at careers.alueducation.com\n2. Click on 'Counseling Services' in the main menu\n3. Select 'Schedule a Session' from the dropdown\n4. Choose your preferred counselor from the available list\n5. Select an available date and time slot\n6. Fill in the pre-session questionnaire about your needs\n7. Submit your request and await confirmation email\n8. Receive a calendar invite with meeting details (in-person or virtual)",
+      "contact": "For assistance with scheduling, email careers@alueducation.com"
+    },
+    {
+      "id": "car_005",
+      "type": "table_response",
+      "question": "What companies frequently recruit ALU graduates?",
+      "answer": "ALU graduates are recruited by leading companies across various sectors:",
+      "table": {
+        "headers": ["Company", "Industry", "Typical Roles"],
+        "rows": [
+          ["Microsoft", "Technology", "Software Engineers, Product Managers, Business Analysts"],
+          ["McKinsey & Company", "Consulting", "Business Analysts, Research Associates, Consultants"],
+          ["Safaricom", "Telecommunications", "Technology Analysts, Marketing Specialists, Strategy Associates"],
+          ["African Development Bank", "Financial Services", "Development Associates, Project Analysts, Research Assistants"],
+          ["Andela", "Technology", "Software Engineers, Technical Team Leads, Product Designers"]
+        ]
+      }
+    },
+    {
+      "id": "car_006",
+      "type": "long_response",
+      "question": "How does ALU prepare students for entrepreneurship?",
+      "answer": "ALU's approach to entrepreneurship preparation is multifaceted and integrated across the educational experience.\n\nThe curriculum incorporates entrepreneurial thinking from day one, with all students completing courses in entrepreneurial leadership regardless of their major. These courses teach opportunity identification, design thinking, resource mobilization, and sustainable business modeling.\n\nBeyond the classroom, ALU offers several structured entrepreneurship programs:\n\n1. **Venture Incubator**: A semester-long program where student teams develop business ideas with mentorship from established entrepreneurs. Teams receive seed funding, workspace, and connection to potential investors.\n\n2. **Entrepreneurship Lab**: A dedicated space on campus equipped with prototyping tools, meeting rooms, and resources for business development. The Lab hosts regular workshops, pitch competitions, and networking events.\n\n3. **Founder's Mentorship Program**: Matches aspiring student entrepreneurs with successful founders for one-on-one mentorship throughout their ALU journey.\n\n4. **Innovation Challenges**: Regular competitions where students solve real business problems posed by industry partners, with winning solutions receiving implementation funding.\n\nALU also maintains partnerships with entrepreneurship ecosystems across Africa, providing students with internship opportunities at startups and access to accelerator programs post-graduation. Financial resources include the ALU Venture Fund, which provides early-stage capital to promising student and alumni ventures.\n\nThis comprehensive approach has resulted in approximately 15% of ALU graduates launching their own ventures within two years of graduation, with several raising significant external funding."
     }
   ]
 }
