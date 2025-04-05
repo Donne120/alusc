@@ -2,10 +2,11 @@
 import React, { useRef, useEffect } from "react";
 import { Person, ChatMessage } from "./types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Brain } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@/components/ui/tooltip";
 
 interface HumanChatActiveStageProps {
   selectedPerson: Person;
@@ -63,10 +64,12 @@ export const HumanChatActiveStage = ({
         <div className="flex items-center">
           <span className="font-medium">{selectedPerson.name}</span>
           {useNyptho && (
-            <Badge className="ml-2 bg-gradient-to-r from-indigo-500 to-purple-600">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Nyptho
-            </Badge>
+            <Tooltip delayDuration={300} content="Using Nyptho meta-learning AI">
+              <Badge className="ml-2 bg-gradient-to-r from-indigo-500 to-purple-600">
+                <Brain className="w-3 h-3 mr-1" />
+                Nyptho
+              </Badge>
+            </Tooltip>
           )}
         </div>
       </div>
@@ -112,10 +115,22 @@ export const HumanChatActiveStage = ({
           </Button>
         </div>
         {aiPersona && (
-          <div className="mt-2 text-xs text-muted-foreground flex items-center">
-            <span className="mr-1">Using AI Persona:</span> 
-            <span className="font-semibold">{aiPersona.name}</span>
-            {useNyptho && <Sparkles className="w-3 h-3 ml-1 text-purple-400" />}
+          <div className="mt-2 text-xs text-muted-foreground flex flex-wrap gap-2 items-center">
+            <span className="flex items-center">
+              <span className="mr-1">Using AI Persona:</span> 
+              <span className="font-semibold">{aiPersona.name}</span>
+              {useNyptho && <Sparkles className="w-3 h-3 ml-1 text-purple-400" />}
+            </span>
+
+            {useNyptho && (
+              <div className="flex gap-2 ml-auto">
+                {Object.entries(aiPersona.traits).map(([trait, value]) => (
+                  <Badge key={trait} variant="outline" className="text-xs py-0 h-5">
+                    {trait.charAt(0).toUpperCase() + trait.slice(1)}: {value}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

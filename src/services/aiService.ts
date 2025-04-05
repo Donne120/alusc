@@ -11,6 +11,33 @@ interface BackendResponse {
   engine?: string;
 }
 
+interface NypthoStatus {
+  learning: {
+    observation_count: number;
+    learning_rate: number;
+    model_confidence: number;
+    last_observed: string;
+  };
+  knowledge: {
+    knowledge_items: number;
+    topics: string[];
+  };
+  observed_models: string[];
+  ready: boolean;
+}
+
+interface ModelComparisonData {
+  models: string[];
+  metrics: {
+    accuracy: Record<string, number>;
+    helpfulness: Record<string, number>;
+    creativity: Record<string, number>;
+    speed: Record<string, number>;
+  };
+  strengths: Record<string, string[]>;
+  recommendations: string[];
+}
+
 export const aiService = {
   // Main function to generate responses
   async generateResponse(
@@ -121,7 +148,7 @@ Please try again later when the connection to our backend systems has been resto
   },
   
   // Get Nyptho status
-  async getNypthoStatus(): Promise<any> {
+  async getNypthoStatus(): Promise<NypthoStatus> {
     try {
       const response = await fetch('http://localhost:8000/nyptho/status', {
         method: 'GET',
@@ -136,7 +163,21 @@ Please try again later when the connection to our backend systems has been resto
       return await response.json();
     } catch (error) {
       console.error("Error getting Nyptho status:", error);
-      return { error: "Failed to fetch Nyptho status" };
+      return { 
+        learning: {
+          observation_count: 0,
+          learning_rate: 0,
+          model_confidence: 0,
+          last_observed: 'never'
+        },
+        knowledge: {
+          knowledge_items: 0,
+          topics: []
+        },
+        observed_models: [],
+        ready: false,
+        error: "Failed to fetch Nyptho status" 
+      };
     }
   },
   
@@ -166,7 +207,7 @@ Please try again later when the connection to our backend systems has been resto
   },
   
   // Get model comparison data
-  async getModelComparison(): Promise<any> {
+  async getModelComparison(): Promise<ModelComparisonData> {
     try {
       const response = await fetch('http://localhost:8000/nyptho/model-comparison', {
         method: 'GET',
@@ -180,7 +221,37 @@ Please try again later when the connection to our backend systems has been resto
       return await response.json();
     } catch (error) {
       console.error("Error getting model comparison:", error);
-      return { error: "Failed to fetch model comparison" };
+      return { 
+        models: [],
+        metrics: {
+          accuracy: {},
+          helpfulness: {},
+          creativity: {},
+          speed: {}
+        },
+        strengths: {},
+        recommendations: [],
+        error: "Failed to fetch model comparison" 
+      };
+    }
+  },
+  
+  // Get Nyptho learning statistics
+  async getNypthoLearningStats(): Promise<any> {
+    try {
+      const response = await fetch('http://localhost:8000/nyptho/learning-stats', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Backend error (${response.status})`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error getting Nyptho learning stats:", error);
+      return { error: "Failed to fetch Nyptho learning stats" };
     }
   }
 };
