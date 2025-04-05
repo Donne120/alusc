@@ -1,3 +1,4 @@
+
 import os
 import json
 import uvicorn
@@ -10,6 +11,7 @@ from typing import List, Optional, Dict, Any
 from document_processor import DocumentProcessor
 from retrieval_engine_extended import ExtendedRetrievalEngine
 from prompt_engine import PromptEngine
+from prompt_engine.nyptho_integration import NypthoIntegration
 
 # Create FastAPI app
 app = FastAPI(title="ALU Chatbot Backend")
@@ -27,6 +29,7 @@ app.add_middleware(
 document_processor = DocumentProcessor()
 retrieval_engine = ExtendedRetrievalEngine()
 prompt_engine = PromptEngine()
+nyptho = NypthoIntegration()  # Initialize Nyptho
 
 # Define request models
 class QueryRequest(BaseModel):
@@ -39,6 +42,12 @@ class DocumentMetadata(BaseModel):
     title: str
     source: str
     date: Optional[str] = None
+
+class PersonalitySettings(BaseModel):
+    helpfulness: float
+    creativity: float
+    precision: float
+    friendliness: float
 
 @app.get("/")
 async def root():
@@ -55,18 +64,50 @@ async def generate_response(request: QueryRequest):
             role=request.role
         )
         
-        # Generate response using prompt engineering
-        response = prompt_engine.generate_response(
-            query=request.query,
-            context=context_docs,
-            conversation_history=request.conversation_history,
-            role=request.role,
-            options=request.options
-        )
+        # Check if we should use Nyptho
+        use_nyptho = False
+        if request.options and "use_nyptho" in request.options:
+            use_nyptho = request.options["use_nyptho"]
+        
+        # Set model ID for observation
+        model_id = "standard_engine"
+        
+        # Generate response using appropriate engine
+        if use_nyptho and nyptho.get_status()["ready"]:
+            # Use Nyptho for response
+            personality = None
+            if request.options and "personality" in request.options:
+                personality = request.options["personality"]
+                
+            response = nyptho.generate_response(
+                query=request.query,
+                context=context_docs,
+                personality=personality
+            )
+            model_id = "nyptho"
+        else:
+            # Use standard prompt engine
+            response = prompt_engine.generate_response(
+                query=request.query,
+                context=context_docs,
+                conversation_history=request.conversation_history,
+                role=request.role,
+                options=request.options
+            )
+        
+        # Have Nyptho observe this interaction (it learns from all responses)
+        if model_id != "nyptho":  # Don't observe itself
+            nyptho.observe_model(
+                query=request.query,
+                response=response,
+                model_id=model_id,
+                context=context_docs
+            )
         
         return {
             "response": response,
-            "sources": [doc.metadata for doc in context_docs[:3]] if context_docs else []
+            "sources": [doc.metadata for doc in context_docs[:3]] if context_docs else [],
+            "engine": model_id
         }
     except Exception as e:
         print(f"Error generating response: {e}")
@@ -129,6 +170,42 @@ async def rebuild_index(background_tasks: BackgroundTasks):
         return {"status": "success", "message": "Index rebuild started in the background"}
     except Exception as e:
         print(f"Error starting index rebuild: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# New Nyptho-specific endpoints
+@app.get("/nyptho/status")
+async def get_nyptho_status():
+    """Get the current status of Nyptho"""
+    try:
+        status = nyptho.get_status()
+        return status
+    except Exception as e:
+        print(f"Error getting Nyptho status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/nyptho/model-comparison")
+async def get_model_comparison():
+    """Get a comparison of observed models"""
+    try:
+        comparison = nyptho.get_model_comparison()
+        return comparison
+    except Exception as e:
+        print(f"Error getting model comparison: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/nyptho/personality")
+async def set_nyptho_personality(settings: PersonalitySettings):
+    """Update Nyptho's personality settings"""
+    try:
+        result = nyptho.set_personality({
+            "helpfulness": settings.helpfulness,
+            "creativity": settings.creativity,
+            "precision": settings.precision,
+            "friendliness": settings.friendliness
+        })
+        return result
+    except Exception as e:
+        print(f"Error updating personality: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Run the server

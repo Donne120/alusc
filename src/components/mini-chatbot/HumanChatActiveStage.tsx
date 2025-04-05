@@ -1,98 +1,123 @@
 
-import React, { useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronLeft, Send } from "lucide-react";
+import React, { useRef, useEffect } from "react";
 import { Person, ChatMessage } from "./types";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Send, Sparkles } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 interface HumanChatActiveStageProps {
   selectedPerson: Person;
   chatMessages: ChatMessage[];
   humanChatInput: string;
   isLoading: boolean;
-  onInputChange: (input: string) => void;
+  onInputChange: (value: string) => void;
   onSendMessage: () => void;
   onGoBack: () => void;
+  useNyptho?: boolean;
+  aiPersona?: {
+    name: string;
+    traits: {
+      helpfulness: number;
+      creativity: number;
+      precision: number;
+      friendliness: number;
+    }
+  };
 }
 
-export const HumanChatActiveStage: React.FC<HumanChatActiveStageProps> = ({
+export const HumanChatActiveStage = ({
   selectedPerson,
   chatMessages,
   humanChatInput,
   isLoading,
   onInputChange,
   onSendMessage,
-  onGoBack
-}) => {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  
-  // Auto-scroll to bottom when messages change or on component mount
+  onGoBack,
+  useNyptho = false,
+  aiPersona
+}: HumanChatActiveStageProps) => {
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollArea = scrollAreaRef.current;
-      scrollArea.scrollTop = scrollArea.scrollHeight;
+    if (scrollViewportRef.current) {
+      scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
     }
-  }, [chatMessages, isLoading]);
+  }, [chatMessages]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSendMessage();
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={onGoBack}>
-          <ChevronLeft size={16} />
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-4">
+        <Button variant="ghost" size="sm" onClick={onGoBack}>
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </Button>
-        <h3 className="text-sm font-medium">
-          Chat with {selectedPerson?.name}
-        </h3>
+        <div className="flex items-center">
+          <span className="font-medium">{selectedPerson.name}</span>
+          {useNyptho && (
+            <Badge className="ml-2 bg-gradient-to-r from-indigo-500 to-purple-600">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Nyptho
+            </Badge>
+          )}
+        </div>
       </div>
-      
-      <ScrollArea className="h-48 pr-4 mb-2" viewportRef={scrollAreaRef}>
-        <div className="space-y-3">
-          {chatMessages.map((msg, index) => (
-            <div key={index} className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}>
-              <div className={`rounded-lg px-3 py-2 max-w-[80%] text-sm ${
-                msg.isUser 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-secondary text-secondary-foreground"
-              }`}>
-                {msg.text}
-              </div>
+
+      <ScrollArea className="flex-1 pr-4" viewportRef={scrollViewportRef}>
+        <div className="flex flex-col space-y-3">
+          {chatMessages.map((msg, i) => (
+            <div
+              key={i}
+              className={`${
+                msg.isUser
+                  ? "ml-auto bg-primary text-primary-foreground"
+                  : "mr-auto bg-muted"
+              } rounded-lg p-3 max-w-[80%]`}
+            >
+              <p className="whitespace-pre-wrap break-words">{msg.text}</p>
             </div>
           ))}
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="rounded-lg px-3 py-2 bg-secondary text-secondary-foreground">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce"></div>
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "0.4s" }}></div>
-                </div>
+            <div className="mr-auto bg-muted rounded-lg p-3">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
+                <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
               </div>
             </div>
           )}
         </div>
       </ScrollArea>
-      
-      <div className="flex gap-2">
-        <Input
-          value={humanChatInput}
-          onChange={(e) => onInputChange(e.target.value)}
-          placeholder="Type your message..."
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              onSendMessage();
-            }
-          }}
-          disabled={isLoading}
-        />
-        <Button 
-          size="sm"
-          onClick={onSendMessage}
-          disabled={!humanChatInput.trim() || isLoading}
-        >
-          <Send size={16} />
-        </Button>
+
+      <div className="mt-4">
+        <div className="flex space-x-2">
+          <Textarea
+            placeholder="Type your message..."
+            value={humanChatInput}
+            onChange={(e) => onInputChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="resize-none min-h-[60px]"
+            disabled={isLoading}
+          />
+          <Button onClick={onSendMessage} disabled={isLoading || !humanChatInput.trim()}>
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
+        {aiPersona && (
+          <div className="mt-2 text-xs text-muted-foreground flex items-center">
+            <span className="mr-1">Using AI Persona:</span> 
+            <span className="font-semibold">{aiPersona.name}</span>
+            {useNyptho && <Sparkles className="w-3 h-3 ml-1 text-purple-400" />}
+          </div>
+        )}
       </div>
     </div>
   );

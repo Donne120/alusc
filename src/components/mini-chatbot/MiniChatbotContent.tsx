@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Stage, Department, Person, ChatMessage, EmailTemplate } from "./types";
@@ -10,6 +11,7 @@ import { HumanChatActiveStage } from "./HumanChatActiveStage";
 import { EmailInquiryStage } from "./EmailInquiryStage";
 import { EmailSentStage } from "./EmailSentStage";
 import { emailTemplates } from "./mockData";
+import { aiService } from "@/services/aiService";
 
 export const MiniChatbotContent = () => {
   const [stage, setStage] = useState<Stage>("initial");
@@ -29,11 +31,28 @@ export const MiniChatbotContent = () => {
     name: "Academic Advisor",
     traits: { helpfulness: 85, creativity: 40, precision: 90, friendliness: 75 }
   });
+  const [useNyptho, setUseNyptho] = useState<boolean>(false);
+  const [nypthoStatus, setNypthoStatus] = useState<any>(null);
 
   useEffect(() => {
     loadAiPersonaSettings();
     initializeChat();
+    checkNypthoStatus();
   }, []);
+
+  const checkNypthoStatus = async () => {
+    try {
+      const status = await aiService.getNypthoStatus();
+      setNypthoStatus(status);
+      // If Nyptho is ready, enable it based on settings
+      if (status?.ready) {
+        const savedUseNyptho = localStorage.getItem("USE_NYPTHO");
+        setUseNyptho(savedUseNyptho === "true");
+      }
+    } catch (error) {
+      console.error("Error checking Nyptho status:", error);
+    }
+  };
 
   const loadAiPersonaSettings = () => {
     const savedPersona = localStorage.getItem("AI_PERSONA") || "academic";
@@ -46,6 +65,7 @@ export const MiniChatbotContent = () => {
       creative: "Creative Coach",
       technical: "Technical Assistant",
       supportive: "Supportive Guide",
+      nyptho: "Nyptho Learning AI",
       custom: "Custom AI"
     };
     
@@ -53,6 +73,12 @@ export const MiniChatbotContent = () => {
       name: personaNames[savedPersona] || "Academic Advisor",
       traits: savedTraits
     });
+
+    // Check if we should use Nyptho based on saved persona
+    if (savedPersona === "nyptho") {
+      setUseNyptho(true);
+      localStorage.setItem("USE_NYPTHO", "true");
+    }
   };
 
   const initializeChat = () => {
@@ -134,7 +160,7 @@ export const MiniChatbotContent = () => {
     }
   };
 
-  const sendHumanChatMessage = () => {
+  const sendHumanChatMessage = async () => {
     if (humanChatInput.trim() === "") return;
     
     setChatMessages(prev => [...prev, { text: humanChatInput, isUser: true }]);
@@ -142,46 +168,35 @@ export const MiniChatbotContent = () => {
     
     setIsLoading(true);
     
-    setTimeout(() => {
-      const { helpfulness, creativity, precision, friendliness } = aiPersona.traits;
+    try {
+      // Convert chat messages to the format needed by aiService
+      const history = chatMessages.map((msg, i) => ({
+        id: `msg-${i}`,
+        text: msg.text,
+        isAi: !msg.isUser,
+        timestamp: Date.now() - (chatMessages.length - i) * 1000
+      }));
       
-      let responses: string[] = [];
+      // Use aiService to get response
+      const options = {
+        useNyptho: useNyptho,
+        personality: aiPersona.traits
+      };
       
-      if (precision > 80) {
-        responses = [
-          "I understand your inquiry. Here are the specific details you need...",
-          "Based on the ALU guidelines, the exact procedure for this is...",
-          "According to our records, here's the precise information about your request...",
-          "Let me provide you with the accurate details on this matter..."
-        ];
-      } else if (creativity > 80) {
-        responses = [
-          "That's an interesting question! Here's a creative approach we could take...",
-          "I see several possibilities here. Let's explore some unique solutions...",
-          "Your question opens up some fascinating avenues of thought. Consider this perspective...",
-          "What if we looked at this from a completely different angle? Here's an idea..."
-        ];
-      } else if (friendliness > 80) {
-        responses = [
-          "I'm really glad you asked about this! I'd be happy to help you with that.",
-          "That's a great question! I'm excited to work through this with you.",
-          "I completely understand how important this is to you. Let's figure it out together.",
-          "Thank you for bringing this up! I'm here to support you every step of the way."
-        ];
-      } else {
-        responses = [
-          "I understand your concern. Let me check that for you.",
-          "Thanks for providing that information. I'll help you resolve this issue.",
-          "That's a good question. Here's what you need to know...",
-          "I'm looking into this matter for you. Can you provide more details?",
-          "Let me connect you with the appropriate department for further assistance."
-        ];
-      }
+      const response = await aiService.generateResponse(humanChatInput, history, options);
       
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      setChatMessages(prev => [...prev, { text: randomResponse, isUser: false }]);
+      setChatMessages(prev => [...prev, { text: response, isUser: false }]);
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      setChatMessages(prev => [...prev, { 
+        text: "I'm having trouble connecting to our knowledge base. Please try again later.", 
+        isUser: false 
+      }]);
+      
+      toast.error("Error connecting to AI service");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const sendEmailInquiry = () => {
@@ -259,6 +274,8 @@ export const MiniChatbotContent = () => {
             onInputChange={setHumanChatInput}
             onSendMessage={sendHumanChatMessage}
             onGoBack={goBack}
+            useNyptho={useNyptho}
+            aiPersona={aiPersona}
           />
         )}
 
