@@ -6,7 +6,7 @@ import { ArrowLeft, Send, Sparkles, Brain } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface HumanChatActiveStageProps {
   selectedPerson: Person;
@@ -64,12 +64,19 @@ export const HumanChatActiveStage = ({
         <div className="flex items-center">
           <span className="font-medium">{selectedPerson.name}</span>
           {useNyptho && (
-            <Tooltip delayDuration={300} content="Using Nyptho meta-learning AI">
-              <Badge className="ml-2 bg-gradient-to-r from-indigo-500 to-purple-600">
-                <Brain className="w-3 h-3 mr-1" />
-                Nyptho
-              </Badge>
-            </Tooltip>
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <Badge className="ml-2 bg-gradient-to-r from-indigo-500 to-purple-600">
+                    <Brain className="w-3 h-3 mr-1" />
+                    Nyptho
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Using Nyptho meta-learning AI
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>

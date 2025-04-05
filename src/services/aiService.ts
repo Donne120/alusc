@@ -24,6 +24,7 @@ interface NypthoStatus {
   };
   observed_models: string[];
   ready: boolean;
+  error?: string; // Adding optional error property
 }
 
 interface ModelComparisonData {
@@ -36,6 +37,7 @@ interface ModelComparisonData {
   };
   strengths: Record<string, string[]>;
   recommendations: string[];
+  error?: string; // Adding optional error property
 }
 
 export const aiService = {
