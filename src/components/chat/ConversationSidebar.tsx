@@ -77,10 +77,7 @@ export const ConversationSidebar = ({
       </div>
       
       <div className="mt-auto border-t border-gray-700 pt-2 sticky bottom-0 bg-[#202123]">
-        <button onClick={() => navigate('/documents')} className={`w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300 ${isCollapsed ? 'justify-center' : ''}`}>
-          <Database className="h-4 w-4" />
-          {!isCollapsed && <span>Knowledge Base</span>}
-        </button>
+        
         <button onClick={() => navigate('/profile')} className={`w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300 ${isCollapsed ? 'justify-center' : ''}`}>
           <User className="h-4 w-4" />
           {!isCollapsed && <span>{user?.name || 'Profile'}</span>}
