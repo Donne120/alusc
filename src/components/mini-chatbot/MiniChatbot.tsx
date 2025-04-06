@@ -1,14 +1,11 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle, X, Calendar, Users, School } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { MiniChatbotContent } from "./MiniChatbotContent";
 
-interface MiniChatbotProps {
-  children: React.ReactNode;
-}
-
-export const MiniChatbot = ({ children }: MiniChatbotProps) => {
+export const MiniChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 100 });
   const [isDragging, setIsDragging] = useState(false);
@@ -79,7 +76,7 @@ export const MiniChatbot = ({ children }: MiniChatbotProps) => {
               <X className="h-4 w-4" />
             </Button>
           </div>
-          {children}
+          <MiniChatbotContent />
         </Card>
       ) : (
         <Button 

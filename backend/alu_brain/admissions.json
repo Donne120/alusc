@@ -1,37 +1,20 @@
-<<<<<<< HEAD
 
 {
   "category": "admissions",
   "description": "Information about application process, requirements, deadlines, and scholarships",
-=======
-{
-  "category": "admissions",
-  "description": "Comprehensive information about ALU's application process, admission requirements, deadlines, scholarships, fees, and related statistics.",
->>>>>>> c9d6753 (Initial commit for deployment)
   "entries": [
     {
       "id": "adm_001",
       "type": "factual_response",
-<<<<<<< HEAD
       "question": "What are the admission requirements?",
       "answer": "ALU admission requirements include: completed application form, high school transcripts, personal statement, and demonstration of leadership potential. SAT/ACT scores are optional but recommended.",
       "conditions": "Requirements may vary slightly by program and applicant background."
-=======
-      "question": "What are the admission requirements for ALU?",
-      "answer": "ALU requires applicants to submit a completed application form, official high school transcripts, a personal statement outlining leadership potential and academic goals, and at least two letters of recommendation. Standardized test scores (SAT/ACT) are optional but can bolster an application when submitted. Additional documentation, such as portfolios for art or writing programs, may be requested depending on the intended program of study.",
-      "conditions": "Requirements may vary slightly for international applicants and specific programs."
->>>>>>> c9d6753 (Initial commit for deployment)
     },
     {
       "id": "adm_002",
       "type": "date_response",
-<<<<<<< HEAD
       "question": "When are application deadlines?",
       "answer": "ALU has three application rounds each year:",
-=======
-      "question": "When are application deadlines for ALU?",
-      "answer": "ALU accepts applications in multiple rounds throughout the year:",
->>>>>>> c9d6753 (Initial commit for deployment)
       "dates": [
         {
           "round": "Early Decision",
@@ -54,65 +37,37 @@
       "id": "adm_003",
       "type": "long_response",
       "question": "How does the ALU scholarship system work?",
-<<<<<<< HEAD
       "answer": "ALU is committed to making education accessible to talented students regardless of their financial background. The scholarship system at ALU works through a combination of merit-based and need-based financial aid.\n\nWhen students apply to ALU, they are automatically considered for merit scholarships based on their academic performance, leadership potential, and overall application strength. These scholarships can range from partial tuition coverage to full scholarships covering tuition, housing, and stipends.\n\nFor need-based financial aid, students must complete the financial aid application as part of their admission process. This requires submitting documentation about family income and financial circumstances. ALU then determines the level of financial support based on demonstrated need.\n\nALU also partners with various organizations, governments, and foundations to provide additional scholarship opportunities for specific demographics or countries. These partner scholarships often have their own application processes and criteria.\n\nAll scholarship recipients are expected to maintain good academic standing and contribute positively to the ALU community. Some scholarships may have specific requirements such as work-study components or service commitments after graduation."
-=======
-      "answer": "ALU is committed to making high-quality education accessible. The scholarship system combines merit-based awards with need-based financial aid. Merit scholarships are automatically awarded based on academic achievement, leadership experiences, and the strength of the personal statement. For need-based aid, applicants must complete a detailed financial aid form and provide supporting documentation of family income and financial responsibility. Additional scholarships are available through partnerships with governmental bodies, foundations, and corporate sponsors. Scholarship recipients are required to maintain academic excellence and typically engage in community or campus service projects as part of their award conditions."
->>>>>>> c9d6753 (Initial commit for deployment)
     },
     {
       "id": "adm_004",
       "type": "procedural_response",
-<<<<<<< HEAD
       "question": "What is the application process for international students?",
       "answer": "International students applying to ALU should follow these steps:\n1. Create an account on the ALU application portal\n2. Complete the online application form with personal and academic information\n3. Upload required documents (transcripts, passport copy, English proficiency test results)\n4. Submit a personal statement addressing the provided prompts\n5. Request recommendations from teachers or mentors through the portal\n6. Complete the video interview or attend a virtual assessment session\n7. Submit financial documentation for scholarship consideration\n8. Pay the application fee (or request a fee waiver if eligible)\n9. Check application status regularly for updates\n10. If admitted, complete enrollment confirmation steps",
       "requirements": "International students must demonstrate English proficiency through TOEFL (minimum 80) or IELTS (minimum 6.5) scores unless they completed secondary education in English."
-=======
-      "question": "What is the application process for international students at ALU?",
-      "answer": "International students should follow these steps to apply:\n1. Create an account and fill out the online application form on the ALU website.\n2. Upload official academic transcripts, a copy of your passport, and English proficiency test scores (TOEFL with a minimum of 80 or IELTS with a minimum of 6.5), unless you have completed secondary education in English.\n3. Write and submit a personal statement that highlights your leadership potential and academic interests.\n4. Request and submit two letters of recommendation from teachers, counselors, or community leaders.\n5. Complete a financial aid application if you require need-based scholarships.\n6. Participate in an admissions interview or virtual assessment session.\n7. Pay the non-refundable application fee, or apply for a fee waiver if eligible.\n8. Monitor your application status through the portal and respond to any additional information requests promptly.",
-      "requirements": "International applicants must demonstrate English proficiency, and some programs may require additional materials such as portfolios or essays."
->>>>>>> c9d6753 (Initial commit for deployment)
     },
     {
       "id": "adm_005",
       "type": "short_response",
-<<<<<<< HEAD
       "question": "Is there an application fee?",
       "answer": "Yes, there is a $50 USD application fee. However, fee waivers are available for students demonstrating financial need or those from ALU partner schools and organizations."
-=======
-      "question": "Is there an application fee for ALU?",
-      "answer": "Yes, ALU charges a non-refundable application fee of $50 USD. Fee waivers may be available for applicants who can demonstrate financial need or for those applying from partner schools."
->>>>>>> c9d6753 (Initial commit for deployment)
     },
     {
       "id": "adm_006",
       "type": "statistical_response",
-<<<<<<< HEAD
       "question": "What is the admission rate?",
       "answer": "ALU admission statistics from the most recent application cycle:",
-=======
-      "question": "What are the current admission statistics at ALU?",
-      "answer": "Recent application metrics indicate:",
->>>>>>> c9d6753 (Initial commit for deployment)
       "statistics": [
         {
           "metric": "Overall acceptance rate",
           "value": "18%"
         },
         {
-<<<<<<< HEAD
           "metric": "Early decision acceptance rate",
           "value": "24%"
         },
         {
           "metric": "Regular decision acceptance rate",
-=======
-          "metric": "Early Decision acceptance rate",
-          "value": "24%"
-        },
-        {
-          "metric": "Regular Decision acceptance rate",
->>>>>>> c9d6753 (Initial commit for deployment)
           "value": "16%"
         },
         {
@@ -124,24 +79,7 @@
           "value": "78%"
         }
       ],
-<<<<<<< HEAD
       "note": "Acceptance rates vary by program and applicant pool each year"
-=======
-      "note": "These figures are based on the most recent data and may change annually."
-    },
-    {
-      "id": "adm_007",
-      "type": "factual_response",
-      "question": "Can applicants update or change their application information after submission?",
-      "answer": "Yes, ALU allows applicants to update certain parts of their application after submitting. Updates can generally be made through the applicant portal, especially for any additional documentation or corrections. However, any substantive changes must be reviewed and approved by the admissions committee before a final decision is made."
-    },
-    {
-      "id": "adm_008",
-      "type": "procedural_response",
-      "question": "How do I request a fee waiver if I cannot afford the application fee?",
-      "answer": "To request a fee waiver, follow these steps:\n1. Indicate on the application form that you are seeking a fee waiver.\n2. Complete the additional fee waiver form provided on the ALU admissions site.\n3. Provide documentation that supports your request, such as a letter explaining your financial situation and any supporting financial documents.\n4. Submit your fee waiver request along with your completed application.\n5. Await confirmation from the admissions office regarding your fee waiver status.",
-      "requirements": "Fee waiver eligibility is determined by financial need and is subject to review by the admissions team."
->>>>>>> c9d6753 (Initial commit for deployment)
     }
   ]
 }

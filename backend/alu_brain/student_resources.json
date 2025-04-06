@@ -1,33 +1,19 @@
-<<<<<<< HEAD
 
 {
   "category": "student_resources",
   "description": "Information about academic support, technology services, libraries, and student assistance programs",
-=======
-{
-  "category": "student_resources",
-  "description": "Information about academic support, technology services, libraries, and student assistance programs. This document also includes frequently asked questions with detailed responses.",
->>>>>>> c9d6753 (Initial commit for deployment)
   "entries": [
     {
       "id": "res_001",
       "type": "paragraph_response",
       "question": "What academic support services are available?",
-<<<<<<< HEAD
       "answer": "ALU offers comprehensive academic support services through the Learning Commons. Services include one-on-one tutoring in various subjects, writing center assistance for papers and projects, study skills workshops, and academic coaching for students needing help with time management and organization. Peer learning assistants are available for most core courses, and faculty members hold regular office hours for individual support. The Learning Commons is located in the main library building and operates both by appointment and through drop-in hours. Additional support is available for students with documented learning differences through the Office of Accessible Education."
-=======
-      "response": "ALU offers comprehensive academic support services through the Learning Commons. Services include one-on-one tutoring in various subjects, writing center assistance for papers and projects, study skills workshops, and academic coaching for time management and organization. Peer learning assistants are available for most core courses, and faculty members hold regular office hours for additional support. Extra assistance is available for students with documented learning differences through the Office of Accessible Education."
->>>>>>> c9d6753 (Initial commit for deployment)
     },
     {
       "id": "res_002",
       "type": "link_response",
       "question": "How do I access online library resources?",
-<<<<<<< HEAD
       "answer": "ALU provides extensive online library resources accessible through several platforms:",
-=======
-      "response": "ALU provides extensive online library resources accessible through several platforms:",
->>>>>>> c9d6753 (Initial commit for deployment)
       "links": [
         {
           "text": "ALU Digital Library Portal",
@@ -48,11 +34,7 @@
       "id": "res_003",
       "type": "table_response",
       "question": "What tech equipment can students borrow?",
-<<<<<<< HEAD
       "answer": "The ALU Tech Hub offers the following equipment loans to students:",
-=======
-      "response": "The ALU Tech Hub offers the following equipment loans to students:",
->>>>>>> c9d6753 (Initial commit for deployment)
       "table": {
         "headers": ["Equipment", "Loan Period", "Late Fee/Day"],
         "rows": [
@@ -64,113 +46,27 @@
           ["VR Headsets", "Same day only", "$15"]
         ]
       },
-<<<<<<< HEAD
       "requirements": "Valid student ID and signed equipment agreement required for all loans"
-=======
-      "requirements": "Valid student ID and a signed equipment agreement are required for all loans."
->>>>>>> c9d6753 (Initial commit for deployment)
     },
     {
       "id": "res_004",
       "type": "factual_response",
       "question": "Do students get Microsoft Office for free?",
-<<<<<<< HEAD
       "answer": "Yes, all enrolled ALU students receive free access to Microsoft Office 365, including Word, Excel, PowerPoint, OneNote, and Teams. This subscription remains active throughout your enrollment period and includes 1TB of OneDrive cloud storage.",
       "access": "Access is provided through your ALU email account credentials at office.com"
-=======
-      "response": "Yes, all enrolled ALU students receive free access to Microsoft Office 365, including Word, Excel, PowerPoint, OneNote, and Teams. This subscription remains active throughout enrollment and includes 1TB of OneDrive cloud storage. Access is provided via your ALU email account at office.com."
->>>>>>> c9d6753 (Initial commit for deployment)
     },
     {
       "id": "res_005",
       "type": "procedural_response",
       "question": "How do I register for disability accommodations?",
-<<<<<<< HEAD
       "answer": "To register for disability accommodations at ALU:\n1. Contact the Office of Accessible Education at access@alueducation.com\n2. Complete the Accommodation Request Form (available online)\n3. Submit supporting documentation from qualified professionals\n4. Schedule an intake appointment with an accessibility counselor\n5. Discuss and determine appropriate accommodations\n6. Receive an official Accommodation Letter\n7. Share the letter with your instructors each term as needed\n8. Follow up with the office if accommodations need adjustment",
       "deadline": "Requests should be submitted at least 3 weeks before accommodations are needed"
-=======
-      "response": "To register for disability accommodations at ALU:\n1. Contact the Office of Accessible Education at access@alueducation.com.\n2. Complete the Accommodation Request Form available online.\n3. Submit supporting documentation from a qualified professional.\n4. Schedule an intake appointment with an accessibility counselor.\n5. Discuss and determine appropriate accommodations.\n6. Receive an official Accommodation Letter.\n7. Share the letter with your instructors each term.\n8. Follow up if adjustments are needed.",
-      "deadline": "Requests should be submitted at least 3 weeks before accommodations are needed."
->>>>>>> c9d6753 (Initial commit for deployment)
     },
     {
       "id": "res_006",
       "type": "long_response",
       "question": "What wellness resources are available to students?",
-<<<<<<< HEAD
       "answer": "ALU takes a holistic approach to student wellness, providing resources across multiple dimensions of wellbeing:\n\n**Physical Wellness**\n- Fully equipped fitness center with free access for students\n- Group fitness classes including yoga, HIIT, dance, and meditation\n- Intramural sports leagues and weekend recreation activities\n- Nutrition counseling with registered dietitians\n- Sleep hygiene workshops and resources\n\n**Mental Health Support**\n- Individual counseling sessions with licensed therapists (first 8 sessions free)\n- 24/7 crisis helpline accessible via phone, text, or chat\n- Peer support groups for various concerns (stress, grief, adjustment)\n- Mental health screening events each semester\n- Stress management and mindfulness workshops\n\n**Community Wellness**\n- Weekly community meals in residence halls\n- Cultural celebration events throughout the academic year\n- Service learning opportunities in local communities\n- Faith-based groups and spiritual resources\n- Belonging and inclusion initiatives\n\n**Financial Wellness**\n- Financial literacy workshops\n- One-on-one financial coaching\n- Emergency financial assistance fund\n- Student employment opportunities\n- Scholarship and funding guidance\n\nThe ALU Wellness Center coordinates these resources and operates on a drop-in basis Monday through Friday, 9am-5pm, with extended virtual hours on evenings and weekends. All services are confidential and most are included in student fees with no additional cost."
     }
   ]
 }
-=======
-      "response": "ALU takes a holistic approach to student wellness, providing resources across multiple dimensions of wellbeing:\n\n**Physical Wellness**\n- Fully equipped fitness center with free access\n- Group fitness classes (yoga, HIIT, dance, meditation)\n- Intramural sports leagues and weekend recreation activities\n- Nutrition counseling with registered dietitians\n- Sleep hygiene workshops\n\n**Mental Health Support**\n- Individual counseling sessions (first 8 sessions free)\n- 24/7 crisis helpline available via phone, text, or chat\n- Peer support groups for stress, grief, and adjustment\n- Regular mental health screening events\n- Stress management and mindfulness workshops\n\n**Community Wellness**\n- Weekly community meals in residence halls\n- Cultural celebration events\n- Service learning opportunities in local communities\n- Faith-based and spiritual resources\n- Inclusion and belonging initiatives\n\n**Financial Wellness**\n- Financial literacy workshops\n- One-on-one financial coaching\n- Emergency financial assistance fund\n- Student employment opportunities\n- Scholarship and funding guidance\n\nThe ALU Wellness Center coordinates these services on a drop-in basis (Monday–Friday, 9am–5pm) with extended virtual support on evenings and weekends. Most services are included in student fees."
-    },
-    {
-      "id": "qna_001",
-      "type": "short_response",
-      "question": "What is the African Leadership University (ALU)?",
-      "response": "The African Leadership University (ALU) is a pan-African network of universities focused on developing entrepreneurial leaders who can solve Africa's grand challenges. Founded in 2015, ALU emphasizes experiential learning, leadership development, and real-world impact. Learn more at: https://www.africanleadershipuniversity.com/"
-    },
-    {
-      "id": "qna_002",
-      "type": "short_response",
-      "question": "Where are ALU's campuses located?",
-      "response": "ALU has campuses in two countries:\n- Kigali, Rwanda (main campus)\n- Johannesburg, South Africa\nIt also has a growing network across the continent. More details here: https://www.africanleadershipuniversity.com/campuses"
-    },
-    {
-      "id": "qna_003",
-      "type": "short_response",
-      "question": "What programs does ALU offer?",
-      "response": "ALU offers several undergraduate and graduate programs including:\n- Bachelor of Science in Business and Technology\n- Bachelor of Science in Computer Science\n- Master of Science in Computer Science\n- Master of Business Administration\nComplete program details can be found at: https://www.africanleadershipuniversity.com/programs"
-    },
-    {
-      "id": "qna_004",
-      "type": "short_response",
-      "question": "What makes ALU's educational approach unique?",
-      "response": "ALU's model centers on experiential learning with a strong emphasis on real-world projects, leadership development, and entrepreneurial mindset. Its competency-based progression and global networking opportunities set it apart. Learn more at: https://www.africanleadershipuniversity.com/educational-approach"
-    },
-    {
-      "id": "qna_005",
-      "type": "procedural_response",
-      "question": "How does the admission process work at ALU?",
-      "response": "The admission process includes the following steps:\n1. Online application submission\n2. Assessment of leadership potential\n3. Interview\n4. Demonstration of competencies\nDetailed guidelines are available at: https://www.africanleadershipuniversity.com/admissions"
-    },
-    {
-      "id": "qna_006",
-      "type": "short_response",
-      "question": "What are the tuition fees for ALU programs?",
-      "response": "ALU offers a unique payment model where students pay a percentage of their income after graduation. Detailed fee information varies by program and is available at: https://www.africanleadershipuniversity.com/fees"
-    },
-    {
-      "id": "qna_007",
-      "type": "short_response",
-      "question": "What kind of financial aid is available at ALU?",
-      "response": "ALU provides several financial support options including Income Share Agreements (ISAs), scholarships, and flexible payment plans. More details can be found at: https://www.africanleadershipuniversity.com/financial-aid"
-    },
-    {
-      "id": "qna_008",
-      "type": "short_response",
-      "question": "Can you provide information about ALU's alumni network?",
-      "response": "ALU's alumni network spans Africa and beyond, connecting graduates across diverse fields such as technology, finance, healthcare, and social impact. Explore alumni stories at: https://www.africanleadershipuniversity.com/alumni"
-    },
-    {
-      "id": "qna_009",
-      "type": "short_response",
-      "question": "What industry partnerships does ALU have?",
-      "response": "ALU has partnerships with global organizations like Microsoft, Google, IBM, Deloitte, and the African Development Bank. These partnerships help facilitate internships, industry projects, and mentorship. Full details are available at: https://www.africanleadershipuniversity.com/partners"
-    },
-    {
-      "id": "qna_010",
-      "type": "short_response",
-      "question": "How does ALU support student entrepreneurship?",
-      "response": "ALU supports entrepreneurship through dedicated innovation hubs, startup incubation programs, access to funding opportunities, and specialized entrepreneurship courses and workshops. Learn more at: https://www.africanleadershipuniversity.com/entrepreneurship"
-    },
-    {
-      "id": "info_001",
-      "type": "informative_response",
-      "question": "Here’s an English translation of the information about African Leadership University (ALU):",
-      "response": "### Faculty Members and Their Courses\n- **Lizbeth Uwineza**: Foundational Learning Coach, focuses on improving students' communication skills and fostering effective dialogue.\n- **Sylidio Masengesho**: Foundational Learning Coach, designs innovative curricula and promotes learner-centered educational experiences.\n- **Ruth Bazing**: Foundational Learning Coach, teaches Communication and Media Studies, emphasizing creativity and critical thinking.\n- **Arnaud Michel Nibaruta**: BEL Project Manager, oversees project operations and teaches courses in health technology and healthcare management.\n- **Ryan Johnson**: BEL Program Lead, designs and delivers BEL curricula, specializing in economics and finance.\n- **Dr. Chioma Joy Okonkwo**: BEL Program Lead, combines environmental science and leadership expertise to teach sustainable development and ecological solutions.\n- **Mildred Kasaya Amugune**: Professional Learning Coach (Business, Strategy, and Investment), teaches courses on financial inclusion and business strategy.\n- **Nicholas Ssekiziyivu**: Professional Learning Coach (Business, Strategy, and Investment), focuses on data-driven decision-making in business management and entrepreneurship.\n- **Celma Costa**: Professional Learning Coach (Policy and Advocacy), teaches courses on politics, gender, climate change, and innovation.\n- **Dennis Ngobi**: Professional Learning Coach (Business, Strategy, and Investment), teaches entrepreneurship and international business, with a focus on youth empowerment.\n- **Binusha Balachandran**: Software Engineering (SE) Program Lead, manages academic delivery for SE and teaches system software and performance analysis.\n- **Marvin Ogore**: SE Learning Coach (Machine Learning), teaches machine learning and IoT-embedded systems.\n- **Pelin Mutanguha**: SE Learning Coach, specializes in full-stack web development.\n- **Wakuma Tekalign Debela**: SE Learning Coach, focuses on web development technologies and best practices.\n- **Herve Musangwa**: SE Learning Coach, teaches Linux, version control, Python, and databases.\n- **Neza David Tuyishimire**: SE Learning Coach, covers software engineering, machine learning, and AI.\n- **Samiratu Ntohsi**: SE Machine Learning Coach, teaches mobile app development (Flutter) and machine learning.\n- **Sylvie Ndahimana**: Faculty in International Business and Trade, emphasizes sustainable entrepreneurship and leadership.\n- **Dr. Sixbert Sangwa**: Faculty in International Business and Trade, teaches courses on business development and nonprofit management.\n\n---\n\n### ALU Partners\n- **Glasgow Caledonian University (GCU)**: ALU Mauritius’ founding academic and accreditation partner, offering internationally recognized UK degrees.\n- **African Leadership Group**: A collective including ALU, aiming to develop 2 million ethical, entrepreneurial African leaders by 2030.\n- **Other Educational Partners**: ALU collaborates with additional institutions to ensure global recognition and academic quality of its degrees.\n\n---\n\n### Key Information About ALU\n- **Mission**: To develop ethical and entrepreneurial leaders through a unique learning model that combines real-world experiences with self-directed education.\n- **Learning Model**: Emphasizes student autonomy, hands-on learning, and problem-solving skills to address global challenges.\n- **Degree Recognition**: ALU degrees are fully accredited and internationally recognized, praised for their innovation and quality.\n- **Campuses**: Located in Mauritius and Rwanda, offering diverse learning environments and opportunities."
-    }
-  ]
-}
->>>>>>> c9d6753 (Initial commit for deployment)
