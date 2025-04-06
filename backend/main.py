@@ -1,4 +1,3 @@
-
 import os
 import json
 import uvicorn
@@ -19,7 +18,7 @@ app = FastAPI(title="ALU Chatbot Backend")
 # Add CORS middleware to allow frontend to access the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with your frontend URL in production
+    allow_origins=["*"],  # Will accept connections from any origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -211,4 +210,4 @@ async def set_nyptho_personality(settings: PersonalitySettings):
 # Run the server
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)  # Set reload to False for production

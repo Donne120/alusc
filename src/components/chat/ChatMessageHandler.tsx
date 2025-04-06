@@ -40,12 +40,18 @@ export const useChatMessageHandler = ({
     setIsLoading(true);
 
     try {
+      // Show a subtle toast notification that we're connecting to ALU Brain
+      const toastId = toast.loading("Connecting to ALU Brain...");
+      
       // Get recent messages for context (limited to MAX_CONTEXT_MESSAGES)
       const MAX_CONTEXT_MESSAGES = 10;
       const recentMessages = messages.slice(-MAX_CONTEXT_MESSAGES);
       
       // Generate AI response
       const aiResponse = await aiService.generateResponse(message, recentMessages);
+      
+      // Dismiss the loading toast
+      toast.dismiss(toastId);
       
       // Add AI message to conversation
       const aiMessage: Message = {

@@ -8,45 +8,61 @@ export const BackendStatus = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const useLocalBackend = localStorage.getItem('USE_LOCAL_BACKEND') === 'true';
+  
+  // Get backend URL - use environment variable or default to local for development
+  const getBackendUrl = () => {
+    // Check if a BACKEND_URL is set in localStorage (for testing)
+    const storedBackendUrl = localStorage.getItem('BACKEND_URL');
+    if (storedBackendUrl) return storedBackendUrl;
+    
+    // Local development mode
+    if (useLocalBackend) return "http://localhost:8000";
+    
+    // Production deployment URL - change this to your Render deployment URL
+    return "https://alu-chatbot-backend.onrender.com";
+  };
 
   useEffect(() => {
-    if (!useLocalBackend) {
-      setIsLoading(false);
-      return;
-    }
-
     const checkConnection = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("http://localhost:8000/generate", {
+        const backendUrl = getBackendUrl();
+        
+        const response = await fetch(`${backendUrl}/generate`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ query: "test connection" }),
-          // Timeout after 5 seconds
-          signal: AbortSignal.timeout(5000)
+          // Timeout after 8 seconds (increased for potentially slower response from deployed backend)
+          signal: AbortSignal.timeout(8000)
         });
         
         setIsConnected(response.ok);
         if (!response.ok) {
-          toast.error("Local ALU backend is not responding correctly");
+          toast.error("ALU backend is not responding correctly");
         } else {
           toast.success("Connected to ALU knowledge base");
         }
       } catch (error) {
         console.error("Error connecting to backend:", error);
         setIsConnected(false);
-        toast.error("Could not connect to local ALU backend");
+        toast.error("Could not connect to ALU backend");
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkConnection();
+    // Only check connection if backend is being used
+    if (window.location.hostname !== 'localhost' || useLocalBackend) {
+      checkConnection();
+    } else {
+      setIsLoading(false);
+    }
   }, [useLocalBackend]);
 
-  if (!useLocalBackend) return null;
+  // Don't show anything if not using backend
+  if (!useLocalBackend && window.location.hostname === 'localhost') return null;
 
   return (
     <Badge variant="outline" className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#2A2F3C] text-xs">
