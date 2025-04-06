@@ -1,7 +1,7 @@
 
 import { BrowserRouter as Router } from "react-router-dom";
 import App from "./App";
-import { ThemeProvider as NextThemeProvider } from "next-themes";
+import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "./contexts/AuthContext";
 import { SettingsProvider } from "./contexts/SettingsContext";
 
@@ -10,9 +10,11 @@ function AppWithSettings() {
   return (
     <SettingsProvider>
       <AuthProvider>
-        <Router>
-          <App />
-        </Router>
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <Router>
+            <App />
+          </Router>
+        </ThemeProvider>
       </AuthProvider>
     </SettingsProvider>
   );

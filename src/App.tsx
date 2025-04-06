@@ -7,14 +7,13 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/settings";
 import Documents from "./pages/documents";
 import { Toaster } from "sonner";
-import { ThemeProvider as NextThemeProvider } from "next-themes";
 import { MiniChatbot } from "./components/mini-chatbot";
 
 import "./App.css";
 
 function App() {
   return (
-    <NextThemeProvider attribute="class" defaultTheme="dark">
+    <>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
@@ -25,7 +24,7 @@ function App() {
       </Routes>
       <MiniChatbot />
       <Toaster position="top-center" richColors />
-    </NextThemeProvider>
+    </>
   );
 }
 

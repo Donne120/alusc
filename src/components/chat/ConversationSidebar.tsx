@@ -1,11 +1,12 @@
 
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Conversation } from "@/types/chat";
-import { ChevronLeft, Settings, Trash2, User, X, Database } from "lucide-react";
+import { Plus, Search, Trash2, MessageSquare, Settings, LogOut } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ConversationSidebarProps {
   conversations: Conversation[];
@@ -20,111 +21,109 @@ export const ConversationSidebar = ({
   currentConversationId,
   onNewChat,
   onSelectConversation,
-  onDeleteConversation
+  onDeleteConversation,
 }: ConversationSidebarProps) => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const currentConversation = conversations.find(conv => conv.id === currentConversationId);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { logout, user } = useAuth();
 
-  const handleClearChat = () => {
-    const conversation = conversations.find(conv => conv.id === currentConversationId);
-    if (conversation) {
-      conversation.messages = [{
-        id: "welcome",
-        text: `# Welcome to ALU Student Companion\n\nI'm here to help! I'll remember our conversation and provide relevant context-aware responses. Feel free to ask any questions!`,
-        isAi: true,
-        timestamp: Date.now()
-      }];
-      toast.success("Chat cleared successfully");
-    }
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
   };
 
-  const getConversationTitle = (conversation: Conversation) => {
-    if (conversation.messages.length <= 1) return "New Chat";
-    const firstUserMessage = conversation.messages.find(msg => !msg.isAi);
-    if (!firstUserMessage) return "New Chat";
-    return firstUserMessage.text.slice(0, 30) + (firstUserMessage.text.length > 30 ? '...' : '');
-  };
-
-  const handleDeleteConversation = (convId: string, event: React.MouseEvent) => {
-    event.stopPropagation();
-    onDeleteConversation(convId);
-  };
-
-  const sidebarWidth = isCollapsed ? "w-16" : "w-64";
+  const filteredConversations = conversations.filter(conv => 
+    conv.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    !searchQuery
+  );
 
   return (
-    <div className={`fixed left-0 top-0 h-full ${sidebarWidth} bg-[#202123] p-2 border-r border-gray-700 flex flex-col z-50 transition-all duration-300`}>
-      <div className="absolute -right-4 top-2">
+    <div className="fixed top-0 left-0 h-screen w-16 md:w-64 bg-[#121621] border-r border-[#2A2F3C] flex flex-col z-10">
+      <div className="p-4">
         <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setIsCollapsed(!isCollapsed)} 
-          className="rounded-full bg-[#202123] hover:bg-[#40414f] w-8 h-8"
+          onClick={onNewChat}
+          className="w-full bg-gradient-to-r from-[#9b87f5] to-[#D946EF] hover:opacity-90 flex justify-center md:justify-start gap-2 p-2.5"
+          variant="default"
         >
-          <ChevronLeft className={`h-4 w-4 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
+          <Plus className="h-5 w-5" />
+          <span className="hidden md:inline">New Chat</span>
         </Button>
       </div>
-      
-      <div className="flex-1 overflow-y-auto mb-2">
-        <button 
-          onClick={onNewChat} 
-          className={`w-full p-3 mb-2 bg-[#40414f] hover:bg-[#4f505f] rounded-lg text-left flex items-center gap-2 ${isCollapsed ? 'justify-center' : ''}`}
-        >
-          {isCollapsed ? '+' : <span>+ New Chat</span>}
-        </button>
 
-        <div className="space-y-2">
-          {conversations.map(conv => (
-            <div key={conv.id} className="group relative">
-              <button 
-                onClick={() => onSelectConversation(conv.id)} 
-                className={`w-full p-3 rounded-lg text-left truncate hover:bg-[#40414f] ${conv.id === currentConversationId ? 'bg-[#40414f]' : ''} ${isCollapsed ? 'justify-center' : ''}`}
-              >
-                {isCollapsed ? '💬' : getConversationTitle(conv)}
-              </button>
-              {!isCollapsed && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={e => handleDeleteConversation(conv.id, e)} 
-                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-[#40414f]"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+      <div className="relative mx-4 mb-2">
+        <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search conversations..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 pr-3 py-2 bg-[#1a1f2c] border border-[#2A2F3C] rounded-md w-full focus:outline-none focus:ring-1 focus:ring-[#9b87f5] text-gray-300 text-sm"
+        />
+      </div>
+
+      <div className="flex-1 overflow-auto p-2">
+        {filteredConversations.length > 0 ? (
+          filteredConversations.map((conversation) => (
+            <div
+              key={conversation.id}
+              onClick={() => onSelectConversation(conversation.id)}
+              className={cn(
+                "flex items-center justify-between p-3 rounded-lg mb-1 cursor-pointer group transition-all",
+                conversation.id === currentConversationId
+                  ? "bg-[#2A2F3C] text-white"
+                  : "hover:bg-[#1a1f2c] text-gray-300"
               )}
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <MessageSquare className="h-5 w-5 flex-shrink-0" />
+                <div className="truncate">
+                  {conversation.title || "New Conversation"}
+                </div>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteConversation(conversation.id);
+                }}
+                className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-[#343B4C] transition-all"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
-          ))}
-        </div>
+          ))
+        ) : (
+          <div className="text-gray-400 text-center py-4 px-2">
+            {searchQuery ? "No conversations match your search." : "No conversations yet. Start a new chat!"}
+          </div>
+        )}
       </div>
       
-      <div className="mt-auto border-t border-gray-700 pt-2 sticky bottom-0 bg-[#202123]">
-        {currentConversationId && !isCollapsed && (
-          <button 
-            onClick={handleClearChat} 
-            className="w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300"
+      <div className="p-4 border-t border-[#2A2F3C] space-y-2">
+        <div className="flex items-center gap-3 px-1 py-2 text-gray-300">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-r from-[#9b87f5] to-[#D946EF] flex items-center justify-center text-white font-medium">
+            {user?.name?.charAt(0) || 'U'}
+          </div>
+          <div className="hidden md:block truncate">
+            <div className="text-sm font-medium">{user?.name || 'User'}</div>
+            <div className="text-xs text-gray-400 truncate">{user?.email || 'user@example.com'}</div>
+          </div>
+        </div>
+        
+        <div className="flex justify-around">
+          <Link to="/settings">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-200" title="Settings">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-gray-400 hover:text-red-500" 
+            onClick={handleLogout}
+            title="Log out"
           >
-            <Trash2 className="h-4 w-4" />
-            <span>Clear Chat</span>
-          </button>
-        )}
-        
-        <button 
-          onClick={() => navigate('/profile')} 
-          className={`w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300 ${isCollapsed ? 'justify-center' : ''}`}
-        >
-          <User className="h-4 w-4" />
-          {!isCollapsed && <span>{user?.name || 'Profile'}</span>}
-        </button>
-        
-        <button 
-          onClick={() => navigate('/settings')} 
-          className={`w-full p-3 text-left hover:bg-[#40414f] rounded-lg flex items-center gap-2 text-gray-300 ${isCollapsed ? 'justify-center' : ''}`}
-        >
-          <Settings className="h-4 w-4" />
-          {!isCollapsed && <span>Settings</span>}
-        </button>
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
     </div>
   );
