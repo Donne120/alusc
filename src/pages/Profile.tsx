@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -8,13 +9,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Camera, LogOut, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const { user, updateProfile, logout } = useAuth();
   const [name, setName] = useState(user?.name || "");
   const [isEditing, setIsEditing] = useState(false);
   const [imageUrl, setImageUrl] = useState(user?.picture || "");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +43,7 @@ export default function Profile() {
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully");
+    navigate("/login");
   };
 
   return (

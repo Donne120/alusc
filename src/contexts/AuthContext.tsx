@@ -1,6 +1,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { User, AuthState } from "@/types/auth";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;

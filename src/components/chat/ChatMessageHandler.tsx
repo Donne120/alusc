@@ -20,6 +20,11 @@ export const useChatMessageHandler = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSendMessage = async (message: string, files: File[] = []) => {
+    if (!message.trim() && files.length === 0) {
+      toast.error("Please enter a message or attach a file");
+      return;
+    }
+
     const attachments = await Promise.all(
       files.map(async (file) => ({
         type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
@@ -77,6 +82,11 @@ export const useChatMessageHandler = ({
   };
 
   const handleEditMessage = (messageId: string, newText: string) => {
+    if (!newText.trim()) {
+      toast.error("Message cannot be empty");
+      return;
+    }
+    
     const aiMessage = messages.find(msg => msg.isAi && messages.indexOf(msg) > messages.findIndex(m => m.id === messageId));
     if (aiMessage) {
       toast.warning("Editing this message may cause inconsistencies with the AI's response");
