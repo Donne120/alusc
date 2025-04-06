@@ -1,0 +1,97 @@
+{
+  "category": "admissions",
+  "description": "Comprehensive information about ALU's application process, admission requirements, deadlines, scholarships, fees, and related statistics.",
+  "entries": [
+    {
+      "id": "adm_001",
+      "type": "factual_response",
+      "question": "What are the admission requirements for ALU?",
+      "answer": "ALU requires applicants to submit a completed application form, official high school transcripts, a personal statement outlining leadership potential and academic goals, and at least two letters of recommendation. Standardized test scores (SAT/ACT) are optional but can bolster an application when submitted. Additional documentation, such as portfolios for art or writing programs, may be requested depending on the intended program of study.",
+      "conditions": "Requirements may vary slightly for international applicants and specific programs."
+    },
+    {
+      "id": "adm_002",
+      "type": "date_response",
+      "question": "When are application deadlines for ALU?",
+      "answer": "ALU accepts applications in multiple rounds throughout the year:",
+      "dates": [
+        {
+          "round": "Early Decision",
+          "deadline": "November 15",
+          "notification": "December 20"
+        },
+        {
+          "round": "Regular Decision",
+          "deadline": "February 15",
+          "notification": "April 1"
+        },
+        {
+          "round": "Late Decision",
+          "deadline": "May 1",
+          "notification": "June 15"
+        }
+      ]
+    },
+    {
+      "id": "adm_003",
+      "type": "long_response",
+      "question": "How does the ALU scholarship system work?",
+      "answer": "ALU is committed to making high-quality education accessible. The scholarship system combines merit-based awards with need-based financial aid. Merit scholarships are automatically awarded based on academic achievement, leadership experiences, and the strength of the personal statement. For need-based aid, applicants must complete a detailed financial aid form and provide supporting documentation of family income and financial responsibility. Additional scholarships are available through partnerships with governmental bodies, foundations, and corporate sponsors. Scholarship recipients are required to maintain academic excellence and typically engage in community or campus service projects as part of their award conditions."
+    },
+    {
+      "id": "adm_004",
+      "type": "procedural_response",
+      "question": "What is the application process for international students at ALU?",
+      "answer": "International students should follow these steps to apply:\n1. Create an account and fill out the online application form on the ALU website.\n2. Upload official academic transcripts, a copy of your passport, and English proficiency test scores (TOEFL with a minimum of 80 or IELTS with a minimum of 6.5), unless you have completed secondary education in English.\n3. Write and submit a personal statement that highlights your leadership potential and academic interests.\n4. Request and submit two letters of recommendation from teachers, counselors, or community leaders.\n5. Complete a financial aid application if you require need-based scholarships.\n6. Participate in an admissions interview or virtual assessment session.\n7. Pay the non-refundable application fee, or apply for a fee waiver if eligible.\n8. Monitor your application status through the portal and respond to any additional information requests promptly.",
+      "requirements": "International applicants must demonstrate English proficiency, and some programs may require additional materials such as portfolios or essays."
+    },
+    {
+      "id": "adm_005",
+      "type": "short_response",
+      "question": "Is there an application fee for ALU?",
+      "answer": "Yes, ALU charges a non-refundable application fee of $50 USD. Fee waivers may be available for applicants who can demonstrate financial need or for those applying from partner schools."
+    },
+    {
+      "id": "adm_006",
+      "type": "statistical_response",
+      "question": "What are the current admission statistics at ALU?",
+      "answer": "Recent application metrics indicate:",
+      "statistics": [
+        {
+          "metric": "Overall acceptance rate",
+          "value": "18%"
+        },
+        {
+          "metric": "Early Decision acceptance rate",
+          "value": "24%"
+        },
+        {
+          "metric": "Regular Decision acceptance rate",
+          "value": "16%"
+        },
+        {
+          "metric": "International student percentage",
+          "value": "42%"
+        },
+        {
+          "metric": "Students receiving financial aid",
+          "value": "78%"
+        }
+      ],
+      "note": "These figures are based on the most recent data and may change annually."
+    },
+    {
+      "id": "adm_007",
+      "type": "factual_response",
+      "question": "Can applicants update or change their application information after submission?",
+      "answer": "Yes, ALU allows applicants to update certain parts of their application after submitting. Updates can generally be made through the applicant portal, especially for any additional documentation or corrections. However, any substantive changes must be reviewed and approved by the admissions committee before a final decision is made."
+    },
+    {
+      "id": "adm_008",
+      "type": "procedural_response",
+      "question": "How do I request a fee waiver if I cannot afford the application fee?",
+      "answer": "To request a fee waiver, follow these steps:\n1. Indicate on the application form that you are seeking a fee waiver.\n2. Complete the additional fee waiver form provided on the ALU admissions site.\n3. Provide documentation that supports your request, such as a letter explaining your financial situation and any supporting financial documents.\n4. Submit your fee waiver request along with your completed application.\n5. Await confirmation from the admissions office regarding your fee waiver status.",
+      "requirements": "Fee waiver eligibility is determined by financial need and is subject to review by the admissions team."
+    }
+  ]
+}
