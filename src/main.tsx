@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -11,3 +12,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <AppWithSettings />
   </React.StrictMode>,
 )
+=======
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+
+createRoot(document.getElementById("root")!).render(<App />);
+>>>>>>> c9d6753 (Initial commit for deployment)
