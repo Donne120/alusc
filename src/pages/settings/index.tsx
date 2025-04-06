@@ -2,7 +2,7 @@
 import { useSettings } from '@/contexts/SettingsContext';
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import { ArrowLeft, Check, Moon, Sun, Monitor, VolumeX, Volume2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Check, Moon, Sun, Monitor, VolumeX, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -12,49 +12,40 @@ const Settings = () => {
   const { 
     theme, 
     setTheme, 
-    aiModel, 
-    setAiModel, 
-    personaName,
-    setPersonaName,
-    accessibilityMode,
-    setAccessibilityMode,
-    notificationSounds,
-    setNotificationSounds,
-    volume,
-    setVolume,
-    messageToneAudio
+    aiPersona,
+    setAiPersona,
+    aiTraits,
+    updateAiTrait,
+    useNyptho,
+    setUseNyptho,
+    notificationSound,
+    setNotificationSound,
+    resetToDefaults
   } = useSettings();
 
   const [testAudio, setTestAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    setTestAudio(new Audio(messageToneAudio));
-  }, [messageToneAudio]);
+    setTestAudio(new Audio('/message.mp3'));
+  }, []);
 
   const playTestSound = () => {
-    if (testAudio && notificationSounds) {
-      testAudio.volume = volume / 100;
+    if (testAudio && notificationSound) {
+      testAudio.volume = 0.5;
       testAudio.play();
       toast.success("Playing notification sound");
-    } else if (!notificationSounds) {
+    } else if (!notificationSound) {
       toast.error("Notification sounds are disabled");
     }
   };
 
-  const modelOptions = [
-    { id: 'gemini', name: 'Gemini Pro', description: 'Balanced model with strong capabilities' },
-    { id: 'llama3', name: 'Llama 3', description: 'Open source model with good performance' },
-    { id: 'mistral', name: 'Mistral', description: 'Fast response with good accuracy' },
-    { id: 'claude', name: 'Claude', description: 'Advanced reasoning capabilities' },
-    { id: 'gpt4', name: 'GPT-4', description: 'High performance but higher latency' },
-  ];
-
   const personaOptions = [
-    { id: 'assistant', name: 'Assistant', description: 'Helpful, polite, and professional' },
-    { id: 'tutor', name: 'Tutor', description: 'Educational focused with explanations' },
-    { id: 'friend', name: 'Friend', description: 'Casual, conversational tone' },
-    { id: 'expert', name: 'Expert', description: 'Technical, detailed responses' },
-    { id: 'concise', name: 'Concise', description: 'Brief, to-the-point answers' },
+    { id: 'academic', name: 'Academic', description: 'Educational and informative responses' },
+    { id: 'creative', name: 'Creative', description: 'Imaginative and expressive communication' },
+    { id: 'technical', name: 'Technical', description: 'Precise and detailed explanations' },
+    { id: 'supportive', name: 'Supportive', description: 'Encouraging and helpful guidance' },
+    { id: 'nyptho', name: 'Nyptho', description: 'Advanced AI with machine learning' },
+    { id: 'custom', name: 'Custom', description: 'Personalized settings' },
   ];
 
   return (
@@ -104,19 +95,6 @@ const Settings = () => {
                     </Button>
                   </div>
                 </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-base font-medium">Accessibility Mode</h3>
-                    <Switch
-                      checked={accessibilityMode}
-                      onCheckedChange={setAccessibilityMode}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-400">
-                    Enables larger text, increased contrast, and simplified interfaces
-                  </p>
-                </div>
               </div>
             </div>
           </section>
@@ -125,28 +103,28 @@ const Settings = () => {
           <section>
             <h2 className="text-xl font-semibold mb-6">AI Settings</h2>
             <div className="bg-[#2A2F3C] rounded-lg p-6 space-y-8">
-              {/* AI Models */}
+              {/* AI Persona */}
               <div>
-                <h3 className="text-base font-medium mb-4">AI Model</h3>
+                <h3 className="text-base font-medium mb-4">AI Persona</h3>
                 <p className="text-sm text-gray-400 mb-4">
-                  Select which model powers your AI assistant
+                  Choose which type of personality your AI assistant uses
                 </p>
                 <div className="space-y-2">
-                  {modelOptions.map((model) => (
+                  {personaOptions.map((persona) => (
                     <div
-                      key={model.id}
+                      key={persona.id}
                       className={`p-4 rounded-lg cursor-pointer flex items-center justify-between transition-colors ${
-                        aiModel === model.id
+                        aiPersona === persona.id
                           ? 'bg-[#3C4250] border border-[#9b87f5]/50'
                           : 'bg-[#232936] hover:bg-[#2F3542]'
                       }`}
-                      onClick={() => setAiModel(model.id)}
+                      onClick={() => setAiPersona(persona.id as any)}
                     >
                       <div>
-                        <h4 className="font-medium">{model.name}</h4>
-                        <p className="text-sm text-gray-400">{model.description}</p>
+                        <h4 className="font-medium">{persona.name}</h4>
+                        <p className="text-sm text-gray-400">{persona.description}</p>
                       </div>
-                      {aiModel === model.id && (
+                      {aiPersona === persona.id && (
                         <div className="h-6 w-6 rounded-full bg-[#9b87f5] flex items-center justify-center">
                           <Check className="h-4 w-4 text-white" />
                         </div>
@@ -156,34 +134,84 @@ const Settings = () => {
                 </div>
               </div>
 
-              {/* AI Persona */}
-              <div>
-                <h3 className="text-base font-medium mb-4">AI Persona</h3>
-                <p className="text-sm text-gray-400 mb-4">
-                  Choose how your AI assistant communicates
-                </p>
-                <div className="space-y-2">
-                  {personaOptions.map((persona) => (
-                    <div
-                      key={persona.id}
-                      className={`p-4 rounded-lg cursor-pointer flex items-center justify-between transition-colors ${
-                        personaName === persona.id
-                          ? 'bg-[#3C4250] border border-[#9b87f5]/50'
-                          : 'bg-[#232936] hover:bg-[#2F3542]'
-                      }`}
-                      onClick={() => setPersonaName(persona.id)}
-                    >
-                      <div>
-                        <h4 className="font-medium">{persona.name}</h4>
-                        <p className="text-sm text-gray-400">{persona.description}</p>
+              {/* Custom AI Traits */}
+              {(aiPersona === 'custom' || aiPersona === 'nyptho') && (
+                <div>
+                  <h3 className="text-base font-medium mb-4">Custom AI Traits</h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    Adjust these sliders to customize how your AI assistant behaves
+                  </p>
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium">Helpfulness</h4>
+                        <span className="text-xs bg-[#3C4250] px-2 py-1 rounded">{aiTraits.helpfulness}%</span>
                       </div>
-                      {personaName === persona.id && (
-                        <div className="h-6 w-6 rounded-full bg-[#9b87f5] flex items-center justify-center">
-                          <Check className="h-4 w-4 text-white" />
-                        </div>
-                      )}
+                      <Slider
+                        value={[aiTraits.helpfulness]}
+                        min={0}
+                        max={100}
+                        step={5}
+                        onValueChange={(value) => updateAiTrait('helpfulness', value[0])}
+                      />
                     </div>
-                  ))}
+                    
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium">Creativity</h4>
+                        <span className="text-xs bg-[#3C4250] px-2 py-1 rounded">{aiTraits.creativity}%</span>
+                      </div>
+                      <Slider
+                        value={[aiTraits.creativity]}
+                        min={0}
+                        max={100}
+                        step={5}
+                        onValueChange={(value) => updateAiTrait('creativity', value[0])}
+                      />
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium">Precision</h4>
+                        <span className="text-xs bg-[#3C4250] px-2 py-1 rounded">{aiTraits.precision}%</span>
+                      </div>
+                      <Slider
+                        value={[aiTraits.precision]}
+                        min={0}
+                        max={100}
+                        step={5}
+                        onValueChange={(value) => updateAiTrait('precision', value[0])}
+                      />
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium">Friendliness</h4>
+                        <span className="text-xs bg-[#3C4250] px-2 py-1 rounded">{aiTraits.friendliness}%</span>
+                      </div>
+                      <Slider
+                        value={[aiTraits.friendliness]}
+                        min={0}
+                        max={100}
+                        step={5}
+                        onValueChange={(value) => updateAiTrait('friendliness', value[0])}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Nyptho Settings */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="text-base font-medium">Use Nyptho AI</h3>
+                    <p className="text-sm text-gray-400">Enable advanced meta-learning capabilities</p>
+                  </div>
+                  <Switch
+                    checked={useNyptho}
+                    onCheckedChange={setUseNyptho}
+                  />
                 </div>
               </div>
             </div>
@@ -200,40 +228,41 @@ const Settings = () => {
                 </div>
                 <div className="flex items-center">
                   <Switch
-                    checked={notificationSounds}
-                    onCheckedChange={setNotificationSounds}
+                    checked={notificationSound}
+                    onCheckedChange={setNotificationSound}
                   />
                 </div>
               </div>
 
-              <div className={notificationSounds ? 'opacity-100' : 'opacity-50 pointer-events-none'}>
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-base font-medium">Sound Volume</h3>
-                    <span className="text-sm bg-[#3C4250] px-2 py-1 rounded">{volume}%</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <VolumeX className="h-5 w-5 text-gray-400" />
-                    <Slider
-                      className="flex-1"
-                      value={[volume]}
-                      min={0}
-                      max={100}
-                      step={5}
-                      onValueChange={(value) => setVolume(value[0])}
-                    />
-                    <Volume2 className="h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
+              <div className={notificationSound ? 'opacity-100' : 'opacity-50 pointer-events-none'}>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={playTestSound}
-                  disabled={!notificationSounds}
+                  disabled={!notificationSound}
                 >
                   Test sound
                 </Button>
               </div>
+            </div>
+          </section>
+
+          {/* Reset Settings */}
+          <section>
+            <h2 className="text-xl font-semibold mb-6">Reset Settings</h2>
+            <div className="bg-[#2A2F3C] rounded-lg p-6">
+              <p className="text-gray-300 mb-4">
+                Reset all settings to their default values. This cannot be undone.
+              </p>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  resetToDefaults();
+                  toast.success("Settings reset to defaults");
+                }}
+              >
+                Reset All Settings
+              </Button>
             </div>
           </section>
 
