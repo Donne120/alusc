@@ -16,4 +16,6 @@ export interface Conversation {
   title: string;
   messages: Message[];
   timestamp: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

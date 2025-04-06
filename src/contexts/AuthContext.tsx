@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect } from "react";
 import { User, AuthState } from "@/types/auth";
 
@@ -35,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       name: email.split("@")[0],
       createdAt: new Date(),
+      picture: null,
     };
     
     localStorage.setItem("user", JSON.stringify(user));
@@ -51,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       name,
       createdAt: new Date(),
+      picture: null,
     };
     
     localStorage.setItem("user", JSON.stringify(user));

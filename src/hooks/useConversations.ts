@@ -10,10 +10,13 @@ export const useConversations = () => {
   const [currentConversationId, setCurrentConversationId] = useState<string>('');
 
   const initializeDefaultConversation = () => {
+    const now = new Date();
     const defaultConversation: Conversation = {
       id: Date.now().toString(),
       title: "New Chat",
       timestamp: Date.now(),
+      createdAt: now,
+      updatedAt: now,
       messages: [{
         id: "welcome",
         text: `# Welcome to ALU Student Companion\n\nI'm here to help! I'll remember our conversation and provide relevant context-aware responses. Feel free to ask any questions!`,
@@ -65,11 +68,14 @@ export const useConversations = () => {
   };
 
   const createNewConversation = () => {
+    const now = new Date();
     const newConversation: Conversation = {
       id: Date.now().toString(),
       title: "New Chat",
       messages: [],
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      createdAt: now,
+      updatedAt: now
     };
     setConversations(prev => [newConversation, ...prev]);
     setCurrentConversationId(newConversation.id);
@@ -102,7 +108,8 @@ export const useConversations = () => {
         return {
           ...conv,
           messages: [...conv.messages, message],
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          updatedAt: new Date()
         };
       }
       return conv;
@@ -118,7 +125,8 @@ export const useConversations = () => {
             msg.id === messageId
               ? { ...msg, text: newText, timestamp: Date.now() }
               : msg
-          )
+          ),
+          updatedAt: new Date()
         };
       }
       return conv;

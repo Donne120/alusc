@@ -33,9 +33,12 @@ export const ChatContainer = () => {
     updateMessageInConversation
   } = useConversations();
 
+  // Get the current conversation safely
   const currentConversation = getCurrentConversation();
 
   const updateConversationTitle = (convId: string, title: string) => {
+    if (!conversations) return;
+    
     const conversation = conversations.find(c => c.id === convId);
     if (conversation) {
       const updatedConversation: Conversation = {
@@ -52,7 +55,7 @@ export const ChatContainer = () => {
     handleEditMessage
   } = useChatMessageHandler({
     currentConversationId,
-    messages: currentConversation.messages,
+    messages: currentConversation?.messages || [],
     onAddMessage: addMessageToConversation,
     onUpdateTitle: updateConversationTitle
   });
@@ -82,7 +85,7 @@ export const ChatContainer = () => {
           </div>
           <div className="pb-32">
             <ChatMessages
-              messages={currentConversation.messages}
+              messages={currentConversation?.messages || []}
               isLoading={isLoading}
               onEditMessage={handleEditMessageWrapper}
               activeModel={activeModel}

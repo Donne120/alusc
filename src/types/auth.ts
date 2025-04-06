@@ -1,9 +1,10 @@
+
 export interface User {
   id: string;
-  email: string;
   name: string;
-  picture?: string;
+  email: string;
   createdAt: Date;
+  picture: string | null;
 }
 
 export interface AuthState {
