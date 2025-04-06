@@ -2,9 +2,13 @@
 import { MiniChatbot } from "./MiniChatbot";
 import { MiniChatbotContentUpdated } from "./MiniChatbotContentUpdated";
 
-// Re-export with the updated content
+// Create a unified component that combines both
 const UpdatedMiniChatbot = () => {
-  return <MiniChatbot content={<MiniChatbotContentUpdated />} />;
+  return (
+    <MiniChatbot>
+      <MiniChatbotContentUpdated />
+    </MiniChatbot>
+  );
 };
 
 export { UpdatedMiniChatbot as MiniChatbot };
