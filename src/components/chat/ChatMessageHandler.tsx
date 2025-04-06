@@ -19,7 +19,7 @@ export const useChatMessageHandler = ({
 }: ChatMessageHandlerProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = async (message: string, files: File[]) => {
+  const handleSendMessage = async (message: string, files: File[] = []) => {
     const attachments = await Promise.all(
       files.map(async (file) => ({
         type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
@@ -64,7 +64,7 @@ export const useChatMessageHandler = ({
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error instanceof Error ? error.message : `Failed to get response from Gemini`);
+      toast.error(error instanceof Error ? error.message : "Failed to get response from ALU Brain");
     } finally {
       setIsLoading(false);
     }

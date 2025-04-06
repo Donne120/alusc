@@ -69,11 +69,11 @@ export const HumanChatActiveStage = ({
                 <TooltipTrigger asChild>
                   <Badge className="ml-2 bg-gradient-to-r from-indigo-500 to-purple-600">
                     <Brain className="w-3 h-3 mr-1" />
-                    Nyptho
+                    ALU Brain
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
-                  Using Nyptho meta-learning AI
+                  Using ALU Brain knowledge base
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -129,7 +129,7 @@ export const HumanChatActiveStage = ({
               {useNyptho && <Sparkles className="w-3 h-3 ml-1 text-purple-400" />}
             </span>
 
-            {useNyptho && (
+            {aiPersona.traits && (
               <div className="flex gap-2 ml-auto">
                 {Object.entries(aiPersona.traits).map(([trait, value]) => (
                   <Badge key={trait} variant="outline" className="text-xs py-0 h-5">

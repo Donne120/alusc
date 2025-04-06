@@ -1,6 +1,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Brain, Server } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export const BackendStatus = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -29,6 +31,8 @@ export const BackendStatus = () => {
         setIsConnected(response.ok);
         if (!response.ok) {
           toast.error("Local ALU backend is not responding correctly");
+        } else {
+          toast.success("Connected to ALU knowledge base");
         }
       } catch (error) {
         console.error("Error connecting to backend:", error);
@@ -45,17 +49,18 @@ export const BackendStatus = () => {
   if (!useLocalBackend) return null;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#2A2F3C] text-xs">
-      <div 
-        className={`w-2 h-2 rounded-full ${
-          isLoading ? "bg-yellow-500 animate-pulse" : 
-          isConnected ? "bg-green-500" : "bg-red-500"
-        }`} 
-      />
+    <Badge variant="outline" className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#2A2F3C] text-xs">
+      {isLoading ? (
+        <Server className="h-3 w-3 animate-pulse text-yellow-500" />
+      ) : isConnected ? (
+        <Brain className="h-3 w-3 text-green-500" />
+      ) : (
+        <Server className="h-3 w-3 text-red-500" />
+      )}
       <span>
         {isLoading ? "Connecting to ALU backend..." : 
-         isConnected ? "ALU Backend: Connected" : "ALU Backend: Disconnected"}
+         isConnected ? "ALU Brain: Connected" : "ALU Backend: Disconnected"}
       </span>
-    </div>
+    </Badge>
   );
 };
