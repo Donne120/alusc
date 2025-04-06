@@ -1,17 +1,21 @@
 
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import App from "./App";
-import { SettingsProvider } from "@/contexts/SettingsContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider as NextThemeProvider } from "next-themes";
+import { AuthProvider } from "./contexts/AuthContext";
+import { SettingsProvider } from "./contexts/SettingsContext";
 
-export default function AppWithSettings() {
+// Wrapper that provides settings and auth context to the app
+function AppWithSettings() {
   return (
-    <BrowserRouter>
+    <SettingsProvider>
       <AuthProvider>
-        <SettingsProvider>
+        <Router>
           <App />
-        </SettingsProvider>
+        </Router>
       </AuthProvider>
-    </BrowserRouter>
+    </SettingsProvider>
   );
 }
+
+export default AppWithSettings;

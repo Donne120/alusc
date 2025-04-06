@@ -1,11 +1,11 @@
 
-import { createContext, useContext, useState, useEffect } from "react";
-import { useTheme } from "@/hooks/use-theme";
-import { toast } from "sonner";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { useTheme } from "next-themes";
 
-type AiPersona = "academic" | "creative" | "technical" | "supportive" | "nyptho" | "custom";
+// Define types for our settings
+type AIPersonaType = "academic" | "creative" | "technical" | "supportive" | "nyptho" | "custom";
 
-interface AiTraits {
+interface AITraitsType {
   helpfulness: number;
   creativity: number;
   precision: number;
@@ -13,37 +13,66 @@ interface AiTraits {
 }
 
 interface SettingsContextType {
-  theme: "light" | "dark" | "system";
-  setTheme: (theme: "light" | "dark" | "system") => void;
-  aiPersona: AiPersona;
-  setAiPersona: (persona: AiPersona) => void;
-  aiTraits: AiTraits;
-  updateAiTrait: (trait: keyof AiTraits, value: number) => void;
+  // Theme settings
+  theme: string;
+  setTheme: (theme: string) => void;
+  
+  // AI persona settings
+  aiPersona: AIPersonaType;
+  setAiPersona: (persona: AIPersonaType) => void;
+  
+  // AI traits
+  aiTraits: AITraitsType;
+  updateAiTrait: (trait: keyof AITraitsType, value: number) => void;
+  
+  // Nyptho settings
   useNyptho: boolean;
-  setUseNyptho: (value: boolean) => void;
+  setUseNyptho: (use: boolean) => void;
+  
+  // Sound settings
   notificationSound: boolean;
-  setNotificationSound: (value: boolean) => void;
+  setNotificationSound: (enabled: boolean) => void;
+  
+  // Reset function
   resetToDefaults: () => void;
 }
 
-const defaultAiTraits: AiTraits = {
+// Default values for settings
+const defaultAITraits: AITraitsType = {
   helpfulness: 75,
   creativity: 50,
   precision: 85,
-  friendliness: 70
+  friendliness: 70,
 };
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+// Create context with default values
+const SettingsContext = createContext<SettingsContextType>({
+  theme: "dark",
+  setTheme: () => {},
+  aiPersona: "academic",
+  setAiPersona: () => {},
+  aiTraits: defaultAITraits,
+  updateAiTrait: () => {},
+  useNyptho: false,
+  setUseNyptho: () => {},
+  notificationSound: true,
+  setNotificationSound: () => {},
+  resetToDefaults: () => {},
+});
 
-export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const { theme, setTheme } = useTheme();
-  const [aiPersona, setAiPersona] = useState<AiPersona>(() => {
-    return (localStorage.getItem("AI_PERSONA") as AiPersona) || "academic";
+export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Use next-themes for theme handling
+  const { theme, setTheme: setNextTheme } = useTheme();
+  
+  // Load settings from localStorage or use defaults
+  const [aiPersona, setAiPersona] = useState<AIPersonaType>(() => {
+    const saved = localStorage.getItem("AI_PERSONA");
+    return (saved as AIPersonaType) || "academic";
   });
   
-  const [aiTraits, setAiTraits] = useState<AiTraits>(() => {
-    const savedTraits = localStorage.getItem("AI_TRAITS");
-    return savedTraits ? JSON.parse(savedTraits) : { ...defaultAiTraits };
+  const [aiTraits, setAiTraits] = useState<AITraitsType>(() => {
+    const saved = localStorage.getItem("AI_TRAITS");
+    return saved ? JSON.parse(saved) : defaultAITraits;
   });
   
   const [useNyptho, setUseNyptho] = useState<boolean>(() => {
@@ -51,10 +80,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   });
   
   const [notificationSound, setNotificationSound] = useState<boolean>(() => {
-    return localStorage.getItem("NOTIFICATION_SOUND") !== "false"; // Default to true
+    return localStorage.getItem("NOTIFICATION_SOUND") !== "false";
   });
 
-  // Save settings to localStorage whenever they change
+  // Update localStorage when settings change
   useEffect(() => {
     localStorage.setItem("AI_PERSONA", aiPersona);
   }, [aiPersona]);
@@ -71,43 +100,46 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("NOTIFICATION_SOUND", notificationSound.toString());
   }, [notificationSound]);
 
-  const updateAiTrait = (trait: keyof AiTraits, value: number) => {
-    setAiTraits(prev => ({ ...prev, [trait]: value }));
+  // Function to update a specific AI trait
+  const updateAiTrait = (trait: keyof AITraitsType, value: number) => {
+    setAiTraits((prev) => ({
+      ...prev,
+      [trait]: value,
+    }));
+    
+    // Switch to custom persona automatically when traits are changed
+    setAiPersona("custom");
   };
 
+  // Reset all settings to defaults
   const resetToDefaults = () => {
+    setNextTheme("dark");
     setAiPersona("academic");
-    setAiTraits({ ...defaultAiTraits });
+    setAiTraits(defaultAITraits);
     setUseNyptho(false);
     setNotificationSound(true);
-    toast.success("Settings reset to defaults");
   };
 
   return (
-    <SettingsContext.Provider 
-      value={{ 
-        theme, 
-        setTheme, 
-        aiPersona, 
-        setAiPersona, 
-        aiTraits, 
+    <SettingsContext.Provider
+      value={{
+        theme: theme || "dark",
+        setTheme: setNextTheme,
+        aiPersona,
+        setAiPersona,
+        aiTraits,
         updateAiTrait,
         useNyptho,
         setUseNyptho,
         notificationSound,
         setNotificationSound,
-        resetToDefaults
+        resetToDefaults,
       }}
     >
       {children}
     </SettingsContext.Provider>
   );
-}
-
-export const useSettings = () => {
-  const context = useContext(SettingsContext);
-  if (context === undefined) {
-    throw new Error("useSettings must be used within a SettingsProvider");
-  }
-  return context;
 };
+
+// Custom hook to use the settings context
+export const useSettings = () => useContext(SettingsContext);

@@ -4,16 +4,12 @@ export interface Message {
   text: string;
   isAi: boolean;
   timestamp: number;
-  attachments?: Array<{
-    type: 'image' | 'file';
-    url: string;
-    name: string;
-  }>;
 }
 
 export interface Conversation {
   id: string;
-  title: string;
+  title?: string;
   messages: Message[];
-  timestamp: number;
+  createdAt: number;
+  updatedAt: number;
 }

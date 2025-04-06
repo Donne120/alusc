@@ -1,86 +1,66 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { User, AuthState } from "@/types/auth";
 
-interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
-  updateProfile: (data: Partial<User>) => Promise<void>;
+import React, { createContext, useState, useContext, useEffect } from "react";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType {
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  isAuthenticated: boolean;
+}
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    isAuthenticated: false,
-  });
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  login: async () => {},
+  logout: () => {},
+  isAuthenticated: false,
+});
 
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Check for user in localStorage on initial load
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setAuthState({ user, isAuthenticated: true });
+      setUser(JSON.parse(savedUser));
+      setIsAuthenticated(true);
     }
   }, []);
 
   const login = async (email: string, password: string) => {
-    if (!email.endsWith("@alustudent.com")) {
-      throw new Error("Only @alustudent.com emails are allowed");
-    }
-    
-    // Simulate API call
-    const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      email,
-      name: email.split("@")[0],
-      createdAt: new Date(),
+    // This would normally be an API call to authenticate the user
+    // For demo purposes, we'll just create a mock user
+    const mockUser = {
+      id: "123",
+      name: "Demo User",
+      email: email,
+      role: "student",
     };
     
-    localStorage.setItem("user", JSON.stringify(user));
-    setAuthState({ user, isAuthenticated: true });
-  };
-
-  const signup = async (email: string, password: string, name: string) => {
-    if (!email.endsWith("@alustudent.com")) {
-      throw new Error("Only @alustudent.com emails are allowed");
-    }
-    
-    const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      email,
-      name,
-      createdAt: new Date(),
-    };
-    
-    localStorage.setItem("user", JSON.stringify(user));
-    setAuthState({ user, isAuthenticated: true });
+    setUser(mockUser);
+    setIsAuthenticated(true);
+    localStorage.setItem("user", JSON.stringify(mockUser));
   };
 
   const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
     localStorage.removeItem("user");
-    setAuthState({ user: null, isAuthenticated: false });
-  };
-
-  const updateProfile = async (data: Partial<User>) => {
-    if (!authState.user) return;
-    
-    const updatedUser = { ...authState.user, ...data };
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    setAuthState({ user: updatedUser, isAuthenticated: true });
   };
 
   return (
-    <AuthContext.Provider value={{ ...authState, login, signup, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 };
+
+export const useAuth = () => useContext(AuthContext);
