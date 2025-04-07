@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Calendar, Users, School } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MiniChatbotContent } from "./MiniChatbotContent";
@@ -64,13 +64,13 @@ export const MiniChatbot = () => {
       onMouseDown={handleMouseDown}
     >
       {isOpen ? (
-        <Card className="w-80 shadow-lg animate-fade-in bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between p-3 bg-primary text-primary-foreground">
+        <Card className="w-80 shadow-lg animate-fade-in bg-[#003366] border border-[#FF0033]/20 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#FF0033] to-[#5E2D79] text-white">
             <h3 className="font-medium">ALU Support Chat</h3>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 text-primary-foreground" 
+              className="h-8 w-8 text-white hover:bg-white/10" 
               onClick={() => setIsOpen(false)}
             >
               <X className="h-4 w-4" />
@@ -80,7 +80,7 @@ export const MiniChatbot = () => {
         </Card>
       ) : (
         <Button 
-          className="rounded-full h-14 w-14 shadow-lg animate-pulse bg-primary hover:bg-primary/90"
+          className="rounded-full h-14 w-14 shadow-lg animate-pulse bg-gradient-to-r from-[#FF0033] to-[#5E2D79] hover:from-[#D00029] hover:to-[#4A2361]"
           onClick={() => setIsOpen(true)}
         >
           <MessageCircle size={24} />

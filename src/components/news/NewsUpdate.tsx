@@ -1,7 +1,6 @@
 
 import { ExternalLink, Share } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NewsItem {
   title: string;
@@ -42,10 +41,11 @@ export const NewsUpdate = () => {
   ];
 
   return (
-    <div className="h-full overflow-hidden flex flex-col bg-gradient-to-b from-[#1A1F2C] to-[#2A2F3C] border-l border-[#9b87f5]/20 shadow-xl">
-      {/* Header with simplified title */}
-      <div className="p-6 pb-4 backdrop-blur-sm bg-[#1A1F2C]/60 border-b border-[#9b87f5]/20">
+    <div className="h-full overflow-hidden flex flex-col bg-gradient-to-b from-[#003366] to-[#5E2D79] border-l border-[#FF0033]/20 shadow-xl">
+      {/* Header with ALU branding */}
+      <div className="p-6 pb-4 backdrop-blur-sm bg-[#003366]/80 border-b border-[#FF0033]/20">
         <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-[#FF0033] rounded-sm flex items-center justify-center text-white font-bold text-xs">ALU</div>
           <h2 className="text-2xl font-bold text-white">
             ALU News
           </h2>
@@ -57,7 +57,7 @@ export const NewsUpdate = () => {
         {news.map((item, index) => (
           <div
             key={index}
-            className="relative rounded-xl bg-[#2A2F3C] border border-[#9b87f5]/10 overflow-hidden shadow-lg transition-all group hover:shadow-purple-500/10"
+            className="relative rounded-xl bg-[#003366]/40 border border-[#FF0033]/10 overflow-hidden shadow-lg transition-all group hover:shadow-[#FF0033]/20"
           >
             {/* Image at the top of the card */}
             <div className="w-full h-40 overflow-hidden">
@@ -70,7 +70,7 @@ export const NewsUpdate = () => {
             
             <div className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <Badge variant="outline" className="bg-[#9b87f5]/10 text-[#9b87f5] border-[#9b87f5]/20 hover:border-[#9b87f5]/20 hover:bg-[#9b87f5]/15">
+                <Badge variant="outline" className="bg-[#FF0033]/10 text-[#FF0033] border-[#FF0033]/20 hover:border-[#FF0033]/20 hover:bg-[#FF0033]/15">
                   {item.category}
                 </Badge>
                 <span className="text-xs font-medium text-gray-400">{new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -82,7 +82,7 @@ export const NewsUpdate = () => {
                 rel="noopener noreferrer"
                 className="block group"
               >
-                <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-[#9b87f5] transition-colors flex items-center gap-2">
+                <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-[#FF0033] transition-colors flex items-center gap-2">
                   {item.title}
                   <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </h3>
@@ -90,11 +90,11 @@ export const NewsUpdate = () => {
                   {item.description}
                 </p>
                 
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#9b87f5]/10">
-                  <span className="text-xs text-[#9b87f5]">Read more</span>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#FF0033]/10">
+                  <span className="text-xs text-[#FF0033]">Read more</span>
                   <div className="flex space-x-2">
-                    <button className="p-1.5 rounded-full hover:bg-[#9b87f5]/10 transition-colors" title="Share">
-                      <Share className="w-4 h-4 text-gray-400 hover:text-[#9b87f5]" />
+                    <button className="p-1.5 rounded-full hover:bg-[#FF0033]/10 transition-colors" title="Share">
+                      <Share className="w-4 h-4 text-gray-400 hover:text-[#FF0033]" />
                     </button>
                   </div>
                 </div>
@@ -105,10 +105,10 @@ export const NewsUpdate = () => {
       </div>
 
       {/* Footer with subscription hint */}
-      <div className="mt-auto p-5 bg-gradient-to-r from-[#9b87f5]/10 via-[#8B5CF6]/10 to-[#D946EF]/10 backdrop-blur-sm">
+      <div className="mt-auto p-5 bg-gradient-to-r from-[#003366]/80 via-[#5E2D79]/60 to-[#FF0033]/30 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-300">
               Subscribe for real-time ALU news from our campuses worldwide.
             </p>
           </div>

@@ -1,208 +1,129 @@
 
+// This file contains the AI service that interacts with the backend
 import { Message } from "@/types/chat";
 
-interface BackendResponse {
-  response: string;
-  sources?: Array<{
-    title: string;
-    source: string;
-    date?: string;
-  }>;
-  engine?: string;
-}
-
-// Helper function to get backend URL with improved caching
-const getBackendUrl = (() => {
-  let cachedUrl: string | null = null;
-  
-  return () => {
-    if (cachedUrl) return cachedUrl;
-    
-    // Check if a BACKEND_URL is set in localStorage (for testing)
-    const storedBackendUrl = localStorage.getItem('BACKEND_URL');
-    if (storedBackendUrl) {
-      cachedUrl = storedBackendUrl;
-      return cachedUrl;
-    }
-    
-    // Local development mode
-    if (localStorage.getItem('USE_LOCAL_BACKEND') === 'true') {
-      cachedUrl = "http://localhost:8000";
-      return cachedUrl;
-    }
-    
-    // Production deployment URL
-    cachedUrl = "https://alu-chatbot-backend.onrender.com"; 
-    return cachedUrl;
-  };
-})();
-
+/**
+ * Service for interacting with the AI backend
+ */
 export const aiService = {
-  // Cached backend availability status to prevent unnecessary checks
+  // Cache for backend availability to reduce repeated checks
   _backendAvailableCache: {
     status: null as boolean | null,
     timestamp: 0,
-    expiryMs: 60000, // Cache expires after 1 minute
+    expiryMs: 30000, // 30 seconds cache validity
   },
-  
-  // Main function to generate responses - optimized for speed
+
+  /**
+   * Generates a response from the AI
+   */
   async generateResponse(
-    query: string, 
-    conversationHistory: Message[] = [], 
+    query: string,
+    conversationHistory: Message[] = [],
     options: { personality?: any } = {}
   ): Promise<string> {
-    // Check if backend is available (using cache if possible)
-    const backendAvailable = await this.isBackendAvailable();
-    
-    if (backendAvailable) {
-      try {
-        return await this.getResponseFromBackend(query, conversationHistory, options);
-      } catch (error) {
-        console.error("Backend error:", error);
-        return this.getFallbackResponse(query);
+    try {
+      // Check if backend is available
+      const isAvailable = await this.isBackendAvailable();
+      if (!isAvailable) {
+        throw new Error("Backend service is currently unavailable");
       }
-    } else {
-      console.warn("Backend not available, using fallback");
-      return this.getFallbackResponse(query);
+
+      // Use the backend for response generation
+      return await this.getResponseFromBackend(query, conversationHistory, options);
+    } catch (error) {
+      console.error("Error generating response:", error);
+      return "I'm sorry, I'm having trouble connecting to the ALU knowledge base right now. Please try again later.";
     }
   },
-  
-  // Check if the backend is available with caching
+
+  /**
+   * Checks if the backend is available
+   */
   async isBackendAvailable(): Promise<boolean> {
+    // Use cache if valid
     const now = Date.now();
-    const cache = this._backendAvailableCache;
-    
-    // Use cached result if it's still valid
-    if (cache.status !== null && (now - cache.timestamp) < cache.expiryMs) {
-      return cache.status;
+    if (
+      this._backendAvailableCache.status !== null &&
+      now - this._backendAvailableCache.timestamp < this._backendAvailableCache.expiryMs
+    ) {
+      return this._backendAvailableCache.status;
     }
-    
+
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // Reduced timeout for faster UI
-      
-      const backendUrl = getBackendUrl();
-      const response = await fetch(`${backendUrl}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/health`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(2000), // 2 second timeout
       });
-      
-      clearTimeout(timeoutId);
+
+      const isAvailable = response.ok;
       
       // Update cache
-      cache.status = response.ok;
-      cache.timestamp = now;
+      this._backendAvailableCache.status = isAvailable;
+      this._backendAvailableCache.timestamp = now;
       
-      return response.ok;
+      return isAvailable;
     } catch (error) {
-      console.warn("Backend check failed:", error);
+      console.error("Backend health check failed:", error);
       
       // Update cache with failed status
-      cache.status = false;
-      cache.timestamp = now;
+      this._backendAvailableCache.status = false;
+      this._backendAvailableCache.timestamp = now;
       
       return false;
     }
   },
-  
-  // Get response from the backend - optimized for performance
+
+  /**
+   * Gets a response from the backend
+   */
   async getResponseFromBackend(
-    query: string, 
-    conversationHistory: Message[], 
+    query: string,
+    conversationHistory: Message[],
     options: { personality?: any } = {}
   ): Promise<string> {
-    // Format conversation history efficiently
-    const formattedHistory = conversationHistory.map(msg => ({
-      role: msg.isAi ? "assistant" : "user",
-      text: msg.text
-    }));
-    
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // Reduced timeout for faster experience
-      
-      const backendUrl = getBackendUrl();
-      const response = await fetch(`${backendUrl}/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      // Convert the conversation history to the format expected by the backend
+      const history = conversationHistory.map((message) => ({
+        role: message.isAi ? "assistant" : "user",
+        content: message.text,
+      }));
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          query,
-          conversation_history: formattedHistory,
-          role: "student", // Default to student role
-          options: {
-            temperature: 0.7,
-            ...options
-          }
+          message: query,
+          history,
+          options,
         }),
-        signal: controller.signal
       });
-      
-      clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Backend error (${response.status}): ${errorText}`);
+        throw new Error(`Backend response error: ${response.status}`);
       }
-      
-      const data: BackendResponse = await response.json();
-      
-      // Format response with sources if available
-      let formattedResponse = data.response;
-      
-      // If there are sources, append them to the response
-      if (data.sources && data.sources.length > 0) {
-        formattedResponse += "\n\n**Sources:**\n";
-        data.sources.forEach((source, index) => {
-          formattedResponse += `${index + 1}. ${source.title} (${source.source})\n`;
-        });
-      }
-      
-      return formattedResponse;
+
+      const data = await response.json();
+      return data.response || "No response from backend";
     } catch (error) {
-      console.error("Backend fetch error:", error);
-      throw error;
+      console.error("Error getting response from backend:", error);
+      throw new Error("Failed to get response from backend");
     }
   },
-  
-  // Improved fallback response function
-  getFallbackResponse(query: string): string {
-    return `I'm currently unable to connect to the ALU knowledge base. Here's a general response to your query about "${query}".
 
-As an ALU student companion, I provide information about courses, campus life, administrative procedures, and academic resources. When our systems are fully operational, I can give you specific information from ALU's knowledge base.
-
-Please try again later when the connection to our backend systems has been restored.`;
-  },
-  
-  // Simplified helper method to fetch from backend with dynamic URL
-  async _fetchFromBackend(endpoint: string, method = 'GET', body?: any): Promise<any> {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-      
-      const backendUrl = getBackendUrl();
-      const options: RequestInit = {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal
-      };
-      
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
-      
-      const response = await fetch(`${backendUrl}${endpoint}`, options);
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        throw new Error(`Backend error (${response.status})`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error(`Error fetching from ${endpoint}:`, error);
-      throw error;
-    }
+  /**
+   * Gets the backend status information
+   */
+  async getBackendStatus(): Promise<{ status: string; message: string }> {
+    const isAvailable = await this.isBackendAvailable();
+    
+    return {
+      status: isAvailable ? 'online' : 'offline',
+      message: isAvailable ? 'Knowledge base connected' : 'Knowledge base unavailable'
+    };
   }
 };

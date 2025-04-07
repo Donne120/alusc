@@ -66,7 +66,7 @@ export const ChatContainer = () => {
   };
 
   // Apply accessibility classes if enabled
-  const containerClasses = `min-h-screen bg-[#1A1F2C] font-inter text-white flex 
+  const containerClasses = `min-h-screen bg-gradient-to-b from-[#003366] to-[#1A1F2C] font-inter text-white flex 
     ${accessibilityMode ? 'text-lg leading-relaxed' : ''}`;
 
   return (
