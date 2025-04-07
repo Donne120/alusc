@@ -125,5 +125,33 @@ export const aiService = {
       status: isAvailable ? 'online' : 'offline',
       message: isAvailable ? 'Knowledge base connected' : 'Knowledge base unavailable'
     };
+  },
+
+  /**
+   * Gets the status of the Nyptho system
+   */
+  async getNypthoStatus(): Promise<{ ready: boolean; learning: any }> {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/nyptho/status`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(2000),
+      });
+
+      if (!response.ok) {
+        return { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
+      }
+
+      const data = await response.json();
+      return {
+        ready: data.ready || false,
+        learning: data.learning || { observation_count: 0, learning_rate: 0 }
+      };
+    } catch (error) {
+      console.error("Error getting Nyptho status:", error);
+      return { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
+    }
   }
 };

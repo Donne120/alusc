@@ -1,3 +1,4 @@
+
 import os
 import json
 import uvicorn
@@ -31,6 +32,11 @@ prompt_engine = PromptEngine()
 nyptho = NypthoIntegration()  # Initialize Nyptho
 
 # Define request models
+class ChatRequest(BaseModel):
+    message: str
+    history: List[Dict[str, str]] = []
+    options: Optional[Dict[str, Any]] = None
+
 class QueryRequest(BaseModel):
     query: str
     role: str = "student"
@@ -52,6 +58,92 @@ class PersonalitySettings(BaseModel):
 async def root():
     """Health check endpoint"""
     return {"status": "ALU Chatbot backend is running"}
+
+@app.get("/health")
+async def health():
+    """Health check endpoint with detailed system status"""
+    try:
+        # Get component statuses
+        brain_status = retrieval_engine.alu_brain is not None
+        nyptho_status = nyptho.get_status()
+        
+        # Return comprehensive health information
+        return {
+            "status": "healthy",
+            "components": {
+                "retrieval_engine": "online",
+                "alu_brain": "online" if brain_status else "offline",
+                "prompt_engine": "online",
+                "nyptho": nyptho_status
+            },
+            "version": "1.0.0",
+            "environment": os.getenv("ENVIRONMENT", "development")
+        }
+    except Exception as e:
+        print(f"Health check error: {e}")
+        raise HTTPException(status_code=500, detail="System health check failed")
+
+@app.post("/chat")
+async def chat(request: ChatRequest):
+    """Process a chat message and return a response"""
+    try:
+        # Extract the user message
+        query = request.message
+        
+        # Convert history format if needed
+        conversation_history = []
+        for item in request.history:
+            role = item.get("role", "user")
+            content = item.get("content", "")
+            conversation_history.append({"role": role, "content": content})
+        
+        # Get the role from options or default to student
+        role = "student"
+        if request.options and "role" in request.options:
+            role = request.options["role"]
+        
+        # Get relevant context from the retrieval engine
+        context_docs = retrieval_engine.retrieve_context(
+            query=query,
+            role=role
+        )
+        
+        # Generate response using the prompt engine
+        response = prompt_engine.generate_response(
+            query=query,
+            context=context_docs,
+            conversation_history=conversation_history,
+            role=role,
+            options=request.options
+        )
+        
+        # Have Nyptho observe this interaction
+        nyptho.observe_model(
+            query=query,
+            response=response,
+            model_id="alu_prompt_engine",
+            context=context_docs
+        )
+        
+        # Extract sources for attribution
+        sources = []
+        for doc in context_docs[:3]:  # Top 3 sources
+            if doc.metadata and 'source' in doc.metadata:
+                source = {
+                    'title': doc.metadata.get('title', 'ALU Knowledge Base'),
+                    'source': doc.metadata.get('source', 'ALU Brain')
+                }
+                if source not in sources:  # Avoid duplicates
+                    sources.append(source)
+        
+        return {
+            "response": response,
+            "sources": sources,
+            "engine": "alu_prompt_engine"
+        }
+    except Exception as e:
+        print(f"Error processing chat message: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate")
 async def generate_response(request: QueryRequest):
@@ -171,7 +263,7 @@ async def rebuild_index(background_tasks: BackgroundTasks):
         print(f"Error starting index rebuild: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# New Nyptho-specific endpoints
+# Nyptho-specific endpoints
 @app.get("/nyptho/status")
 async def get_nyptho_status():
     """Get the current status of Nyptho"""
@@ -180,16 +272,6 @@ async def get_nyptho_status():
         return status
     except Exception as e:
         print(f"Error getting Nyptho status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/nyptho/model-comparison")
-async def get_model_comparison():
-    """Get a comparison of observed models"""
-    try:
-        comparison = nyptho.get_model_comparison()
-        return comparison
-    except Exception as e:
-        print(f"Error getting model comparison: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/nyptho/personality")
@@ -205,6 +287,16 @@ async def set_nyptho_personality(settings: PersonalitySettings):
         return result
     except Exception as e:
         print(f"Error updating personality: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/search-stats")
+async def get_search_stats():
+    """Get search engine performance statistics"""
+    try:
+        search_stats = retrieval_engine.alu_brain.search_engine.get_search_stats()
+        return search_stats
+    except Exception as e:
+        print(f"Error getting search stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Run the server
