@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Message } from "@/types/chat";
 import { toast } from "sonner";
 import { aiService } from "@/services/aiService";
@@ -19,34 +19,37 @@ export const useChatMessageHandler = ({
 }: ChatMessageHandlerProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = async (message: string, files: File[] = []) => {
+  // Optimize the handleSendMessage function with useCallback
+  const handleSendMessage = useCallback(async (message: string, files: File[] = []) => {
     if (!message.trim() && files.length === 0) {
       toast.error("Please enter a message or attach a file");
       return;
     }
 
-    const attachments = await Promise.all(
+    // Process attachments efficiently
+    const attachments = files.length > 0 ? await Promise.all(
       files.map(async (file) => ({
         type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
         url: URL.createObjectURL(file),
         name: file.name
       }))
-    );
+    ) : [];
 
     const newMessage: Message = {
       id: Date.now().toString(),
       text: message,
       isAi: false,
       timestamp: Date.now(),
-      attachments
+      attachments: attachments.length > 0 ? attachments : undefined
     };
 
+    // Add user message immediately for better UX
     onAddMessage(currentConversationId, newMessage);
     setIsLoading(true);
 
     try {
-      // Show a subtle toast notification that we're connecting to ALU Brain
-      const toastId = toast.loading("Connecting to ALU Brain...");
+      // Use a more efficient toast
+      const toastId = toast.loading("Processing your query...");
       
       // Get recent messages for context (limited to MAX_CONTEXT_MESSAGES)
       const MAX_CONTEXT_MESSAGES = 10;
@@ -68,20 +71,20 @@ export const useChatMessageHandler = ({
       
       onAddMessage(currentConversationId, aiMessage);
       
-      // Update conversation title if this is the first user message
+      // Update conversation title if this is the first user message (optimized)
       if (messages.length <= 1 && onUpdateTitle) {
-        const newTitle = message.slice(0, 30) + (message.length > 30 ? '...' : '');
+        const newTitle = message.length > 30 ? `${message.slice(0, 30)}...` : message;
         onUpdateTitle(currentConversationId, newTitle);
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to get response from ALU Brain");
+      toast.error(error instanceof Error ? error.message : "Failed to get response");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentConversationId, messages, onAddMessage, onUpdateTitle]);
 
-  const handleEditMessage = (messageId: string, newText: string) => {
+  const handleEditMessage = useCallback((messageId: string, newText: string) => {
     if (!newText.trim()) {
       toast.error("Message cannot be empty");
       return;
@@ -91,7 +94,7 @@ export const useChatMessageHandler = ({
     if (aiMessage) {
       toast.warning("Editing this message may cause inconsistencies with the AI's response");
     }
-  };
+  }, [messages]);
 
   return {
     isLoading,
