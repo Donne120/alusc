@@ -1,6 +1,7 @@
 
-import { Newspaper, ExternalLink, Globe, Share } from "lucide-react";
+import { ExternalLink, Share } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NewsItem {
   title: string;
@@ -8,50 +9,46 @@ interface NewsItem {
   category: string;
   description: string;
   url: string;
+  image: string;
 }
 
 export const NewsUpdate = () => {
-  // This would typically come from an API, but for now we'll use static data
+  // This would typically come from an API, but for now we'll use static data with real images
   const news: NewsItem[] = [
     {
       title: "New Leadership Program Launch",
       date: "2024-02-20",
       category: "Academic",
       description: "ALU introduces an innovative leadership development program focused on African entrepreneurship.",
-      url: "https://www.alueducation.com/news/leadership-program-2024"
+      url: "https://www.alueducation.com/news/leadership-program-2024",
+      image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
     },
     {
       title: "Campus Sustainability Initiative",
       date: "2024-02-19",
       category: "Campus",
       description: "ALU commits to 100% renewable energy usage by 2025 across all campuses.",
-      url: "https://www.alueducation.com/news/sustainability-2025"
+      url: "https://www.alueducation.com/news/sustainability-2025",
+      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
     },
     {
       title: "Tech Innovation Challenge",
       date: "2024-02-18",
       category: "Events",
       description: "Join the upcoming pan-African tech innovation challenge with prizes worth $10,000.",
-      url: "https://www.alueducation.com/events/tech-challenge"
+      url: "https://www.alueducation.com/events/tech-challenge",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
     }
   ];
 
   return (
     <div className="h-full overflow-hidden flex flex-col bg-gradient-to-b from-[#1A1F2C] to-[#2A2F3C] border-l border-[#9b87f5]/20 shadow-xl">
-      {/* Header with improved design */}
+      {/* Header with simplified title */}
       <div className="p-6 pb-4 backdrop-blur-sm bg-[#1A1F2C]/60 border-b border-[#9b87f5]/20">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-tr from-[#9b87f5] to-[#8B5CF6] p-0.5 shadow-lg shadow-purple-500/20">
-            <div className="bg-[#1A1F2C] w-full h-full rounded-xl p-2.5 flex items-center justify-center">
-              <Globe className="w-full h-full text-white" />
-            </div>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#D946EF] text-transparent bg-clip-text">
-              Global ALU News
-            </h2>
-            <p className="text-xs text-gray-400">Latest updates from around the ALU network</p>
-          </div>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-white">
+            ALU News
+          </h2>
         </div>
       </div>
 
@@ -62,8 +59,14 @@ export const NewsUpdate = () => {
             key={index}
             className="relative rounded-xl bg-[#2A2F3C] border border-[#9b87f5]/10 overflow-hidden shadow-lg transition-all group hover:shadow-purple-500/10"
           >
-            {/* Decorative gradient accent */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#9b87f5] to-[#D946EF]"></div>
+            {/* Image at the top of the card */}
+            <div className="w-full h-40 overflow-hidden">
+              <img 
+                src={item.image} 
+                alt={item.title} 
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
             
             <div className="p-5">
               <div className="flex items-center justify-between mb-3">
@@ -105,12 +108,10 @@ export const NewsUpdate = () => {
       <div className="mt-auto p-5 bg-gradient-to-r from-[#9b87f5]/10 via-[#8B5CF6]/10 to-[#D946EF]/10 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-white mb-1">Stay Globally Connected</h3>
             <p className="text-xs text-gray-400">
               Subscribe for real-time ALU news from our campuses worldwide.
             </p>
           </div>
-          <Newspaper className="w-5 h-5 text-[#9b87f5] opacity-80" />
         </div>
       </div>
     </div>
