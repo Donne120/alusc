@@ -12,6 +12,20 @@ export const aiService = {
     timestamp: 0,
     expiryMs: 30000, // 30 seconds cache validity
   },
+  
+  // Cache for backend status to avoid repeated API calls
+  _backendStatusCache: {
+    status: null as { status: string; message: string } | null,
+    timestamp: 0,
+    expiryMs: 60000, // 60 seconds cache validity
+  },
+  
+  // Cache for Nyptho status to avoid repeated API calls
+  _nypthoStatusCache: {
+    status: null as any | null,
+    timestamp: 0,
+    expiryMs: 120000, // 120 seconds cache validity
+  },
 
   /**
    * Generates a response from the AI
@@ -19,7 +33,7 @@ export const aiService = {
   async generateResponse(
     query: string,
     conversationHistory: Message[] = [],
-    options: { personality?: any } = {}
+    options: { personality?: any; useNyptho?: boolean } = {}
   ): Promise<string> {
     try {
       // Check if backend is available
@@ -82,7 +96,7 @@ export const aiService = {
   async getResponseFromBackend(
     query: string,
     conversationHistory: Message[],
-    options: { personality?: any } = {}
+    options: { personality?: any; useNyptho?: boolean } = {}
   ): Promise<string> {
     try {
       // Convert the conversation history to the format expected by the backend
@@ -119,18 +133,55 @@ export const aiService = {
    * Gets the backend status information
    */
   async getBackendStatus(): Promise<{ status: string; message: string }> {
-    const isAvailable = await this.isBackendAvailable();
+    // Use cache if valid
+    const now = Date.now();
+    if (
+      this._backendStatusCache.status !== null &&
+      now - this._backendStatusCache.timestamp < this._backendStatusCache.expiryMs
+    ) {
+      return this._backendStatusCache.status;
+    }
     
-    return {
-      status: isAvailable ? 'online' : 'offline',
-      message: isAvailable ? 'Knowledge base connected' : 'Knowledge base unavailable'
-    };
+    try {
+      const isAvailable = await this.isBackendAvailable();
+      
+      const status = {
+        status: isAvailable ? 'online' : 'offline',
+        message: isAvailable ? 'Knowledge base connected' : 'Knowledge base unavailable'
+      };
+      
+      // Update cache
+      this._backendStatusCache.status = status;
+      this._backendStatusCache.timestamp = now;
+      
+      return status;
+    } catch (error) {
+      const fallbackStatus = {
+        status: 'offline',
+        message: 'Knowledge base unavailable'
+      };
+      
+      // Update cache with error status
+      this._backendStatusCache.status = fallbackStatus;
+      this._backendStatusCache.timestamp = now;
+      
+      return fallbackStatus;
+    }
   },
 
   /**
    * Gets the status of the Nyptho system
    */
   async getNypthoStatus(): Promise<{ ready: boolean; learning: any }> {
+    // Use cache if valid
+    const now = Date.now();
+    if (
+      this._nypthoStatusCache.status !== null &&
+      now - this._nypthoStatusCache.timestamp < this._nypthoStatusCache.expiryMs
+    ) {
+      return this._nypthoStatusCache.status;
+    }
+    
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/nyptho/status`, {
         method: "GET",
@@ -141,17 +192,33 @@ export const aiService = {
       });
 
       if (!response.ok) {
-        return { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
+        const fallbackStatus = { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
+        this._nypthoStatusCache.status = fallbackStatus;
+        this._nypthoStatusCache.timestamp = now;
+        return fallbackStatus;
       }
 
       const data = await response.json();
-      return {
+      const status = {
         ready: data.ready || false,
         learning: data.learning || { observation_count: 0, learning_rate: 0 }
       };
+      
+      // Update cache
+      this._nypthoStatusCache.status = status;
+      this._nypthoStatusCache.timestamp = now;
+      
+      return status;
     } catch (error) {
       console.error("Error getting Nyptho status:", error);
-      return { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
+      
+      const fallbackStatus = { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
+      
+      // Update cache
+      this._nypthoStatusCache.status = fallbackStatus;
+      this._nypthoStatusCache.timestamp = now;
+      
+      return fallbackStatus;
     }
   }
 };
