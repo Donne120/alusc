@@ -1,5 +1,5 @@
 
-import { ChatContainer } from "@/components/ChatContainer";
+import { ChatContainer } from "../components/ChatContainer";
 
 const Index = () => {
   return <ChatContainer />;

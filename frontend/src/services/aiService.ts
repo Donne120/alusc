@@ -1,6 +1,5 @@
-
 // This file contains the AI service that interacts with the backend
-import { Message } from "@/types/chat";
+import { Message } from "../types/chat";
 
 /**
  * Service for interacting with the AI backend

@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Conversation } from "@/types/chat";
+import { Button } from "../ui/button";
+import { Conversation } from "../../types/chat";
 import { ChevronLeft, Settings, Trash2, User, X, Database } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 interface ConversationSidebarProps {
   conversations: Conversation[];

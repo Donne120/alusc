@@ -1,11 +1,10 @@
-
-import { useConversations } from "@/hooks/useConversations";
-import { useChatMessageHandler } from "./chat/ChatMessageHandler";
+import { useConversations } from "../hooks/useConversations";
+import { useChatMessageHandler } from "../components/chat/ChatMessageHandler";
 import { ChatInput } from "./ChatInput";
 import { ConversationSidebar } from "./chat/ConversationSidebar";
 import { ChatMessages } from "./chat/ChatMessages";
 import { NewsUpdate } from "./news/NewsUpdate";
-import { Conversation } from "@/types/chat";
+import { Conversation } from "../types/chat";
 import { BackendStatus } from "./chat/BackendStatus";
 import { useEffect, useState } from "react";
 
