@@ -1,7 +1,6 @@
 
-import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { Stage, Department, Person, ChatMessage, EmailTemplate } from "./types";
+import React, { useState } from "react";
+import { ChatMessage, Stage, Department, Person, EmailTemplate } from "./types";
 import { InitialStage } from "./InitialStage";
 import { SelectionListStage } from "./SelectionListStage";
 import { BookingStage } from "./BookingStage";
@@ -10,298 +9,199 @@ import { HumanChatStage } from "./HumanChatStage";
 import { HumanChatActiveStage } from "./HumanChatActiveStage";
 import { EmailInquiryStage } from "./EmailInquiryStage";
 import { EmailSentStage } from "./EmailSentStage";
-import { emailTemplates } from "./mockData";
-import { aiService } from "../../services/aiService";
+import { learningCoaches, departments, administrationOffices, chatAgents, emailDepartments, emailTemplates } from "./mockData";
 
-export const MiniChatbotContent = () => {
+export const MiniChatbotContent: React.FC = () => {
   const [stage, setStage] = useState<Stage>("initial");
-  const [department, setDepartment] = useState<Department | null>(null);
-  const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [emailSubject, setEmailSubject] = useState("");
-  const [emailBody, setEmailBody] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState<Person | null>(null);
-  const [humanChatInput, setHumanChatInput] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
-  const [aiPersona, setAiPersona] = useState({
-    name: "Academic Advisor",
-    traits: { helpfulness: 85, creativity: 40, precision: 90, friendliness: 75 }
-  });
-  const [useNyptho, setUseNyptho] = useState<boolean>(false);
-  const [nypthoStatus, setNypthoStatus] = useState<any>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      text: "Hello! I'm your ALU Student Companion. How can I help you today?",
+      isUser: false,
+    },
+  ]);
+  const [bookingDate, setBookingDate] = useState<Date | null>(null);
+  const [bookingTime, setBookingTime] = useState<string>("");
+  const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<EmailTemplate | null>(null);
+  const [emailSubject, setEmailSubject] = useState<string>("");
+  const [emailBody, setEmailBody] = useState<string>("");
 
-  useEffect(() => {
-    loadAiPersonaSettings();
-    initializeChat();
-    checkNypthoStatus();
-  }, []);
-
-  const checkNypthoStatus = async () => {
-    try {
-      const status = await aiService.getNypthoStatus();
-      setNypthoStatus(status);
-      // If Nyptho is ready, enable it based on settings
-      if (status?.ready) {
-        const savedUseNyptho = localStorage.getItem("USE_NYPTHO");
-        setUseNyptho(savedUseNyptho === "true");
-      }
-    } catch (error) {
-      console.error("Error checking Nyptho status:", error);
-    }
-  };
-
-  const loadAiPersonaSettings = () => {
-    const savedPersona = localStorage.getItem("AI_PERSONA") || "academic";
-    const savedTraits = JSON.parse(localStorage.getItem("AI_TRAITS") || JSON.stringify({ 
-      helpfulness: 75, creativity: 50, precision: 85, friendliness: 70 
-    }));
+  const handleDepartmentSelect = (department: Department) => {
+    setSelectedDepartment(department);
     
-    const personaNames: {[key: string]: string} = {
-      academic: "Academic Advisor",
-      creative: "Creative Coach",
-      technical: "Technical Assistant",
-      supportive: "Supportive Guide",
-      nyptho: "Nyptho Learning AI",
-      custom: "Custom AI"
+    // Add a message to show the selected department
+    const departmentNames = {
+      "learning-coach": "Learning Coach",
+      "department": "Academic Department",
+      "administration": "Administration",
     };
+    addMessage(`I'd like to contact a ${departmentNames[department]}`, true);
     
-    setAiPersona({
-      name: personaNames[savedPersona] || "Academic Advisor",
-      traits: savedTraits
-    });
-
-    // Check if we should use Nyptho based on saved persona
-    if (savedPersona === "nyptho") {
-      setUseNyptho(true);
-      localStorage.setItem("USE_NYPTHO", "true");
-    }
-  };
-
-  const initializeChat = () => {
-    const greetings = [
-      "Hi there! I'm your academic advisor. How can I help with your educational journey today?",
-      "Hello! I'm here to assist with any questions about your courses, schedules, or academic resources.",
-      "Welcome to ALU support! I'm your AI assistant. What can I help you with today?"
-    ];
-
-    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-    
-    setChatMessages([
-      { 
-        text: `Hi there! I'm your ${aiPersona.name}. How can I help you today?`, 
-        isUser: false 
-      }
-    ]);
-  };
-
-  const handleDepartmentSelect = (dept: Department) => {
-    setDepartment(dept);
     setStage("selection-list");
   };
 
   const handlePersonSelect = (person: Person) => {
     setSelectedPerson(person);
-    
-    if (person.calendarLink) {
-      window.open(person.calendarLink, '_blank');
-      return;
-    }
-    
-    setStage("department-selection");
+    addMessage(`I want to speak with ${person.name}`, true);
+    setStage("booking");
   };
 
-  const handleBooking = () => {
-    setIsLoading(true);
+  const handleBookingConfirm = (date: Date, time: string) => {
+    setBookingDate(date);
+    setBookingTime(time);
+    addMessage(`I'd like to book an appointment on ${date.toDateString()} at ${time}`, true);
+    setStage("confirmation");
+  };
+
+  const handleHumanChatSelect = () => {
+    addMessage("I'd like to chat with a human agent", true);
+    setStage("human-chat");
+  };
+
+  const handleChatAgentSelect = (agent: Person) => {
+    setSelectedPerson(agent);
+    addMessage(`Connecting to ${agent.name}...`, false);
+    // Simulate a short delay before connecting
+    setTimeout(() => setStage("human-chat-active"), 1000);
+  };
+
+  const handleEmailInquirySelect = () => {
+    addMessage("I'd like to send an email inquiry", true);
+    setStage("email-inquiry");
+  };
+
+  const handleEmailDepartmentSelect = (department: Person) => {
+    setSelectedPerson(department);
+    addMessage(`I'll send an email to ${department.name}`, true);
+  };
+
+  const handleEmailTemplateSelect = (template: EmailTemplate) => {
+    setSelectedEmailTemplate(template);
+    setEmailSubject(template.subject);
+    setEmailBody(template.body);
+  };
+
+  const handleSendEmail = () => {
+    // In a real app, we would send the email here
+    addMessage(`Email sent to ${selectedPerson?.name}`, false);
+    setStage("email-sent");
+  };
+
+  const handleSendMessage = (text: string) => {
+    addMessage(text, true);
+    
+    // Simulate a response
     setTimeout(() => {
-      setIsLoading(false);
-      setStage("confirmation");
-    }, 1500);
+      addMessage("Thank you for your message. An agent will respond shortly.", false);
+    }, 1000);
   };
 
-  const resetChat = () => {
+  const addMessage = (text: string, isUser: boolean) => {
+    setMessages((prev) => [...prev, { text, isUser }]);
+  };
+
+  const handleReset = () => {
+    // Go back to the initial stage and add a reset message
     setStage("initial");
-    setDepartment(null);
-    setMessage("");
-    setSelectedDate("");
-    setSelectedTime("");
-    setSelectedPerson(null);
-    initializeChat();
-    setEmailSubject("");
-    setEmailBody("");
-    setSelectedDepartment(null);
-    setHumanChatInput("");
+    addMessage("How else can I help you today?", false);
   };
 
-  const goBack = () => {
-    if (stage === "selection-list") {
-      setStage("initial");
-      setDepartment(null);
-    } else if (stage === "department-selection") {
-      setStage("selection-list");
-      setSelectedPerson(null);
-    } else if (stage === "human-chat" || stage === "email-inquiry") {
-      setStage("initial");
-    } else if (stage === "human-chat-active") {
-      setStage("human-chat");
+  // Determine which list of options to display based on the selected department
+  const getSelectionList = () => {
+    switch (selectedDepartment) {
+      case "learning-coach":
+        return learningCoaches;
+      case "department":
+        return departments;
+      case "administration":
+        return administrationOffices;
+      default:
+        return [];
     }
   };
 
-  const handleTemplateSelect = (templateId: EmailTemplate) => {
-    setSelectedTemplate(templateId);
-    const template = emailTemplates.find(t => t.id === templateId);
-    
-    if (template) {
-      setEmailSubject(template.subject);
-      setEmailBody(template.body);
-    }
-  };
-
-  const sendHumanChatMessage = async () => {
-    if (humanChatInput.trim() === "") return;
-    
-    setChatMessages(prev => [...prev, { text: humanChatInput, isUser: true }]);
-    setHumanChatInput("");
-    
-    setIsLoading(true);
-    
-    try {
-      // Convert chat messages to the format needed by aiService
-      const history = chatMessages.map((msg, i) => ({
-        id: `msg-${i}`,
-        text: msg.text,
-        isAi: !msg.isUser,
-        timestamp: Date.now() - (chatMessages.length - i) * 1000
-      }));
-      
-      // Use aiService to get response
-      const options = {
-        useNyptho: useNyptho,
-        personality: aiPersona.traits
-      };
-      
-      const response = await aiService.generateResponse(humanChatInput, history, options);
-      
-      setChatMessages(prev => [...prev, { text: response, isUser: false }]);
-    } catch (error) {
-      console.error("Error getting AI response:", error);
-      setChatMessages(prev => [...prev, { 
-        text: "I'm having trouble connecting to our knowledge base. Please try again later.", 
-        isUser: false 
-      }]);
-      
-      toast.error("Error connecting to AI service");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const sendEmailInquiry = () => {
-    if (!selectedDepartment || !emailSubject || !emailBody) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      setIsLoading(false);
-      setStage("email-sent");
-    }, 1500);
-  };
-
-  return (
-    <div className="flex flex-col h-96">
-      <div className="flex-1 overflow-y-auto p-4">
-        {stage === "initial" && (
+  // Render appropriate stage based on current state
+  const renderStageContent = () => {
+    switch (stage) {
+      case "initial":
+        return (
           <InitialStage 
             onDepartmentSelect={handleDepartmentSelect}
-            onStageChange={setStage}
+            onHumanChatSelect={handleHumanChatSelect}
+            onEmailInquirySelect={handleEmailInquirySelect}
           />
-        )}
-
-        {stage === "selection-list" && department && (
+        );
+      case "selection-list":
+        return (
           <SelectionListStage 
-            department={department}
-            onPersonSelect={handlePersonSelect}
-            onGoBack={goBack}
+            items={getSelectionList()}
+            onSelect={handlePersonSelect}
+            onBack={() => setStage("initial")}
+            department={selectedDepartment}
           />
-        )}
-
-        {stage === "department-selection" && selectedPerson && (
+        );
+      case "booking":
+        return selectedPerson && (
           <BookingStage 
             selectedPerson={selectedPerson}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            message={message}
-            isLoading={isLoading}
-            onDateChange={setSelectedDate}
-            onTimeChange={setSelectedTime}
-            onMessageChange={setMessage}
-            onBooking={handleBooking}
-            onGoBack={goBack}
+            onConfirm={handleBookingConfirm}
+            onBack={() => setStage("selection-list")}
           />
-        )}
-
-        {stage === "confirmation" && selectedPerson && (
+        );
+      case "confirmation":
+        return bookingDate && selectedPerson && (
           <ConfirmationStage 
             selectedPerson={selectedPerson}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            onReset={resetChat}
+            bookingDate={bookingDate}
+            bookingTime={bookingTime}
+            onReset={handleReset}
           />
-        )}
-
-        {stage === "human-chat" && (
+        );
+      case "human-chat":
+        return (
           <HumanChatStage 
-            onPersonSelect={(person) => {
-              setSelectedPerson(person);
-              setStage("human-chat-active");
-            }}
-            onGoBack={goBack}
+            agents={chatAgents}
+            onSelect={handleChatAgentSelect}
+            onBack={() => setStage("initial")}
           />
-        )}
-
-        {stage === "human-chat-active" && selectedPerson && (
+        );
+      case "human-chat-active":
+        return selectedPerson && (
           <HumanChatActiveStage 
-            selectedPerson={selectedPerson}
-            chatMessages={chatMessages}
-            humanChatInput={humanChatInput}
-            isLoading={isLoading}
-            onInputChange={setHumanChatInput}
-            onSendMessage={sendHumanChatMessage}
-            onGoBack={goBack}
-            useNyptho={useNyptho}
-            aiPersona={aiPersona}
+            agent={selectedPerson}
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            onEndChat={handleReset}
           />
-        )}
-
-        {stage === "email-inquiry" && (
+        );
+      case "email-inquiry":
+        return (
           <EmailInquiryStage 
-            selectedDepartment={selectedDepartment}
+            departments={emailDepartments}
+            templates={emailTemplates}
+            selectedDepartment={selectedPerson}
+            onDepartmentSelect={handleEmailDepartmentSelect}
+            onTemplateSelect={handleEmailTemplateSelect}
             emailSubject={emailSubject}
             emailBody={emailBody}
-            selectedTemplate={selectedTemplate}
-            isLoading={isLoading}
-            onDepartmentSelect={setSelectedDepartment}
-            onTemplateSelect={handleTemplateSelect}
             onSubjectChange={setEmailSubject}
             onBodyChange={setEmailBody}
-            onSendEmail={sendEmailInquiry}
-            onGoBack={goBack}
+            onSendEmail={handleSendEmail}
+            onBack={() => setStage("initial")}
           />
-        )}
-
-        {stage === "email-sent" && selectedDepartment && (
+        );
+      case "email-sent":
+        return selectedPerson && (
           <EmailSentStage 
-            selectedDepartment={selectedDepartment}
-            onReset={resetChat}
+            selectedDepartment={selectedPerson}
+            onReset={handleReset}
           />
-        )}
-      </div>
-    </div>
-  );
+        );
+      default:
+        return null;
+    }
+  };
+
+  return <div className="px-1">{renderStageContent()}</div>;
 };

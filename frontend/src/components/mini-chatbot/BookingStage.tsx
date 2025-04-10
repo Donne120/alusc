@@ -1,68 +1,69 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { Calendar } from "../ui/calendar";
 import { Person } from "./types";
-import { availableTimes } from "./mockData";
 
 interface BookingStageProps {
   selectedPerson: Person;
-  selectedDate: string;
-  selectedTime: string;
-  message: string;
-  isLoading: boolean;
-  onDateChange: (date: string) => void;
-  onTimeChange: (time: string) => void;
-  onMessageChange: (message: string) => void;
-  onBooking: () => void;
-  onGoBack: () => void;
+  onConfirm: (date: Date, time: string) => void;
+  onBack: () => void;
 }
+
+const availableTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
 export const BookingStage: React.FC<BookingStageProps> = ({
   selectedPerson,
-  selectedDate,
-  selectedTime,
-  message,
-  isLoading,
-  onDateChange,
-  onTimeChange,
-  onMessageChange,
-  onBooking,
-  onGoBack
+  onConfirm,
+  onBack
 }) => {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  
+  const handleConfirm = () => {
+    if (selectedDate && selectedTime) {
+      onConfirm(selectedDate, selectedTime);
+    }
+  };
+
+  // Disable past dates and weekends
+  const isDateDisabled = (date: Date) => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const day = date.getDay();
+    return date < now || day === 0 || day === 6; // Sunday or Saturday
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Button variant="ghost" size="sm" className="p-0 h-8 w-8" onClick={onGoBack}>
-          <ChevronLeft size={16} />
-        </Button>
-        <h3 className="text-sm font-medium">
-          {selectedPerson && selectedPerson.name}
-        </h3>
+      <div className="flex flex-col space-y-1.5">
+        <h3 className="font-medium text-center">Book with {selectedPerson.name}</h3>
+        <p className="text-sm text-center text-muted-foreground">
+          Select a date and time for your appointment
+        </p>
       </div>
-      
-      <div className="space-y-2">
-        <p className="text-xs font-medium">Select a date:</p>
-        <Input 
-          type="date" 
-          min={new Date().toISOString().split('T')[0]}
-          value={selectedDate}
-          onChange={(e) => onDateChange(e.target.value)}
-        />
-      </div>
-      
+
+      {/* Calendar */}
+      <Calendar
+        mode="single"
+        selected={selectedDate}
+        onSelect={setSelectedDate}
+        disabled={isDateDisabled}
+        className="mx-auto"
+      />
+
+      {/* Time slots */}
       {selectedDate && (
         <div className="space-y-2">
-          <p className="text-xs font-medium">Available times:</p>
+          <p className="text-sm font-medium">Available Times:</p>
           <div className="grid grid-cols-3 gap-2">
             {availableTimes.map((time) => (
               <Button
                 key={time}
                 variant={selectedTime === time ? "default" : "outline"}
                 size="sm"
-                className="text-xs"
-                onClick={() => onTimeChange(time)}
+                onClick={() => setSelectedTime(time)}
+                className="w-full"
               >
                 {time}
               </Button>
@@ -71,34 +72,16 @@ export const BookingStage: React.FC<BookingStageProps> = ({
         </div>
       )}
 
-      {selectedDate && selectedTime && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium">Add a message (optional):</p>
-          <Input
-            placeholder="What would you like to discuss?"
-            value={message}
-            onChange={(e) => onMessageChange(e.target.value)}
-          />
-        </div>
-      )}
-
-      <div className="flex justify-between">
-        <Button variant="outline" size="sm" onClick={onGoBack}>
+      {/* Action buttons */}
+      <div className="flex space-x-2 justify-between pt-2">
+        <Button variant="outline" onClick={onBack}>
           Back
         </Button>
-        <Button 
-          disabled={!selectedDate || !selectedTime || isLoading}
-          size="sm"
-          onClick={onBooking}
+        <Button
+          onClick={handleConfirm}
+          disabled={!selectedDate || !selectedTime}
         >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Booking...
-            </>
-          ) : (
-            "Book Session"
-          )}
+          Book Appointment
         </Button>
       </div>
     </div>
