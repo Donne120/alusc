@@ -1,3 +1,4 @@
+
 // This file contains the AI service that interacts with the backend
 import { Message } from "../types/chat";
 
@@ -63,7 +64,12 @@ export const aiService = {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/health`, {
+      // Use a default URL if environment variable is not defined
+      const apiUrl = typeof import.meta !== 'undefined' && import.meta.env ? 
+        import.meta.env.VITE_API_URL || 'http://localhost:8000' : 
+        'http://localhost:8000';
+        
+      const response = await fetch(`${apiUrl}/health`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -104,7 +110,12 @@ export const aiService = {
         content: message.text,
       }));
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/chat`, {
+      // Use a default URL if environment variable is not defined
+      const apiUrl = typeof import.meta !== 'undefined' && import.meta.env ? 
+        import.meta.env.VITE_API_URL || 'http://localhost:8000' : 
+        'http://localhost:8000';
+
+      const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -182,7 +193,12 @@ export const aiService = {
     }
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/nyptho/status`, {
+      // Use a default URL if environment variable is not defined
+      const apiUrl = typeof import.meta !== 'undefined' && import.meta.env ? 
+        import.meta.env.VITE_API_URL || 'http://localhost:8000' : 
+        'http://localhost:8000';
+        
+      const response = await fetch(`${apiUrl}/nyptho/status`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

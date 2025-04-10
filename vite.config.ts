@@ -20,4 +20,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./frontend/src"),
     },
   },
+  root: './frontend',
+  publicDir: './public',
 }));
