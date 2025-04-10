@@ -7,17 +7,20 @@ import { Person } from "./types";
 
 interface ConfirmationStageProps {
   selectedPerson: Person;
-  bookingDate: Date;
-  bookingTime: string;
+  selectedDate: string;
+  selectedTime: string;
   onReset: () => void;
 }
 
 export const ConfirmationStage: React.FC<ConfirmationStageProps> = ({
   selectedPerson,
-  bookingDate,
-  bookingTime,
+  selectedDate,
+  selectedTime,
   onReset
 }) => {
+  // Parse the date string to a Date object
+  const bookingDate = selectedDate ? new Date(selectedDate) : new Date();
+  
   return (
     <div className="space-y-4 text-center">
       <div className="py-4">
@@ -31,7 +34,7 @@ export const ConfirmationStage: React.FC<ConfirmationStageProps> = ({
           Your appointment with {selectedPerson.name} has been booked for:
         </p>
         <p className="font-medium">
-          {format(bookingDate, "EEEE, MMMM d, yyyy")} at {bookingTime}
+          {format(bookingDate, "EEEE, MMMM d, yyyy")} at {selectedTime}
         </p>
       </div>
       <p className="text-xs text-muted-foreground">

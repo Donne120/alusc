@@ -6,23 +6,37 @@ import { Person } from "./types";
 
 interface BookingStageProps {
   selectedPerson: Person;
-  onConfirm: (date: Date, time: string) => void;
-  onBack: () => void;
+  selectedDate: string;
+  selectedTime: string;
+  message: string;
+  isLoading: boolean;
+  onDateChange: (date: string) => void;
+  onTimeChange: (time: string) => void;
+  onMessageChange: (message: string) => void;
+  onBooking: () => void;
+  onGoBack: () => void;
 }
 
 const availableTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
 export const BookingStage: React.FC<BookingStageProps> = ({
   selectedPerson,
-  onConfirm,
-  onBack
+  selectedDate,
+  selectedTime,
+  message,
+  isLoading,
+  onDateChange,
+  onTimeChange,
+  onMessageChange,
+  onBooking,
+  onGoBack
 }) => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  
-  const handleConfirm = () => {
-    if (selectedDate && selectedTime) {
-      onConfirm(selectedDate, selectedTime);
+  const [date, setDate] = useState<Date | undefined>(undefined);
+
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      setDate(selectedDate);
+      onDateChange(selectedDate.toISOString().split('T')[0]);
     }
   };
 
@@ -46,14 +60,14 @@ export const BookingStage: React.FC<BookingStageProps> = ({
       {/* Calendar */}
       <Calendar
         mode="single"
-        selected={selectedDate}
-        onSelect={setSelectedDate}
+        selected={date}
+        onSelect={handleDateSelect}
         disabled={isDateDisabled}
         className="mx-auto"
       />
 
       {/* Time slots */}
-      {selectedDate && (
+      {date && (
         <div className="space-y-2">
           <p className="text-sm font-medium">Available Times:</p>
           <div className="grid grid-cols-3 gap-2">
@@ -62,7 +76,7 @@ export const BookingStage: React.FC<BookingStageProps> = ({
                 key={time}
                 variant={selectedTime === time ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedTime(time)}
+                onClick={() => onTimeChange(time)}
                 className="w-full"
               >
                 {time}
@@ -74,14 +88,14 @@ export const BookingStage: React.FC<BookingStageProps> = ({
 
       {/* Action buttons */}
       <div className="flex space-x-2 justify-between pt-2">
-        <Button variant="outline" onClick={onBack}>
+        <Button variant="outline" onClick={onGoBack}>
           Back
         </Button>
         <Button
-          onClick={handleConfirm}
-          disabled={!selectedDate || !selectedTime}
+          onClick={onBooking}
+          disabled={!date || !selectedTime || isLoading}
         >
-          Book Appointment
+          {isLoading ? "Booking..." : "Book Appointment"}
         </Button>
       </div>
     </div>

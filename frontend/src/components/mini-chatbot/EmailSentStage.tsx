@@ -22,7 +22,7 @@ export const EmailSentStage: React.FC<EmailSentStageProps> = ({
       </div>
       <h3 className="font-medium">Email Sent Successfully!</h3>
       <p className="text-sm">
-        Your inquiry has been sent to {selectedDepartment?.name} ({selectedDepartment?.email}).
+        Your inquiry has been sent to {selectedDepartment.name} {selectedDepartment.email && `(${selectedDepartment.email})`}.
       </p>
       <p className="text-xs text-muted-foreground">
         You should receive a response within 24-48 hours.
