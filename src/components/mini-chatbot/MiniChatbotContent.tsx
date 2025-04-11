@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Stage, Department, Person, ChatMessage, EmailTemplate } from "./types";
+import { Stage, Department, Person, ChatMessage } from "./types";
 import { InitialStage } from "./InitialStage";
 import { SelectionListStage } from "./SelectionListStage";
 import { BookingStage } from "./BookingStage";
@@ -11,7 +11,7 @@ import { HumanChatActiveStage } from "./HumanChatActiveStage";
 import { EmailInquiryStage } from "./EmailInquiryStage";
 import { EmailSentStage } from "./EmailSentStage";
 import { emailTemplates } from "./mockData";
-import { aiService } from "@/services/aiService";
+import { aiService } from "../../services/aiService";
 
 export const MiniChatbotContent = () => {
   const [stage, setStage] = useState<Stage>("initial");
@@ -26,7 +26,7 @@ export const MiniChatbotContent = () => {
   const [emailBody, setEmailBody] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<Person | null>(null);
   const [humanChatInput, setHumanChatInput] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [aiPersona, setAiPersona] = useState({
     name: "Academic Advisor",
     traits: { helpfulness: 85, creativity: 40, precision: 90, friendliness: 75 }
@@ -111,15 +111,23 @@ export const MiniChatbotContent = () => {
       return;
     }
     
-    setStage("department-selection");
+    setStage("booking");
   };
 
-  const handleBooking = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+  const handleNext = () => {
+    if (stage === "booking") {
       setStage("confirmation");
-    }, 1500);
+    }
+  };
+
+  const handleBack = () => {
+    if (stage === "booking") {
+      setStage("selection-list");
+    } else if (stage === "confirmation") {
+      setStage("booking");
+    } else if (stage === "selection-list") {
+      setStage("initial");
+    }
   };
 
   const resetChat = () => {
@@ -136,21 +144,7 @@ export const MiniChatbotContent = () => {
     setHumanChatInput("");
   };
 
-  const goBack = () => {
-    if (stage === "selection-list") {
-      setStage("initial");
-      setDepartment(null);
-    } else if (stage === "department-selection") {
-      setStage("selection-list");
-      setSelectedPerson(null);
-    } else if (stage === "human-chat" || stage === "email-inquiry") {
-      setStage("initial");
-    } else if (stage === "human-chat-active") {
-      setStage("human-chat");
-    }
-  };
-
-  const handleTemplateSelect = (templateId: EmailTemplate) => {
+  const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
     const template = emailTemplates.find(t => t.id === templateId);
     
@@ -199,20 +193,6 @@ export const MiniChatbotContent = () => {
     }
   };
 
-  const sendEmailInquiry = () => {
-    if (!selectedDepartment || !emailSubject || !emailBody) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      setIsLoading(false);
-      setStage("email-sent");
-    }, 1500);
-  };
-
   return (
     <div className="flex flex-col h-96">
       <div className="flex-1 overflow-y-auto p-4">
@@ -227,31 +207,21 @@ export const MiniChatbotContent = () => {
           <SelectionListStage 
             department={department}
             onPersonSelect={handlePersonSelect}
-            onGoBack={goBack}
+            onGoBack={handleBack}
           />
         )}
 
-        {stage === "department-selection" && selectedPerson && (
+        {stage === "booking" && (
           <BookingStage 
-            selectedPerson={selectedPerson}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            message={message}
-            isLoading={isLoading}
-            onDateChange={setSelectedDate}
-            onTimeChange={setSelectedTime}
-            onMessageChange={setMessage}
-            onBooking={handleBooking}
-            onGoBack={goBack}
+            onNext={handleNext}
+            onBack={handleBack}
           />
         )}
 
-        {stage === "confirmation" && selectedPerson && (
+        {stage === "confirmation" && (
           <ConfirmationStage 
-            selectedPerson={selectedPerson}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            onReset={resetChat}
+            onNext={resetChat}
+            onBack={handleBack}
           />
         )}
 
@@ -261,7 +231,7 @@ export const MiniChatbotContent = () => {
               setSelectedPerson(person);
               setStage("human-chat-active");
             }}
-            onGoBack={goBack}
+            onGoBack={() => setStage("initial")}
           />
         )}
 
@@ -273,7 +243,7 @@ export const MiniChatbotContent = () => {
             isLoading={isLoading}
             onInputChange={setHumanChatInput}
             onSendMessage={sendHumanChatMessage}
-            onGoBack={goBack}
+            onGoBack={() => setStage("human-chat")}
             useNyptho={useNyptho}
             aiPersona={aiPersona}
           />
@@ -290,8 +260,8 @@ export const MiniChatbotContent = () => {
             onTemplateSelect={handleTemplateSelect}
             onSubjectChange={setEmailSubject}
             onBodyChange={setEmailBody}
-            onSendEmail={sendEmailInquiry}
-            onGoBack={goBack}
+            onSendEmail={() => setStage("email-sent")}
+            onGoBack={() => setStage("initial")}
           />
         )}
 

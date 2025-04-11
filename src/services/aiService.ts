@@ -1,5 +1,7 @@
 
-import { Message, MessageRole } from "../types/chat";
+import { Message } from "../types/chat";
+
+type MessageRole = "user" | "assistant" | "system";
 
 interface AIChatMessage {
   content: string;
@@ -13,28 +15,17 @@ interface AIChatRequest {
   max_tokens?: number;
 }
 
-interface AIChatResponse {
-  id: string;
-  choices: {
-    message: {
-      content: string;
-      role: string;
-    };
-    finish_reason: string;
-  }[];
-}
-
 // Convert our app's message format to the AI service format
 const formatMessages = (messages: Message[]): AIChatMessage[] => {
   return messages.map((message) => ({
-    content: message.content,
-    role: message.role === MessageRole.User ? "user" : "assistant",
+    content: message.text,
+    role: message.isAi ? "assistant" : "user",
   }));
 };
 
 // Base AI service
 export class AIService {
-  private async sendRequest(
+  protected async sendRequest(
     endpoint: string,
     body: any,
     apiKey: string
@@ -195,5 +186,27 @@ export const createAIService = (provider: string): AIService => {
       return new GeminiService();
     default:
       return new OpenAIService();
+  }
+};
+
+// Export a singleton instance of AI Service
+export const aiService = {
+  async generateResponse(
+    query: string,
+    conversationHistory: Message[] = [],
+    options: { personality?: any; useNyptho?: boolean } = {}
+  ): Promise<string> {
+    try {
+      // Create a default AI service (OpenAI)
+      const service = new OpenAIService();
+      return await service.sendMessage([...conversationHistory, { id: Date.now().toString(), text: query, isAi: false, timestamp: Date.now() }]);
+    } catch (error) {
+      console.error("Error generating response:", error);
+      return "I'm sorry, I'm having trouble connecting right now. Please try again later.";
+    }
+  },
+
+  async getNypthoStatus(): Promise<{ ready: boolean; learning: any }> {
+    return { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
   }
 };
