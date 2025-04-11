@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { Brain, Server } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { apiConfig } from "@/config/apiConfig";
 
 export const BackendStatus = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -10,19 +11,6 @@ export const BackendStatus = () => {
   const [isRetrying, setIsRetrying] = useState(false);
   const useLocalBackend = localStorage.getItem('USE_LOCAL_BACKEND') === 'true';
   const connectionChecked = useRef(false);
-  
-  // Get backend URL with efficient caching
-  const getBackendUrl = () => {
-    // Check if a BACKEND_URL is set in localStorage (for testing)
-    const storedBackendUrl = localStorage.getItem('BACKEND_URL');
-    if (storedBackendUrl) return storedBackendUrl;
-    
-    // Local development mode
-    if (useLocalBackend) return "http://localhost:8000";
-    
-    // Production deployment URL
-    return "https://alu-chatbot-backend.onrender.com";
-  };
 
   useEffect(() => {
     // Prevent multiple connection checks on component remount
@@ -31,7 +19,7 @@ export const BackendStatus = () => {
     const checkConnection = async () => {
       try {
         setIsLoading(true);
-        const backendUrl = getBackendUrl();
+        const backendUrl = apiConfig.backendUrl;
         
         // Use a simple GET request instead of POST for faster checking
         const response = await fetch(`${backendUrl}/`, {

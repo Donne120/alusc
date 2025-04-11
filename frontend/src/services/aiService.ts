@@ -1,15 +1,7 @@
 
 // This file contains the AI service that interacts with the backend
 import { Message } from "@/types/chat";
-
-/**
- * Get the API URL for services
- */
-function getApiUrl(): string {
-  // Use a fallback if import.meta.env is not available
-  const API_URL = "https://alu-student-companion-api.onrender.com";
-  return API_URL;
-}
+import { apiConfig } from "@/config/apiConfig";
 
 /**
  * Service for interacting with the AI backend
@@ -73,13 +65,12 @@ export const aiService = {
     }
 
     try {
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/health`, {
+      const response = await fetch(`${apiConfig.backendUrl}${apiConfig.endpoints.health}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        signal: AbortSignal.timeout(2000), // 2 second timeout
+        signal: AbortSignal.timeout(apiConfig.defaultTimeout),
       });
 
       const isAvailable = response.ok;
@@ -115,8 +106,7 @@ export const aiService = {
         content: message.text,
       }));
 
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/chat`, {
+      const response = await fetch(`${apiConfig.backendUrl}${apiConfig.endpoints.chat}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -194,13 +184,12 @@ export const aiService = {
     }
     
     try {
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/nyptho/status`, {
+      const response = await fetch(`${apiConfig.backendUrl}${apiConfig.endpoints.nypthoStatus}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        signal: AbortSignal.timeout(2000),
+        signal: AbortSignal.timeout(apiConfig.defaultTimeout),
       });
 
       if (!response.ok) {
