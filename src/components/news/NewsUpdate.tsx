@@ -1,6 +1,8 @@
 
-import { ExternalLink, Share } from "lucide-react";
+import { ChevronRight, ExternalLink, MinusCircle, PlusCircle, Share } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface NewsItem {
   title: string;
@@ -12,6 +14,8 @@ interface NewsItem {
 }
 
 export const NewsUpdate = () => {
+  const [isOpen, setIsOpen] = useState(true);
+  
   // This would typically come from an API, but for now we'll use static data with real images
   const news: NewsItem[] = [
     {
@@ -42,78 +46,108 @@ export const NewsUpdate = () => {
 
   return (
     <div className="h-full overflow-hidden flex flex-col bg-gradient-to-b from-[#003366] to-[#5E2D79] border-l border-[#FF0033]/20 shadow-xl">
-      {/* Header with ALU branding */}
+      {/* Header with ALU branding and collapsible trigger */}
       <div className="p-6 pb-4 backdrop-blur-sm bg-[#003366]/80 border-b border-[#FF0033]/20">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-[#FF0033] rounded-sm flex items-center justify-center text-white font-bold text-xs">ALU</div>
-          <h2 className="text-2xl font-bold text-white">
-            ALU News
-          </h2>
-        </div>
-      </div>
-
-      {/* Scrollable news content */}
-      <div className="flex-grow overflow-y-auto p-6 pt-4 space-y-5">
-        {news.map((item, index) => (
-          <div
-            key={index}
-            className="relative rounded-xl bg-[#003366]/40 border border-[#FF0033]/10 overflow-hidden shadow-lg transition-all group hover:shadow-[#FF0033]/20"
-          >
-            {/* Image at the top of the card */}
-            <div className="w-full h-40 overflow-hidden">
-              <img 
-                src={item.image} 
-                alt={item.title} 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-              />
-            </div>
-            
-            <div className="p-5">
-              <div className="flex items-center justify-between mb-3">
-                <Badge variant="outline" className="bg-[#FF0033]/10 text-[#FF0033] border-[#FF0033]/20 hover:border-[#FF0033]/20 hover:bg-[#FF0033]/15">
-                  {item.category}
-                </Badge>
-                <span className="text-xs font-medium text-gray-400">{new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-              </div>
-              
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block group"
-              >
-                <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-[#FF0033] transition-colors flex items-center gap-2">
-                  {item.title}
-                  <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </h3>
-                <p className="text-gray-300 line-clamp-2 mb-4">
-                  {item.description}
-                </p>
-                
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#FF0033]/10">
-                  <span className="text-xs text-[#FF0033]">Read more</span>
-                  <div className="flex space-x-2">
-                    <button className="p-1.5 rounded-full hover:bg-[#FF0033]/10 transition-colors" title="Share">
-                      <Share className="w-4 h-4 text-gray-400 hover:text-[#FF0033]" />
-                    </button>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Footer with subscription hint */}
-      <div className="mt-auto p-5 bg-gradient-to-r from-[#003366]/80 via-[#5E2D79]/60 to-[#FF0033]/30 backdrop-blur-sm">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-gray-300">
-              Subscribe for real-time ALU news from our campuses worldwide.
-            </p>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-[#FF0033] rounded-sm flex items-center justify-center text-white font-bold text-xs">ALU</div>
+            <h2 className="text-2xl font-bold text-white">
+              ALU News
+            </h2>
           </div>
+          <CollapsibleTrigger 
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2 rounded-full hover:bg-white/10 transition-colors"
+          >
+            {isOpen ? (
+              <MinusCircle className="h-5 w-5 text-[#FF0033]" />
+            ) : (
+              <PlusCircle className="h-5 w-5 text-[#FF0033]" />
+            )}
+          </CollapsibleTrigger>
         </div>
       </div>
+
+      <Collapsible 
+        open={isOpen} 
+        onOpenChange={setIsOpen}
+        className="flex-grow flex flex-col"
+      >
+        <CollapsibleContent className="flex-grow flex flex-col data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
+          {/* Scrollable news content */}
+          <div className="flex-grow overflow-y-auto p-6 pt-4 space-y-5">
+            {news.map((item, index) => (
+              <div
+                key={index}
+                className="relative rounded-xl bg-[#003366]/40 border border-[#FF0033]/10 overflow-hidden shadow-lg transition-all group hover:shadow-[#FF0033]/20"
+              >
+                {/* Image at the top of the card */}
+                <div className="w-full h-40 overflow-hidden">
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                </div>
+                
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <Badge variant="outline" className="bg-[#FF0033]/10 text-[#FF0033] border-[#FF0033]/20 hover:border-[#FF0033]/20 hover:bg-[#FF0033]/15">
+                      {item.category}
+                    </Badge>
+                    <span className="text-xs font-medium text-gray-400">{new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                  
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                  >
+                    <h3 className="font-semibold text-white text-lg mb-2 group-hover:text-[#FF0033] transition-colors flex items-center gap-2">
+                      {item.title}
+                      <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </h3>
+                    <p className="text-gray-300 line-clamp-2 mb-4">
+                      {item.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#FF0033]/10">
+                      <span className="text-xs text-[#FF0033]">Read more</span>
+                      <div className="flex space-x-2">
+                        <button className="p-1.5 rounded-full hover:bg-[#FF0033]/10 transition-colors" title="Share">
+                          <Share className="w-4 h-4 text-gray-400 hover:text-[#FF0033]" />
+                        </button>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer with subscription hint */}
+          <div className="mt-auto p-5 bg-gradient-to-r from-[#003366]/80 via-[#5E2D79]/60 to-[#FF0033]/30 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-300">
+                  Subscribe for real-time ALU news from our campuses worldwide.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Collapsed indicator that appears when panel is collapsed */}
+      {!isOpen && (
+        <div className="py-4 px-6 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-white/70 text-sm">
+            <ChevronRight className="h-4 w-4 text-[#FF0033]" />
+            <span>Expand news panel</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

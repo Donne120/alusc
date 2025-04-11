@@ -1,224 +1,199 @@
 
-// This file contains the AI service that interacts with the backend
-import { Message } from "@/types/chat";
+import { Message, MessageRole } from "../types/chat";
 
-/**
- * Service for interacting with the AI backend
- */
-export const aiService = {
-  // Cache for backend availability to reduce repeated checks
-  _backendAvailableCache: {
-    status: null as boolean | null,
-    timestamp: 0,
-    expiryMs: 30000, // 30 seconds cache validity
-  },
-  
-  // Cache for backend status to avoid repeated API calls
-  _backendStatusCache: {
-    status: null as { status: string; message: string } | null,
-    timestamp: 0,
-    expiryMs: 60000, // 60 seconds cache validity
-  },
-  
-  // Cache for Nyptho status to avoid repeated API calls
-  _nypthoStatusCache: {
-    status: null as any | null,
-    timestamp: 0,
-    expiryMs: 120000, // 120 seconds cache validity
-  },
+interface AIChatMessage {
+  content: string;
+  role: string;
+}
 
-  /**
-   * Generates a response from the AI
-   */
-  async generateResponse(
-    query: string,
-    conversationHistory: Message[] = [],
-    options: { personality?: any; useNyptho?: boolean } = {}
+interface AIChatRequest {
+  messages: AIChatMessage[];
+  model?: string;
+  temperature?: number;
+  max_tokens?: number;
+}
+
+interface AIChatResponse {
+  id: string;
+  choices: {
+    message: {
+      content: string;
+      role: string;
+    };
+    finish_reason: string;
+  }[];
+}
+
+// Convert our app's message format to the AI service format
+const formatMessages = (messages: Message[]): AIChatMessage[] => {
+  return messages.map((message) => ({
+    content: message.content,
+    role: message.role === MessageRole.User ? "user" : "assistant",
+  }));
+};
+
+// Base AI service
+export class AIService {
+  private async sendRequest(
+    endpoint: string,
+    body: any,
+    apiKey: string
+  ): Promise<Response> {
+    return fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    });
+  }
+
+  async sendMessage(
+    messages: Message[],
+    model: string = "gpt-3.5-turbo"
+  ): Promise<string> {
+    throw new Error("Method not implemented in base class");
+  }
+}
+
+// OpenAI implementation
+export class OpenAIService extends AIService {
+  private apiKey: string;
+
+  constructor() {
+    super();
+    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || "";
+  }
+
+  async sendMessage(
+    messages: Message[],
+    model: string = "gpt-3.5-turbo"
   ): Promise<string> {
     try {
-      // Check if backend is available
-      const isAvailable = await this.isBackendAvailable();
-      if (!isAvailable) {
-        throw new Error("Backend service is currently unavailable");
-      }
+      const formattedMessages = formatMessages(messages);
+      const body: AIChatRequest = {
+        messages: formattedMessages,
+        model,
+        temperature: 0.7,
+        max_tokens: 1000,
+      };
 
-      // Use the backend for response generation
-      return await this.getResponseFromBackend(query, conversationHistory, options);
-    } catch (error) {
-      console.error("Error generating response:", error);
-      return "I'm sorry, I'm having trouble connecting to the ALU knowledge base right now. Please try again later.";
-    }
-  },
-
-  /**
-   * Checks if the backend is available
-   */
-  async isBackendAvailable(): Promise<boolean> {
-    // Use cache if valid
-    const now = Date.now();
-    if (
-      this._backendAvailableCache.status !== null &&
-      now - this._backendAvailableCache.timestamp < this._backendAvailableCache.expiryMs
-    ) {
-      return this._backendAvailableCache.status;
-    }
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/health`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: AbortSignal.timeout(2000), // 2 second timeout
-      });
-
-      const isAvailable = response.ok;
-      
-      // Update cache
-      this._backendAvailableCache.status = isAvailable;
-      this._backendAvailableCache.timestamp = now;
-      
-      return isAvailable;
-    } catch (error) {
-      console.error("Backend health check failed:", error);
-      
-      // Update cache with failed status
-      this._backendAvailableCache.status = false;
-      this._backendAvailableCache.timestamp = now;
-      
-      return false;
-    }
-  },
-
-  /**
-   * Gets a response from the backend
-   */
-  async getResponseFromBackend(
-    query: string,
-    conversationHistory: Message[],
-    options: { personality?: any; useNyptho?: boolean } = {}
-  ): Promise<string> {
-    try {
-      // Convert the conversation history to the format expected by the backend
-      const history = conversationHistory.map((message) => ({
-        role: message.isAi ? "assistant" : "user",
-        content: message.text,
-      }));
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: query,
-          history,
-          options,
-        }),
-      });
+      const response = await this.sendRequest(
+        "https://api.openai.com/v1/chat/completions",
+        body,
+        this.apiKey
+      );
 
       if (!response.ok) {
-        throw new Error(`Backend response error: ${response.status}`);
+        const error = await response.text();
+        throw new Error(`OpenAI API error: ${error}`);
       }
 
       const data = await response.json();
-      return data.response || "No response from backend";
+      return data.choices[0].message.content;
     } catch (error) {
-      console.error("Error getting response from backend:", error);
-      throw new Error("Failed to get response from backend");
+      console.error("Error calling OpenAI:", error);
+      throw error;
     }
-  },
+  }
+}
 
-  /**
-   * Gets the backend status information
-   */
-  async getBackendStatus(): Promise<{ status: string; message: string }> {
-    // Use cache if valid
-    const now = Date.now();
-    if (
-      this._backendStatusCache.status !== null &&
-      now - this._backendStatusCache.timestamp < this._backendStatusCache.expiryMs
-    ) {
-      return this._backendStatusCache.status;
-    }
-    
-    try {
-      const isAvailable = await this.isBackendAvailable();
-      
-      const status = {
-        status: isAvailable ? 'online' : 'offline',
-        message: isAvailable ? 'Knowledge base connected' : 'Knowledge base unavailable'
-      };
-      
-      // Update cache
-      this._backendStatusCache.status = status;
-      this._backendStatusCache.timestamp = now;
-      
-      return status;
-    } catch (error) {
-      const fallbackStatus = {
-        status: 'offline',
-        message: 'Knowledge base unavailable'
-      };
-      
-      // Update cache with error status
-      this._backendStatusCache.status = fallbackStatus;
-      this._backendStatusCache.timestamp = now;
-      
-      return fallbackStatus;
-    }
-  },
+// Anthropic implementation
+export class AnthropicService extends AIService {
+  private apiKey: string;
 
-  /**
-   * Gets the status of the Nyptho system
-   */
-  async getNypthoStatus(): Promise<{ ready: boolean; learning: any }> {
-    // Use cache if valid
-    const now = Date.now();
-    if (
-      this._nypthoStatusCache.status !== null &&
-      now - this._nypthoStatusCache.timestamp < this._nypthoStatusCache.expiryMs
-    ) {
-      return this._nypthoStatusCache.status;
-    }
-    
+  constructor() {
+    super();
+    this.apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
+  }
+
+  async sendMessage(
+    messages: Message[],
+    model: string = "claude-2"
+  ): Promise<string> {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/nyptho/status`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: AbortSignal.timeout(2000),
-      });
+      const formattedMessages = formatMessages(messages);
+      
+      const body = {
+        messages: formattedMessages,
+        model,
+        max_tokens: 1000,
+      };
+
+      const response = await this.sendRequest(
+        "https://api.anthropic.com/v1/messages",
+        body,
+        this.apiKey
+      );
 
       if (!response.ok) {
-        const fallbackStatus = { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
-        this._nypthoStatusCache.status = fallbackStatus;
-        this._nypthoStatusCache.timestamp = now;
-        return fallbackStatus;
+        const error = await response.text();
+        throw new Error(`Anthropic API error: ${error}`);
       }
 
       const data = await response.json();
-      const status = {
-        ready: data.ready || false,
-        learning: data.learning || { observation_count: 0, learning_rate: 0 }
-      };
-      
-      // Update cache
-      this._nypthoStatusCache.status = status;
-      this._nypthoStatusCache.timestamp = now;
-      
-      return status;
+      return data.content[0].text;
     } catch (error) {
-      console.error("Error getting Nyptho status:", error);
-      
-      const fallbackStatus = { ready: false, learning: { observation_count: 0, learning_rate: 0 } };
-      
-      // Update cache
-      this._nypthoStatusCache.status = fallbackStatus;
-      this._nypthoStatusCache.timestamp = now;
-      
-      return fallbackStatus;
+      console.error("Error calling Anthropic:", error);
+      throw error;
     }
+  }
+}
+
+// Google Gemini implementation
+export class GeminiService extends AIService {
+  private apiKey: string;
+
+  constructor() {
+    super();
+    this.apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  }
+
+  async sendMessage(
+    messages: Message[],
+    model: string = "gemini-pro"
+  ): Promise<string> {
+    try {
+      const formattedMessages = formatMessages(messages);
+      
+      const body = {
+        contents: formattedMessages.map(msg => ({
+          role: msg.role === "user" ? "user" : "model",
+          parts: [{ text: msg.content }]
+        })),
+      };
+
+      const response = await this.sendRequest(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`,
+        body,
+        ""
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Gemini API error: ${error}`);
+      }
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text;
+    } catch (error) {
+      console.error("Error calling Gemini:", error);
+      throw error;
+    }
+  }
+}
+
+// AI Service factory
+export const createAIService = (provider: string): AIService => {
+  switch (provider.toLowerCase()) {
+    case "openai":
+      return new OpenAIService();
+    case "anthropic":
+      return new AnthropicService();
+    case "gemini":
+      return new GeminiService();
+    default:
+      return new OpenAIService();
   }
 };
