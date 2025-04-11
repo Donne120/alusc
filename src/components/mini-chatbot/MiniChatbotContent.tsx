@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Stage, Department, Person, ChatMessage } from "./types";
+import { Stage, Department, Person, ChatMessage, EmailTemplate } from "./types";
 import { InitialStage } from "./InitialStage";
 import { SelectionListStage } from "./SelectionListStage";
 import { BookingStage } from "./BookingStage";
@@ -26,7 +25,7 @@ export const MiniChatbotContent = () => {
   const [emailBody, setEmailBody] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<Person | null>(null);
   const [humanChatInput, setHumanChatInput] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [aiPersona, setAiPersona] = useState({
     name: "Academic Advisor",
     traits: { helpfulness: 85, creativity: 40, precision: 90, friendliness: 75 }
@@ -44,7 +43,6 @@ export const MiniChatbotContent = () => {
     try {
       const status = await aiService.getNypthoStatus();
       setNypthoStatus(status);
-      // If Nyptho is ready, enable it based on settings
       if (status?.ready) {
         const savedUseNyptho = localStorage.getItem("USE_NYPTHO");
         setUseNyptho(savedUseNyptho === "true");
@@ -74,7 +72,6 @@ export const MiniChatbotContent = () => {
       traits: savedTraits
     });
 
-    // Check if we should use Nyptho based on saved persona
     if (savedPersona === "nyptho") {
       setUseNyptho(true);
       localStorage.setItem("USE_NYPTHO", "true");
@@ -144,7 +141,7 @@ export const MiniChatbotContent = () => {
     setHumanChatInput("");
   };
 
-  const handleTemplateSelect = (templateId: string) => {
+  const handleTemplateSelect = (templateId: EmailTemplate) => {
     setSelectedTemplate(templateId);
     const template = emailTemplates.find(t => t.id === templateId);
     
@@ -163,7 +160,6 @@ export const MiniChatbotContent = () => {
     setIsLoading(true);
     
     try {
-      // Convert chat messages to the format needed by aiService
       const history = chatMessages.map((msg, i) => ({
         id: `msg-${i}`,
         text: msg.text,
@@ -171,7 +167,6 @@ export const MiniChatbotContent = () => {
         timestamp: Date.now() - (chatMessages.length - i) * 1000
       }));
       
-      // Use aiService to get response
       const options = {
         useNyptho: useNyptho,
         personality: aiPersona.traits
