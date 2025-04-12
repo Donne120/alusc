@@ -1,4 +1,5 @@
-import { useConversations } from "../hooks/useConversations";
+
+import { useConversations } from "@/hooks/useConversations";
 import { useChatMessageHandler } from "../components/chat/ChatMessageHandler";
 import { ChatInput } from "./ChatInput";
 import { ConversationSidebar } from "./chat/ConversationSidebar";
