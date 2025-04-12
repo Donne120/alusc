@@ -15,6 +15,13 @@ export function getBackendUrl(): string {
   // Check if using local backend is enabled
   const useLocalBackend = localStorage.getItem('USE_LOCAL_BACKEND') === 'true';
   
+  // Check if using HuggingFace backend is enabled
+  const useHuggingFaceBackend = localStorage.getItem('USE_HUGGINGFACE_BACKEND') === 'true';
+  
+  if (useHuggingFaceBackend) {
+    return "https://ngum-alu-chatbot.hf.space"; // HuggingFace deployment URL
+  }
+  
   // Local development mode
   if (useLocalBackend) return "http://localhost:8000";
   

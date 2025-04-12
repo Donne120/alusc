@@ -1,138 +1,142 @@
-import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, InfoIcon } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Button } from "../../components/ui/button";
-import { Switch } from "../../components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { useToast } from "../../hooks/use-toast";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
-import { BackendStatus } from "../../components/chat/BackendStatus";
-import { aiService } from "../../services/aiService";
+import { BackendSelector } from "@/components/settings/BackendSelector";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
-export default function Settings() {
-  const [accessibilityMode, setAccessibilityMode] = useState(false);
-  const [activeModel, setActiveModel] = useState("gemini");
-  const { toast } = useToast();
+const Settings = () => {
+  const [accessibilityMode, setAccessibilityMode] = useState(
+    localStorage.getItem("ACCESSIBILITY_MODE") === "true"
+  );
+  
+  const [activeModel, setActiveModel] = useState(
+    localStorage.getItem("ACTIVE_MODEL") || "gemini"
+  );
 
-  useEffect(() => {
-    // Load settings from localStorage
-    const savedModel = localStorage.getItem("ACTIVE_MODEL") || "gemini";
-    const savedAccessibilityMode = localStorage.getItem("ACCESSIBILITY_MODE") === "true";
-
-    setActiveModel(savedModel);
-    setAccessibilityMode(savedAccessibilityMode);
-  }, []);
-
-  const handleAccessibilityChange = (value: boolean) => {
-    setAccessibilityMode(value);
-    localStorage.setItem("ACCESSIBILITY_MODE", value.toString());
-    toast({
-      title: "Accessibility Mode",
-      description: `Accessibility mode ${value ? 'enabled' : 'disabled'}.`,
-    });
+  const handleAccessibilityChange = (checked: boolean) => {
+    setAccessibilityMode(checked);
+    localStorage.setItem("ACCESSIBILITY_MODE", checked.toString());
+    toast.success(`Accessibility mode ${checked ? "enabled" : "disabled"}`);
   };
 
-  const handleModelChange = (model: string) => {
-    setActiveModel(model);
-    localStorage.setItem("ACTIVE_MODEL", model);
-    toast({
-      title: "Active Model",
-      description: `Active model set to ${model}.`,
-    });
+  const handleModelChange = (value: string) => {
+    setActiveModel(value);
+    localStorage.setItem("ACTIVE_MODEL", value);
+    toast.success(`Model changed to ${value}`);
+  };
+
+  const clearLocalStorage = () => {
+    // Keep only essential settings
+    const accessibilitySetting = localStorage.getItem("ACCESSIBILITY_MODE");
+    const modelSetting = localStorage.getItem("ACTIVE_MODEL");
+    const backendSettings = {
+      BACKEND_URL: localStorage.getItem("BACKEND_URL"),
+      USE_LOCAL_BACKEND: localStorage.getItem("USE_LOCAL_BACKEND"),
+      USE_HUGGINGFACE_BACKEND: localStorage.getItem("USE_HUGGINGFACE_BACKEND")
+    };
+    
+    // Clear everything
+    localStorage.clear();
+    
+    // Restore essential settings
+    if (accessibilitySetting) localStorage.setItem("ACCESSIBILITY_MODE", accessibilitySetting);
+    if (modelSetting) localStorage.setItem("ACTIVE_MODEL", modelSetting);
+    if (backendSettings.BACKEND_URL) localStorage.setItem("BACKEND_URL", backendSettings.BACKEND_URL);
+    if (backendSettings.USE_LOCAL_BACKEND) localStorage.setItem("USE_LOCAL_BACKEND", backendSettings.USE_LOCAL_BACKEND);
+    if (backendSettings.USE_HUGGINGFACE_BACKEND) localStorage.setItem("USE_HUGGINGFACE_BACKEND", backendSettings.USE_HUGGINGFACE_BACKEND);
+    
+    toast.success("Chat history and cache cleared");
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-4xl mx-auto py-8 px-4">
-        <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft size={20} />
-          Back to Chat
-        </Link>
-
-        <Tabs defaultValue="general" className="w-full space-y-4">
-          <TabsList>
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="ai">AI Settings</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
-          </TabsList>
-          <TabsContent value="general" className="space-y-4">
+    <div className="container mx-auto py-10">
+      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      
+      <Tabs defaultValue="general" className="mb-8">
+        <TabsList className="mb-4">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="connection">Connection</TabsTrigger>
+          <TabsTrigger value="advanced">Advanced</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="general">
+          <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Accessibility</CardTitle>
-                <CardDescription>Enable accessibility mode for improved readability.</CardDescription>
+                <CardDescription>
+                  Configure accessibility settings for the application
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium leading-none">Accessibility Mode</p>
-                    <p className="text-sm text-muted-foreground">Enable larger fonts and improved contrast.</p>
-                  </div>
-                  <Switch id="accessibility" checked={accessibilityMode} onCheckedChange={handleAccessibilityChange} />
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="accessibility-mode" 
+                    checked={accessibilityMode}
+                    onCheckedChange={handleAccessibilityChange}
+                  />
+                  <Label htmlFor="accessibility-mode">Enable accessibility mode</Label>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-          <TabsContent value="ai" className="space-y-4">
+            
             <Card>
               <CardHeader>
                 <CardTitle>AI Model</CardTitle>
-                <CardDescription>Choose the AI model to use for chat responses.</CardDescription>
+                <CardDescription>
+                  Select which AI model to use for responses
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium leading-none">Active Model</p>
-                    <p className="text-sm text-muted-foreground">Select the AI model for generating responses.</p>
-                  </div>
-                  <select
-                    className="bg-background border rounded px-2 py-1 text-foreground"
-                    value={activeModel}
-                    onChange={(e) => handleModelChange(e.target.value)}
-                  >
-                    <option value="gemini">Gemini</option>
-                    <option value="gpt">GPT</option>
-                  </select>
-                </div>
+                <Select value={activeModel} onValueChange={handleModelChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gemini">Google Gemini</SelectItem>
+                    <SelectItem value="openai">OpenAI GPT</SelectItem>
+                    <SelectItem value="anthropic">Anthropic Claude</SelectItem>
+                  </SelectContent>
+                </Select>
               </CardContent>
-              <CardFooter>
-                <BackendStatus />
-              </CardFooter>
             </Card>
-          </TabsContent>
-          <TabsContent value="about">
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="connection">
+          <div className="grid gap-6 md:grid-cols-2">
+            <BackendSelector />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="advanced">
+          <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>About ALU Student Companion</CardTitle>
-                <CardDescription>Information about this project.</CardDescription>
+                <CardTitle>Data Management</CardTitle>
+                <CardDescription>
+                  Manage application data and storage
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="text-sm text-muted-foreground">
-                  <p>
-                    ALU Student Companion is an AI-powered assistant designed to help ALU students with their academic and
-                    administrative needs.
-                  </p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>Provides quick answers to common questions</li>
-                    <li>Assists with task and schedule management</li>
-                    <li>Offers guidance on assignments and resources</li>
-                    <li>Connects students with relevant departments</li>
-                  </ul>
-                  <p>
-                    This project is developed by students at the African Leadership University to improve the student
-                    experience.
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="secondary">
-                  <InfoIcon className="mr-2 h-4 w-4" />
-                  Learn More
+              <CardContent>
+                <Button 
+                  variant="destructive" 
+                  onClick={clearLocalStorage}
+                  className="w-full"
+                >
+                  Clear Chat History & Cache
                 </Button>
-              </CardFooter>
+              </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+};
+
+export default Settings;
